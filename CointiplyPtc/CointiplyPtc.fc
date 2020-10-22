@@ -1,5 +1,4 @@
-﻿using Base;
-using FaucetCollector.Script;
+﻿using FaucetCollector.Script;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -214,6 +213,11 @@ public class CointiplyPtc : FaucetScript
                     }
                     CheckForPopupsEnabled=false;
                     Click(Ads[n] , false);
+                    Wait(2);
+                    Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
+                    Wait(1);
+                    Driver.SwitchTo( ).Window(Driver.WindowHandles.Last( ));
+                    Wait(2);
                     Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
                     Wait(1);
                     Driver.SwitchTo( ).Window(Driver.WindowHandles.Last( ));
@@ -249,13 +253,13 @@ public class CointiplyPtc : FaucetScript
             }
         }
 
-        return MarkSuccess(n );
+        return MarkSuccess(n);
     }
-    public int MarkSuccess( int nAds )
+    public int MarkSuccess(int nAds)
     {
         ClaimSuccess( );
         IsSuccess=true;
-        Log("You successfully viewed " +nAds.ToString(),
+        Log("You successfully viewed "+nAds.ToString( ) ,
             Level.Payout);
         return GetWaitSetting( );
     }
@@ -282,7 +286,7 @@ public class CointiplyPtc : FaucetScript
         }
 
         return IsVisible(ElementByXPath("//span[contains(text(),'Validate Your Click')]"));
-        
+
 
     }
     public void ValidateClick( )
@@ -305,7 +309,7 @@ public class CointiplyPtc : FaucetScript
             }
             catch ( Exception ex )
             {
-                Log("Something bad was happenned getting the correct time ex message "+ ex.Message);
+                Log("Something bad was happenned getting the correct time ex message "+ex.Message);
             }
             if ( File.Exists(Path) )
             {
@@ -316,7 +320,7 @@ public class CointiplyPtc : FaucetScript
 
                         if ( KnowImage==null )
                         {
-                            Log("We have a problems reading your script assets please check it",Level.Error);
+                            Log("We have a problems reading your script assets please check it" , Level.Error);
                             return;
 
                         }
