@@ -1,6 +1,6 @@
 //==================//
 //script Written by: ••AviramDayan•• 19/10/2020 20:00PM - Version 1
-//Last Update: 20/10/2020 15:00PM - Version 1
+//Last Update: 23/10/2020 18:40PM - Version 2
 //==================//
 
 using System;
@@ -389,17 +389,18 @@ public class CryptoSkull : FaucetScript
  public override int DoSolveFaucet()
  {
 
+   //go to Auto game
+   Log("AutoGame: go to home page");        
+   GoToUrl("https://cryptoskull.com/");
+   Wait(3);  
+   MenuCurrency_Function(); //call
+   
+
   //======//
   //AutoGame
-  //=======//
-	
-  //if the AutoGame on
+  //=======//	
   if (GetBoolSetting("AutoGame"))
-  {  
-     //go to Auto game
-	 Log("AutoGame: go to home page");        
-	 GoToUrl("https://cryptoskull.com/");
-     
+  {       
 	 var BalanceVAR = ElementByXPath("//span[@id='balance']");
      string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[1];
      int BalanceINT = Convert.ToInt32(BalanceSTRING);
@@ -525,11 +526,6 @@ public class CryptoSkull : FaucetScript
     if (GetBoolSetting("FaucetClaim"))
     {  
 
-		GoToUrl("https://cryptoskull.com/");
-		Log("FaucetClaim - go to home page");        
-		
-        Wait(3);
-
         var BalanceVAR = ElementByXPath("//span[@id='balance']");
         string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[1];
         int BalanceINT = Convert.ToInt32(BalanceSTRING);
@@ -598,6 +594,29 @@ public class CryptoSkull : FaucetScript
         return base.CheckFaucetResult();
     }
  
+
+
+
+        //=================//
+        //MenuCurrency_Function
+        //=================//
+        public int MenuCurrency_Function()
+        {
+           var MenuCurrency = ElementByXPath("//div[@class='dropdown selectBox']//div[contains(@class,'selected currencies')]"); 
+           Click(MenuCurrency);		
+		   Log("Click on MenuCurrency");
+           
+		   Wait(2);
+           
+		   var BtcVAR = ElementByXPath("//div[@class='dropdown selectBox']//li[@value='BTC']"); 
+           Click(BtcVAR);		
+		   Log("Choose BTC");
+		   
+		   Wait();
+		   
+           return 0;		
+        }//end MenuCurrency_Function
+        //=================//	
 
 
         //=================//
