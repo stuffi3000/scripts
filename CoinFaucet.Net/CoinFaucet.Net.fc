@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 13/10/2020 04:30AM - Version 1
-//Last Update: 25/10/2020 14:30PM - Version 5
+//Last Update: 25/10/2020 22:10PM - Version 5
 //==================//
 
 using System;
@@ -70,11 +70,11 @@ public class CoinFaucetNet : FaucetScript
 		ad=false;
 		
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "CoinFaucet.Net";
+        Title = "CoinFaucet.net";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
-        SuccessXPath = "//*"; //*[text()='']
-        FailXPath = "//*"; //*[text()='']
+        SuccessXPath = "//div[contains(@class,'alert-success')]"; //*[text()='']
+        FailXPath = "//div[contains(@class,'alert-danger')]"; //*[text()='']
 
         //Let Faucet Collector start up everything
         base.Start();
@@ -306,7 +306,8 @@ public class CoinFaucetNet : FaucetScript
            var Button_Claim = ElementByXPath("//button[contains(text(),'ROLL') or contains(text(),'Roll')]");  
            if (IsVisible(Button_Claim))
 		   {
-		   Click(Button_Claim);		
+		   //Click(Button_Claim);	
+		   ExecuteScript("arguments[0].click()", Button_Claim);
 		   }
 		   
 	       Wait();		
@@ -325,7 +326,7 @@ public class CoinFaucetNet : FaucetScript
 	         
 			 Wait(2);
 			 
-             var Success_Claim = ElementByXPath("//div[contains(@class,'alert alert-success')]");
+             var Success_Claim = ElementByXPath("//div[contains(@class,'alert-success')]");
              if (Success_Claim !=null) //visible
 		     {
 		     Log("FaucetClaim - Success " + Success_Claim.Text);  
@@ -441,11 +442,11 @@ public class CoinFaucetNet : FaucetScript
 
 
           //ImageCap
-          var ImageCap = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          var ImageCap = ElementByXPath ("//img[@id='img-captcha']"); 
           if (IsVisible(ImageCap))
 		  {  
             Log("DO ImageCap");	  
-	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'img-captcha')]"),ElementByXPath("//input[@id='captcha']")); 
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[@id='img-captcha']"),ElementByXPath("//input[@id='captcha']")); 
             if (result_2 > 0)
             {
                 return Fail("ImageCap - Fail solving captcha");
