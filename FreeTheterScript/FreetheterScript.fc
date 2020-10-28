@@ -1,0 +1,172 @@
+﻿using FaucetCollector.Script;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+//css_ref Faucetcollector.Utilities
+public class FreeTheterScript : FaucetScript
+{
+    /// <summary>
+    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
+    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
+    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
+    /// </summary>
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://www.free-tether.com/")
+            {
+                new FaucetSetting(){Name="User",Type=EditorType.TextBox,Required=true,Display="Email"},
+                new FaucetSetting(){Name="Pass",Type=EditorType.Password,Required=true,Display="Password"},
+                 
+            };
+        }
+    }
+
+  
+    public override void Start()
+    {
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "Free";
+
+        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
+        SuccessXPath = "//h2[@id='info' and contains(@style,'green')]";
+        FailXPath = "//h2[@id='info' and contains(@style,'red')]";
+
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+    public override bool IsLoggedIn()
+    {
+        //In here we can check for the presence of an element that is only present when you are logged in.
+        //In this case we check for en element with the class "loggedIn"
+        return ElementByXPath( "//a[@href='/homepage/out']" ) != null;
+    }
+
+    public override int BeforeLogin()
+    {
+        var GoLogin = ElementByXPath("//a[@id='login']");
+        if (!IsVisible(GoLogin))
+        {
+            return Fail("Go login is not visible");
+        }
+        Click(GoLogin);
+        Wait(1);
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeLogin();
+    }
+
+    public override int DoLogin()
+    {
+        FaucetCollector.Utilities.HumanActions.DriverHumanActions humanActions=new FaucetCollector.Utilities.HumanActions.DriverHumanActions(Driver);
+
+         var EmailBox = ElementByXPath("//div[@id='loginform']//input[@name='email']");
+        if (!IsVisible(EmailBox))
+        {
+            return Fail("Email box isn't visible");
+        }
+        humanActions.SetText(EmailBox, GetSetting("User"));
+        var PasswordBox = ElementByXPath("//div[@id='loginform']//input[@name='password']");
+        if (!IsVisible(PasswordBox))
+        {
+            return Fail("Password box isn't visible");
+        }
+        humanActions.SetText(PasswordBox, GetPassword("Pass"));
+		
+		 var button = ElementByXPath("//button[@id='loginbutton']");
+        if (!IsVisible(button))
+        {
+            return Fail("Button isn't visible");
+        }
+		
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return Fail("Fail solve captcha");
+        }
+       
+        humanActions.Click( button );
+
+        var ErrorLogin = ElementByXPath("//div[@class='flash info']");
+        if (IsVisible(ErrorLogin))
+        {
+            Log(ErrorLogin.Text);
+            if(ErrorLogin.Text.Contains("Incorrect login detail"))
+            {
+                Disable();
+                return Fail("You need to set your credentials correctly");
+            }
+          
+        }
+        
+        
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoLogin();
+    }
+    public void HumanClick ( IWebElement element )
+    {
+        Actions actions =new Actions(Driver);
+
+        actions.MoveToElement ( element , element.Size.Width/2 , element.Size.Height/2 ).Build ( ).Perform ( );
+        Wait (1 );
+        actions.Click ( ).Build ( ).Perform ( );
+
+    }
+
+    public override int DoSolveCaptcha ( )
+    {
+        if ( ElementByXPath ( "//div[contains(@class,'g-recaptcha')]" )==null )
+        {
+            return 0;
+        }
+
+        return base.DoSolveCaptcha ( );
+    }
+    public override int GetFaucetWaitTime()
+    {
+        var MinuteElement = ElementByXPath("//span[@id='cislo1']");
+        if (!IsVisible(MinuteElement))
+        {
+            return 0;
+        }
+        var SecondElement = ElementByXPath("//span[@id='cislo2']");
+        if (!IsVisible(SecondElement))
+        {
+            return 0;
+        }
+        int M, S;
+        if(int.TryParse(MinuteElement.Text,out M) && int.TryParse(SecondElement.Text,out S))
+        {
+            return M * 60 + S;
+        }
+
+      
+        return base.GetFaucetWaitTime();
+    }
+
+    public override int BeforeSolveFaucet ( )
+    {       
+        return base.BeforeSolveFaucet ( );
+    }
+    public override int DoSolveFaucet()
+    {
+        if (!Driver.Url.Contains("https://www.free-tether.com/free/"))
+        {
+            GoToUrl("https://www.free-tether.com/free/");
+        }
+        var ButtonClaim = ElementByXPath("//button[contains(@class,'btn btn-success')]");
+        if (!IsVisible(ButtonClaim))
+        {
+            return Fail("Button claim not found");
+        }
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return Fail("fail solving captcha");
+        }
+        Click(ButtonClaim);
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveFaucet();
+    }
+
+}
