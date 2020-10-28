@@ -64,14 +64,14 @@ class AutoFaucetManualClaim : FaucetScript
         GoToUrl(LoginUrl);
         Wait(2);
 
-        var Userbox=ElementByXPath("//input[@placeholder='Username']");
+        var Userbox=ElementByXPath("//form[@id='form-signin']");
         if ( !IsVisible(Userbox) )
         {
             return Fail("User box is not visible");
         }
         SetText(Userbox , GetSetting("User"));
 
-        var PasswordBox=ElementByXPath("//input[@placeholder='Password']");
+        var PasswordBox=ElementByXPath("//input[@id='l-form-password']");
         if ( !IsVisible(PasswordBox) )
         {
             return Fail("Password box is not visible");
