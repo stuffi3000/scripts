@@ -1,7 +1,7 @@
 
 //==================//
-//script Written by: ••AviramDayan•• 29/10/2020 19:45AM - Version 1
-//Last Update: 29/10/2020 19:45AM - Version 1
+//script Written by: ••AviramDayan•• 29/10/2020 20:20AM - Version 1
+//Last Update: 29/10/2020 20:20AM - Version 1
 //==================//
 
 using System;
@@ -70,7 +70,7 @@ public class CloudFaucetIO : FaucetScript
 		ad=false;
 		
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "CloudFaucet.io";
+        Title = "Cloud Faucet";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
         SuccessXPath = "//span[contains(@class,'jconfirm-title') and contains(text(),'uccess') ]"; //*[text()='']
@@ -123,6 +123,9 @@ public class CloudFaucetIO : FaucetScript
     public override int BeforeLogin()
     {
 		
+        GoToUrl("https://cloudfaucet.io/dashboard");
+        Wait();		
+        Wait(2);
 		
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
@@ -284,15 +287,15 @@ public class CloudFaucetIO : FaucetScript
 	    Wait();
 	    Wait(4);
 
-        var WaitTimerText = ElementByXPath("//div[contains(@id,'clock')]//li[1]/span");
+        var WaitTimerText = ElementByXPath("//div[@id='clock']//li[1]/span[contains(text(),'Coin')]");
 
-        if (IsVisible(WaitTimerText))
+        if (!IsVisible(WaitTimerText))
         {
            return Time_Function(); //call to function time
         } // end WaitTimerText visible
 
 
-        if (!IsVisible(WaitTimerText))
+        if (IsVisible(WaitTimerText))
         {
 	       Wait(2);
 		   
