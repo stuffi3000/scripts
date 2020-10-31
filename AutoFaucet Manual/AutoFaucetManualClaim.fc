@@ -64,7 +64,7 @@ class AutoFaucetManualClaim : FaucetScript
         GoToUrl(LoginUrl);
         Wait(2);
 
-        var Userbox=ElementByXPath("//form[@id='form-signin']");
+        var Userbox=ElementByXPath("//input[@id='l-form-username']");
         if ( !IsVisible(Userbox) )
         {
             return Fail("User box is not visible");
@@ -122,18 +122,41 @@ class AutoFaucetManualClaim : FaucetScript
     }
     public override int DoSolveCaptcha( )
     {
-        var Selectcaptcha=ElementByXPath("//select[@id='captcha-select']");
-        if ( IsVisible(Selectcaptcha) )
+        var selectCaptchaDiv= ElementByXPath("//button[@id='dropdownMenuButton']");
+
+        if ( IsVisible(selectCaptchaDiv) )
         {
-            if ( GetBoolSetting("UseSolvemedia") )
+            Click(selectCaptchaDiv);
+            Wait(1);
+
+            var captchaSelectorXPath=GetBoolSetting("UseSolvemedia")?"//p[@id='solvemedia']"
+                :"//p[@id='recaptcha']";
+
+            var captchaSelector=ElementByXPath(captchaSelectorXPath);
+
+            if ( IsVisible(captchaSelector) )
             {
-                SelectOptionByValue(Selectcaptcha , "solvemedia");
+
+                Click(captchaSelector);
+                Wait(2);
             }
-            else
+             
+        }
+        else
+        {
+            var Selectcaptcha=ElementByXPath("//select[@id='captcha-select']");
+            if ( IsVisible(Selectcaptcha) )
             {
-                SelectOptionByValue(Selectcaptcha , "recaptcha");
+                if ( GetBoolSetting("UseSolvemedia") )
+                {
+                    SelectOptionByValue(Selectcaptcha , "solvemedia");
+                }
+                else
+                {
+                    SelectOptionByValue(Selectcaptcha , "recaptcha");
+                }
+                Wait( );
             }
-            Wait( );
         }
 
         return base.DoSolveCaptcha( );
