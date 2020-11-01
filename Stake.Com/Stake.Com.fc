@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 20/10/2020 17:10AM - Version 22
+//Last Update: 01/11/2020 14:00AM - Version 23
 //==================//
 
 using System;
@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using System.Globalization;
 
 //css_inc recaptchaUtilities
 //css_inc AntiBotLinksUtility
@@ -40,7 +41,9 @@ public class stake : FaucetScript
                 new FaucetSetting() { Name = "ExclusiveBonusDrop_Telegram", Display = "Exclusive Bonus Drop - ON/OFF - in Telegram - 'Stake.com - Play Smarter' - Public Channel", Type = EditorType.CheckBox, Default =true},	
 				
                 new FaucetSetting() { Name = "Reload", Display = "Reload - ON/OFF - claim unlimited time if available", Type = EditorType.CheckBox, Default =true},	
-                new FaucetSetting(){Name="RakeBack",Display="RakeBack - ON/OFF - from Bronze level",Type=EditorType.CheckBox,Default=false},
+                new FaucetSetting() { Name = "Reload_SiteTimeDate", Display = "Reload Time - return to the exact time that found on the site", Type = EditorType.CheckBox, Default =true},	
+                
+				new FaucetSetting(){Name="RakeBack",Display="RakeBack - ON/OFF - from Bronze level",Type=EditorType.CheckBox,Default=false},
 
 				new FaucetSetting(){Name="MenuCoins",Display="MenuCoins - Select Favorite Coins",Type=EditorType.ComboBox,Default="btc",Items=new System.Collections.Generic.List<string>{"btc","eth","ltc","doge","bch","xrp","trx","eos"}},
 
@@ -541,19 +544,39 @@ public class stake : FaucetScript
     }
 
 
-	
+
         //=================//
        //Time_Function
         //=================//
         public int Time_Function()
         {
-			
+
+           if (GetBoolSetting("Reload_SiteTimeDate"))
+           {
+             Title = "stake.com";
+             GoToUrl("https://stake.com/?currency=btc&modal=vipReload");
+	         Log("Go to try - Reload to return to time");	
+	         Wait();
+	         Wait(5);	
+			   
+             //site time with date - example 10:00 PM | 10:00 AM
+             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+             if (IsVisible(CheckAvailableGeneral))
+             {
+               var XpathTimeVAR = ElementByXPath("//div[contains(@class,'ModalFormWrap')]/p[1]/span/span");
+		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text, "t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+               return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+		     }
+		   } // end Reload_SiteTimeDate
+
+		   		   
+		   //site time with normal counter
            var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
 		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
 
            if (IsVisible(MinVar))
            {
-	         Log("WaitTimerText apper - return to site time"); 
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
              int min,sec;
              min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
              sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
@@ -562,7 +585,7 @@ public class stake : FaucetScript
 
            if (!IsVisible(MinVar))
            {
-	            Log("return to your time"); 
+	            Log("Time_Function - return to your time"); 
 		        return GetWaitSetting();
            }
 
@@ -616,6 +639,8 @@ public class stake : FaucetScript
             } //CheckClaim
 		  
 		  }//end CheckAvailableGeneral
+
+
 
 		}//end All_Function
 		//=========//
