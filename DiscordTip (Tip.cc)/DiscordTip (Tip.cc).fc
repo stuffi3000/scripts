@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 15/10/2020 13:30PM - Version 72
+//Last Update: 01/11/2020 01:40AM - Version 73
 //==================//
 
 using System;
@@ -47,7 +47,10 @@ public class DiscordScript: FaucetScript
                 new FaucetSetting(){Name="Discordtip_LaccsFaucet_BTC_OnOff",Display="LaccsFaucet BTC - AirDrop - 'commands' channel - On/off",Type=EditorType.CheckBox,Default=true},	
 				new FaucetSetting(){Name="Command_1",Display="LaccsFaucet_BTC - Command_1",Default="!claim",Type=EditorType.TextBox,Required=true},
 				new FaucetSetting(){Name="Command_2",Display="LaccsFaucet_BTC - Command_2",Default="%claim",Type=EditorType.TextBox,Required=true},
-                
+
+				new FaucetSetting(){Name="Discordtip_Tippi_vote_OnOff",Display="Discordtip_Tippi_vote - On/off",Type=EditorType.CheckBox,Default=true},
+				new FaucetSetting(){Name="Discordtip_Tippi_Main_ID",Display="Tippi - Vote and Claim between 50 to 100 satoshi - every 12 hours' ",Default="569955063519510549",Type=EditorType.TextBox,Required=true},
+               
 				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_1_OnOff",Display="CryptoMoon - AirDrop 1 - '💲-raining-🏙' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
 				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_2_OnOff",Display="CryptoMoon - AirDrop 2 - '💲-airdrops-🎉' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
 				new FaucetSetting(){Name="Discordtip_CryptoMoon_Airdrop_3_OnOff",Display="CryptoMoon - AirDrop 3 - 'tip-cc' channel - OnOff",Type=EditorType.CheckBox,Default=true},		
@@ -67,7 +70,10 @@ public class DiscordScript: FaucetScript
 				//new FaucetSetting(){Name="AutoWithdraw_GridCoin",Display="AutoWithdraw GridCoin - On/off",Type=EditorType.CheckBox,Default=false},	
 				
 				new FaucetSetting(){Name="WalletAddress_BTC",Display="WalletAddress BTC",Type=EditorType.TextBox,Required=false},
-				new FaucetSetting(){Name="WalletAddress_DOGE",Display="WalletAddress DOGE",Type=EditorType.TextBox,Required=false},
+				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_BTC",Display="AutoDisableWithdrawAfterSuccessful_BTC",Type=EditorType.TextBox,Required=false},
+				new FaucetSetting(){Name="WalletAddress_DOGE",Display="WalletAddress DOGE",Type=EditorType.TextBox,Required=false},			
+				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_DOGE",Display="AutoDisableWithdrawAfterSuccessful_DOGE",Type=EditorType.TextBox,Required=false},
+					
 				//new FaucetSetting(){Name="WalletAddress_GridCoin",Display="WalletAddress GridCoin",Type=EditorType.TextBox,Required=false},
 
 				//new FaucetSetting(){Name="Input_Custom_Bot_ID_Setting",Display="Enter Custom bot ID (option)",Default="Enter Custom Bot ID",Type=EditorType.TextBox,Required=false},
@@ -456,6 +462,12 @@ public class DiscordScript: FaucetScript
                    Enter_SendKeys_General_Discord_Input_Function();
 			       Log("Withdraw_BTC - success");
                    Wait(5);
+                   if (GetBoolSetting("AutoDisableWithdrawAfterSuccessful_BTC"))
+                   {
+                     Log("AutoWithdraw_BTC - check - we Disable Withdraw After Successful");
+                     SetSetting("AutoWithdraw_BTC", false);  //do off / uncheck  		  
+                   }	
+                   Wait(3);
                 }
 				
 			}// end Error_No_Balance_Check - NOT visible				
@@ -540,6 +552,12 @@ public class DiscordScript: FaucetScript
                    Enter_SendKeys_General_Discord_Input_Function();
 			       Log("Withdraw_BTC - success");
                    Wait(5);
+                   if (GetBoolSetting("AutoDisableWithdrawAfterSuccessful_DOGE"))
+                   {
+                     Log("AutoWithdraw_DOGE - check - we Disable Withdraw After Successful");
+                     SetSetting("AutoWithdraw_DOGE", false);  //do off / uncheck  		  
+                   }
+                   Wait(3);
                 }
 				
 			}// end Error_No_Balance_Check - NOT visible				
@@ -562,7 +580,7 @@ public class DiscordScript: FaucetScript
 			Log("Discordtip_Main - do vote");			
             Tasks_Function(); //call
         
-		} //end FaucetClaim
+		} //end Discordtip_Main_vote_OnOff
         //================//
 
         //================//
@@ -577,9 +595,23 @@ public class DiscordScript: FaucetScript
  	       Log("Discordtip_LaccsFaucet - do vote first");			
            Tasks_Function(); //call
         
-		} //end FaucetClaim
+		} //end Discordtip_LaccsFaucet_vote_OnOff
         //================//
+
+        //================//
+        //Discordtip_Tippi_vote_OnOff//
+        //================//
+        if (GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {
+           Title = "Discordtip";
+           ADFunction_String_URL_Discordtip_Tippi(); //call to Discordtip_Tippi
+           Wait();
 		
+ 	       Log("Discordtip_Tippi - do vote first");			
+           Tasks_Function(); //call
+        
+		} //end Discordtip_Tippi_vote_OnOff
+        //================//
 
         //=========================//
         //Discordtip_FaucetCollector//
@@ -1422,6 +1454,8 @@ public class DiscordScript: FaucetScript
 
 
 
+
+
   //=================//
   //Start_SearchBar_TipCC_Function
   //=================//
@@ -2144,6 +2178,117 @@ public class DiscordScript: FaucetScript
   } //end ADFunction_String_URL_Discordtip_LaccsFaucet
   //====================//
   
+
+  //====================//
+  //ADFunction_String_URL_Discordtip_Tippi
+  //====================//
+  private bool ADFunction_String_URL_Discordtip_Tippi()
+  {
+
+        string Channel_Base_Url_String = "https://discordbots.org/bot/";
+		
+		//Discordtip_Tippi_Main_ID
+        var Discordtip_Tippi_Main_ID_Var = GetSetting("Discordtip_Tippi_Main_ID");
+		string Discordtip_Tippi_Main_ID_String = Discordtip_Tippi_Main_ID_Var;
+		
+		//Custom_Bot_ID
+        var Input_Custom_Bot_ID_Var = GetSetting("Input_Custom_Bot_ID_Setting");
+		string Input_Custom_Bot_ID_String = Input_Custom_Bot_ID_Var;
+		
+        string Channel_End_Url_String = "/vote?currency=";
+		
+		var Menu_Bot_Currency_Var =	GetSetting("Menu_Bot_Currency");	 
+		string Menu_Bot_Currency_string = Menu_Bot_Currency_Var;	
+
+		//get all strings - Discordtip_Tippi_Main_ID
+		string Channel_ID_AllUrl_MainString_Discordtip_Tippi = Channel_Base_Url_String + Discordtip_Tippi_Main_ID_String + Channel_End_Url_String + Menu_Bot_Currency_string;
+
+		//===============//
+		//Discordtip_Tippi ID
+		//===============//
+        if(Menu_Bot_Currency_Var=="btc" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))  
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - btc");
+        }
+		
+        if(Menu_Bot_Currency_Var=="bch" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - bch");
+        }
+		
+        if(Menu_Bot_Currency_Var=="btg" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - btg");
+        }
+		
+        if(Menu_Bot_Currency_Var=="dash" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - dash");
+        }
+		
+        if(Menu_Bot_Currency_Var=="dgb" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - dgb");
+        }
+		
+        if(Menu_Bot_Currency_Var=="eos" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - eos");
+        }
+		
+        if(Menu_Bot_Currency_Var=="eth" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - eth");
+        }
+		
+        if(Menu_Bot_Currency_Var=="ethos" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - ethos");
+        }
+		
+        if(Menu_Bot_Currency_Var=="ltc" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - ltc");
+        }
+		
+        if(Menu_Bot_Currency_Var=="omg" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - omg");
+        }
+		
+        if(Menu_Bot_Currency_Var=="wax" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - wax");
+        }
+		
+        if(Menu_Bot_Currency_Var=="xzc" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - xzc");
+        }
+		
+        if(Menu_Bot_Currency_Var=="zec" && GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
+        {	
+        GoToUrl(Channel_ID_AllUrl_MainString_Discordtip_Tippi);
+        Log("Discordtip_Tippi - go to string url - zec");
+        }
+		//===============//
+		
+        return true;	
+  } //end ADFunction_String_URL_Discordtip_Tippi
+  //====================//
+  
 	
   //====================//
   //ADFunction_String_URL_DiscordBotsTip
@@ -2341,6 +2486,9 @@ public class DiscordScript: FaucetScript
         return true;	
   } //end ADFunction_String_URL_DiscordBotsTip
   //====================//
+
+
+
 
 
         //=================//
