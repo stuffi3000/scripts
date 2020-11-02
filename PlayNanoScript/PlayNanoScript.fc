@@ -1,0 +1,155 @@
+﻿using FaucetCollector.Script;
+using System;
+
+public class PlayNanoScript : FaucetScript
+{
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://playnano.online/")
+            {
+                new FaucetSetting( )
+                {
+                    Name="User",
+                    Display="Email",
+                    Type=EditorType.TextBox,
+                    Required=true
+                },
+                new FaucetSetting( )
+                {
+                    Name="Pass",
+                    Display="Password",
+                    Type=EditorType.Password,
+                    Required=true
+                }
+            };
+        }
+    }
+
+    public override void Start( )
+    {
+        SuccessXPath="//div[@class='noty_body' and not(@style)]";
+        FailXPath="//div[@class='noty_body']";
+        Title="PlayNANO";
+        base.Start( );
+    }
+
+    public override int DoLogin( )
+    {
+        GoToUrl("https://playnano.online/login");
+
+        Wait(1);
+
+        var userBox=ElementByXPath("//input[@id='user_email']");
+        if ( !IsVisible(userBox) )
+        {
+            return Fail("Email box not visible or not found");
+        }
+        SetText(userBox , GetSetting("User"));
+
+        var passwordBox=ElementByXPath("//input[@id='user_password']");
+        if ( !IsVisible(passwordBox) )
+        {
+            return Fail("Password box not visible or not found");
+        }
+        SetText(passwordBox , GetPassword("Pass"));
+
+        if ( IsVisible(ElementByXPath("//label[@for='user_Captcha']")) )
+        {
+            var result=DoSolveCaptcha();
+            if ( result>0 )
+            {
+                return result;
+            }
+        }
+
+        var loginBtn=ElementByXPath("//input[@value='Login']");
+        if ( !IsVisible(loginBtn) )
+        {
+            return Fail("login button not found");
+        }
+
+
+        Click(loginBtn);
+
+        Wait(1);
+
+        var error=ElementByXPath("//div[@class='noty_body']");
+        if ( IsVisible(error) )
+        {
+            Log(error.Text);
+        }
+
+        return base.DoLogin( );
+    }
+
+    public override bool IsLoggedIn( )
+    {
+        return ElementByXPath("//a[@href='/logout']")!=null;
+    }
+
+    public override int DoSolveFaucet( )
+    {
+        GoToUrl("https://playnano.online/watch-and-learn");
+        Wait(1);
+
+        var watchButton=ElementByXPath("//a[@id='watch-link']");
+
+        if ( !IsVisible(watchButton) )
+        {
+            return Fail("watch button not found");
+        }
+        Click(watchButton);
+
+        Wait(1);
+
+
+        var watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
+        int adsClicked=0;
+
+        while ( IsVisible(watchNextButton)&&adsClicked<12 )
+        {
+
+            DateTime timeout= DateTime.Now.AddSeconds(20);
+
+            while ( !watchNextButton.Enabled&&timeout>DateTime.Now )
+            {
+                Wait( );
+            }
+
+            Click(watchNextButton);
+
+            Wait(1);
+            adsClicked++;
+
+            watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
+        }
+
+        Wait(1);
+
+        var stopButton=ElementByXPath("//button[@value='stop']");
+        if ( !IsVisible(stopButton) )
+        {
+            return Fail("Finish button not found");
+        }
+        var result=DoSolveCaptcha();
+        if ( result>0 )
+        {
+            return result;
+        }
+
+        Click(stopButton);
+
+        Wait(1);
+
+        CheckFaucetResult( );
+        Log("you sucessfully viewed the ads" , Level.Payout);
+        ClaimSuccess( );
+
+        return GetWaitSetting( );
+    }
+
+
+}
+
