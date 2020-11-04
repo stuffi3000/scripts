@@ -1,4 +1,5 @@
 ﻿using FaucetCollector.Script;
+using OpenQA.Selenium.Interactions;
 using System;
 
 public class PlayNanoScript : FaucetScript
@@ -107,7 +108,7 @@ public class PlayNanoScript : FaucetScript
 
         var watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
         int adsClicked=0;
-
+        
         while ( IsVisible(watchNextButton)&&adsClicked<12 )
         {
 
@@ -117,6 +118,17 @@ public class PlayNanoScript : FaucetScript
             {
                 Wait( );
             }
+            if (! IsVisible(watchNextButton) )
+            {
+                adsClicked++;
+                continue;
+            }
+
+            Actions holdElement= new Actions(Driver).MoveToElement(watchNextButton,watchNextButton.Size.Width/2,watchNextButton.Size.Height/2);
+
+            holdElement.Build( ).Perform( );
+
+            Wait(1 , 2);
 
             Click(watchNextButton);
 
