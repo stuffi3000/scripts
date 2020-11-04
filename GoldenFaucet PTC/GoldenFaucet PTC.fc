@@ -44,7 +44,7 @@ public class GoldenPTCScript : FaucetScript
     public override void Start()
     {
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "Scarlet";
+        Title = "goldenfaucet.io";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
         SuccessXPath = "//a[@class='btn btn-danger']";
