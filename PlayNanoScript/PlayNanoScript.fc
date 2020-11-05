@@ -1,6 +1,9 @@
 ﻿using FaucetCollector.Script;
+using FaucetCollector.Utilities.HumanActions;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using System;
+//css_ref FaucetCollector.Utilities
 
 public class PlayNanoScript : FaucetScript
 {
@@ -108,21 +111,27 @@ public class PlayNanoScript : FaucetScript
 
         var watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
         int adsClicked=0;
-        
         while ( IsVisible(watchNextButton)&&adsClicked<12 )
         {
 
             DateTime timeout= DateTime.Now.AddSeconds(20);
+          
+            Wait(2);
+
+            scrollDown( );
 
             while ( !watchNextButton.Enabled&&timeout>DateTime.Now )
             {
                 Wait( );
             }
-            if (! IsVisible(watchNextButton) )
+            if ( !IsVisible(watchNextButton) )
             {
                 adsClicked++;
                 continue;
             }
+
+        
+            Wait(2);
 
             Actions holdElement= new Actions(Driver).MoveToElement(watchNextButton,watchNextButton.Size.Width/2,watchNextButton.Size.Height/2);
 
@@ -163,5 +172,26 @@ public class PlayNanoScript : FaucetScript
     }
 
 
+    private  void scrollDown( )
+    {
+        var actionKeyDown= new Actions(Driver).SendKeys(Keys.ArrowDown)
+            .SendKeys(Keys.ArrowDown)
+            .SendKeys(Keys.ArrowDown)
+            .SendKeys(Keys.ArrowDown)
+            .SendKeys(Keys.ArrowDown)
+            .SendKeys(Keys.ArrowDown)
+            .SendKeys(Keys.ArrowDown)
+            .SendKeys(Keys.ArrowDown);
+
+        var action = actionKeyDown.Build();
+        for (int i=0 ;i<7 ;i++ )
+        {
+
+
+            action.Perform( );
+        }
+
+     
+    }
 }
 
