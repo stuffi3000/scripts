@@ -118,6 +118,13 @@ public class PlayNanoScript : FaucetScript
           
             Wait(2);
 
+            //there is not other xpath available
+            var adClose=ElementByName("//div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]");
+
+            if ( IsVisible(adClose) )
+            {
+                ExecuteScript("arguments[0].click()" , adClose);
+            }
             scrollDown( );
 
             while ( !watchNextButton.Enabled&&timeout>DateTime.Now )
