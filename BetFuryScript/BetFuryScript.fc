@@ -1,0 +1,153 @@
+﻿using FaucetCollector.Script;
+using System;
+using System.Globalization;
+using System.Linq;
+
+public class BetFuryScript : FaucetScript
+{
+
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("https://betfury.io/")
+            {
+                new FaucetSetting(){
+                    Name="User",
+                    Type=EditorType.TextBox,
+                    Required=true,
+                    Display="Email"
+                } ,
+                new FaucetSetting()
+                {
+                        Name="Pass",
+                        Type=EditorType.Password,
+                        Required=true,
+                        Display="Password"
+                }
+            };
+        }
+    }
+    public override void Start( )
+    {
+        SuccessXPath="//div[@class='success-notification-content']";
+        FailXPath="//div[@class='notification-content']";
+
+        Title="Betfury";
+        base.Start( );
+    }
+    public override int BeforeLogin( )
+    {
+
+        var loginModalBtn=ElementByXPath("//button[contains(text(),'Log in')]");
+        if ( !IsVisible(loginModalBtn) )
+        {
+            return Fail("Login modal btn not visible or not found");
+        }
+
+        Click(loginModalBtn);
+        Wait(1);
+
+        return base.BeforeLogin( );
+    }
+
+    public override int DoLogin( )
+    {
+        var emailBox=ElementByXPath("//input[@type='email']");
+        if ( !IsVisible(emailBox) )
+        {
+            return Fail("Email box not found or not visible");
+        }
+        SetText(
+            emailBox , GetSetting("User"));
+
+        var passwordBox=ElementByXPath("//input[@type='password']");
+        if ( !IsVisible(passwordBox) )
+        {
+            return Fail("password box not visible or not found");
+        }
+
+        SetText(passwordBox , GetPassword("Pass"));
+
+        var loginBtn=ElementByXPath("//input[@type='password']");
+        if ( !IsVisible(loginBtn) )
+        {
+            return Fail("Login btn not found or not visible");
+        }
+        Click(loginBtn);
+        Wait(2);
+        return base.DoLogin( );
+    }
+
+    public override bool IsLoggedIn( )
+    {
+        return ElementByXPath("//button[contains(text(),'Log out')]")!=null;
+    }
+
+    public override int DoSolveFaucet( )
+    {
+
+        GoToUrl("https://betfury.io/boxes/all");
+        Wait(3 , 4);
+
+        var claimModalBtn=ElementsByXPath("//button[contains(@class,'redbox__btn')]")
+            .FirstOrDefault( x=> IsVisible(x) &&  x.Enabled);
+
+        if ( claimModalBtn==null )
+        {
+            return Fail("claim modal btn not visible or not found");
+        }
+
+        Click(claimModalBtn);
+        Wait(1);
+
+        var result=DoSolveCaptcha();
+        if ( result>0 )
+        {
+            return result;
+        }
+
+        var confirmClaimBtn=ElementByXPath("//button[@class='captcha-block__submit btn_red']");
+        if ( !IsVisible(confirmClaimBtn) )
+        {
+            return Fail("Confirm claim btn not visible or not found");
+        }
+
+        Click(confirmClaimBtn);
+
+        return base.DoSolveFaucet( );
+    }
+
+    public override int GetFaucetWaitTime( )
+    {
+        var satCounter= ElementByXPath("//div[@class='freebox__bc-value']//span");
+
+        if ( IsVisible(satCounter) )
+        {
+            double currentSats;
+
+            if ( double.TryParse(satCounter.Text , NumberStyles.Any , new NumberFormatInfo( ) { CurrencyDecimalSeparator="." } , out currentSats) )
+            {
+                if ( currentSats>=75 )
+                {
+                    return 0;
+                }
+
+                double totalTimer=TimeSpan.FromMinutes(20).TotalSeconds;
+
+                double percent= currentSats/75;
+
+
+                return ( int )( totalTimer*percent );
+
+
+
+            }
+
+        }
+
+
+        return base.GetFaucetWaitTime( );
+    }
+}
