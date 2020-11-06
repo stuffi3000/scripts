@@ -37,7 +37,7 @@ public class Tronwarz_ : FaucetScript
             };
         }
     }
-    public const string BaseUrl="https://tronwarz.com//";
+    public const string BaseUrl="https://tronwarz.com/";
     public const string ShortUrl=BaseUrl+"shortlinks.html";
    private BfreeSolver manager { get; set; }
     /// <summary>
