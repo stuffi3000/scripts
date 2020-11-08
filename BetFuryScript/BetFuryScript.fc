@@ -70,7 +70,7 @@ public class BetFuryScript : FaucetScript
 
         SetText(passwordBox , GetPassword("Pass"));
 
-        var loginBtn=ElementByXPath("//input[@type='password']");
+        var loginBtn=ElementByXPath("//button[contains(text(),'Login')]");
         if ( !IsVisible(loginBtn) )
         {
             return Fail("Login btn not found or not visible");
@@ -82,7 +82,7 @@ public class BetFuryScript : FaucetScript
 
     public override bool IsLoggedIn( )
     {
-        return ElementByXPath("//button[contains(text(),'Log out')]")!=null;
+        return ElementByXPath("//button[contains(text(),'out')]")!=null;
     }
 
     public override int DoSolveFaucet( )
@@ -102,7 +102,7 @@ public class BetFuryScript : FaucetScript
         Click(claimModalBtn);
         Wait(1);
 
-        var result=DoSolveCaptcha();
+        var result=DoHCaptcha();
         if ( result>0 )
         {
             return result;
