@@ -1,5 +1,4 @@
 ﻿using FaucetCollector.Script;
-using FaucetCollector.Utilities.HumanActions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using System;
@@ -111,20 +110,18 @@ public class PlayNanoScript : FaucetScript
 
         var watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
         int adsClicked=0;
+        FaucetCollector.Utilities.Adblock adblock = new FaucetCollector.Utilities.Adblock(this);
         while ( IsVisible(watchNextButton)&&adsClicked<12 )
         {
 
             DateTime timeout= DateTime.Now.AddSeconds(20);
-          
+
             Wait(2);
 
             //there is not other xpath available
-            var adClose=ElementByName("//div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]");
 
-            if ( IsVisible(adClose) )
-            {
-                ExecuteScript("arguments[0].click()" , adClose);
-            }
+          
+            adblock.DestroyAds( );
             scrollDown( );
 
             while ( !watchNextButton.Enabled&&timeout>DateTime.Now )
@@ -137,7 +134,7 @@ public class PlayNanoScript : FaucetScript
                 continue;
             }
 
-        
+
             Wait(2);
 
             Actions holdElement= new Actions(Driver).MoveToElement(watchNextButton,watchNextButton.Size.Width/2,watchNextButton.Size.Height/2);
@@ -179,7 +176,7 @@ public class PlayNanoScript : FaucetScript
     }
 
 
-    private  void scrollDown( )
+    private void scrollDown( )
     {
         var actionKeyDown= new Actions(Driver).SendKeys(Keys.ArrowDown)
             .SendKeys(Keys.ArrowDown)
@@ -191,14 +188,14 @@ public class PlayNanoScript : FaucetScript
             .SendKeys(Keys.ArrowDown);
 
         var action = actionKeyDown.Build();
-        for (int i=0 ;i<7 ;i++ )
+        for ( int i = 0 ; i<7 ; i++ )
         {
 
 
             action.Perform( );
         }
 
-     
+
     }
 }
 
