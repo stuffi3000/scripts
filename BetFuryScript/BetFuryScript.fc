@@ -118,6 +118,35 @@ public class BetFuryScript : FaucetScript
 
         return base.DoSolveFaucet( );
     }
+    public override string GetHCaptchaSiteKey( )
+    {
+        var hcaptchaIframe=ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if ( hcaptchaIframe!=null )
+        {
+            string src= hcaptchaIframe.GetAttribute("src");
+
+            if ( !string.IsNullOrEmpty(src) )
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey= queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey( );
+    }
+
 
     public override int GetFaucetWaitTime( )
     {
@@ -126,17 +155,35 @@ public class BetFuryScript : FaucetScript
         if ( IsVisible(satCounter) )
         {
             double currentSats;
+            var formatInfo=new NumberFormatInfo( ) { CurrencyDecimalSeparator="." };
 
-            if ( double.TryParse(satCounter.Text , NumberStyles.Any , new NumberFormatInfo( ) { CurrencyDecimalSeparator="." } , out currentSats) )
+            if ( double.TryParse(satCounter.Text , NumberStyles.Any ,formatInfo  , out currentSats) )
             {
-                if ( currentSats>=75 )
+                double totalSats= 25;
+                var capacityElement=ElementByXPath("//span[@class='freebox__capacity-value']");
+                if ( IsVisible(capacityElement) )
+                {
+                    string text = ExecuteScript("arguments[0].textContent;",capacityElement) as string;
+                    if ( !string.IsNullOrEmpty(text) )
+                    {
+                        string capacity= text.Trim().Split('/').LastOrDefault().Split(' ').FirstOrDefault();
+
+                        if(!double.TryParse(capacity,NumberStyles.Any,formatInfo,out totalSats) )
+                        {
+                            Log("Something is wrong getting the total reward , will use the default "+totalSats,Level.Warning);
+                        }
+
+                    }
+                }
+              
+                if ( currentSats>=totalSats )
                 {
                     return 0;
                 }
 
                 double totalTimer=TimeSpan.FromMinutes(20).TotalSeconds;
 
-                double percent= currentSats/75;
+                double percent= currentSats/totalSats;
 
 
                 return ( int )( totalTimer*percent );
