@@ -17,7 +17,7 @@ public class RushBitcoinScript : FaucetScript
     {
         get
         {
-            return new FaucetSettings("https://claimbits.net/?ref=40217")
+            return new FaucetSettings("https://claimbits.net")
             {
                 new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
@@ -82,97 +82,6 @@ public class RushBitcoinScript : FaucetScript
         return manager.GetFaucetWaitTime( );
     }
 
-
-    public const string ShortUrl="";
-    public override int BeforeSolveFaucet( )
-    {
-        if ( GetBoolSetting("DoShortLink") )
-        {
-            GoToUrl(ShortUrl);
-            Wait( );
-            var Shortlinks = manager.GetShortlinks();
-            if ( Shortlinks.Count>0 )
-            {
-                int NShort = Random(0, Shortlinks.Count - 1);
-
-                try
-                {
-
-
-
-                    FaucetCollector.Captcha.IconCaptchaSolver solver=new FaucetCollector.Captcha.IconCaptchaSolver(this);
-                    Click(Shortlinks[NShort]);
-                    Wait( );
-                    int count=0;
-                    while ( IsVisible(Shortlinks[NShort])&&!solver.IsVisibleIconCaptcha( )&&count<5 )
-                    {
-                        Click(Shortlinks[NShort]);
-                        Wait( );
-                        count++;
-
-                    }
-
-                    if ( solver.IsVisibleIconCaptcha( ) )
-                    {
-                        solver.DoSolve( );
-                        Wait(4 , 5);
-                        if ( !solver.IsVisibleIconCaptcha( ) )
-                        {
-                            FaucetCollector.Utilities.ShortLinkBypasser bypasser = new FaucetCollector.Utilities.ShortLinkBypasser(this);
-                            if ( bypasser.IsValidShortLink( ) )
-                            {
-                                bool cs = bypasser.DoShortLink();
-
-                                if ( cs )
-                                {
-                                    Log("ShortlinkSuccess");
-                                }
-                                else
-                                {
-                                    Log("Something is wrong with the shortlink");
-                                }
-
-                            }
-                            else
-                            {
-                                GoToUrl(ShortUrl);
-                                return Fail("Something went wrong shortlink this is not a shortlink");
-                            }
-                        }
-                        else
-                        {
-                            return Fail("Icon captcha incorrectly solved");
-                        }
-
-                    }
-
-
-                }
-                finally
-                {
-                    if ( !Driver.Url.Contains(ShortUrl) )
-                    {
-
-                        GoToUrl(ShortUrl);
-                    }
-
-                }
-
-            }
-            else
-            {
-                Log("No more shortlinks available");
-            }
-
-        }
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeSolveCaptcha( );
-    }
-
-    /// <summary>
-    /// This method gets called after the BeforeSolveFaucet. You can do the actual claiming of the faucet in here.
-    /// </summary>
-    /// <returns></returns>
     public override int DoSolveFaucet( )
     {
         if ( Driver.Url!="https://claimbits.net/" )
