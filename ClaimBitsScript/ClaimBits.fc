@@ -6,7 +6,7 @@ using FaucetCollector.Script;
 
 
 
-public class RushBitcoinScript : FaucetScript
+public class ClaimBitsScript : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
