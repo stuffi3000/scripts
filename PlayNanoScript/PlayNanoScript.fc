@@ -25,6 +25,13 @@ public class PlayNanoScript : FaucetScript
                     Display="Password",
                     Type=EditorType.Password,
                     Required=true
+                },
+                new FaucetSetting( )
+                {
+                    Name="Address",
+                    Display="Nano Address",
+                    Type=EditorType.Wallet,
+                    Required=true
                 }
             };
         }
@@ -111,7 +118,9 @@ public class PlayNanoScript : FaucetScript
         var watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
         int adsClicked=0;
         FaucetCollector.Utilities.Adblock adblock = new FaucetCollector.Utilities.Adblock(this);
-        while ( IsVisible(watchNextButton)&&adsClicked<12 )
+        DateTime Timeout = DateTime.Now.AddMinutes(10);
+        adblock.DestroyAds( );
+        while ( IsVisible(watchNextButton)&&adsClicked<40 && DateTime.Now < Timeout )
         {
 
             DateTime timeout= DateTime.Now.AddSeconds(20);
@@ -121,7 +130,6 @@ public class PlayNanoScript : FaucetScript
             //there is not other xpath available
 
 
-            adblock.DestroyAds( );
             TryBlockPrimaryAd( );
 
 
@@ -137,6 +145,8 @@ public class PlayNanoScript : FaucetScript
                 adsClicked++;
                 continue;
             }
+
+            TryBlockPrimaryAd( );
 
 
             Wait(2);
@@ -156,6 +166,14 @@ public class PlayNanoScript : FaucetScript
         }
 
         Wait(1);
+
+        var nanoAddressBox=ElementById("gu_address");
+        if ( !IsVisible(nanoAddressBox) )
+        {
+            return Fail("nano address box not visible");
+        }
+
+        SetText(nanoAddressBox , GetSetting("Address"));
 
         var stopButton=ElementByXPath("//button[@value='stop']");
         if ( !IsVisible(stopButton) )
