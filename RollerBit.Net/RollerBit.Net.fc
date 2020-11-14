@@ -357,9 +357,6 @@ public class btcsamsity : FaucetScript
            if (IsVisible(XpathTimeVAR))
            {
 		     var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text, "t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
-             Driver.Close();  // Close specific chrome window
-             Driver.Quit();  // also Close the console app, that was used to kick off the chrome window
-             Driver.Dispose();  // Close the chromedriver.exe
              return (int)((TimeVAR - DateTime.Now).TotalSeconds);
 		   }
 		   		   
