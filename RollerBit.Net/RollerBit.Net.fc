@@ -7,22 +7,13 @@
 using System;
 using System.IO;
 using FaucetCollector.Script;
-using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
-using System.Drawing;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Globalization;
 
-//css_inc ShortLinkUtilities
 //css_ref FaucetCollector.Utilities
 //css_inc RecaptchaUtilities
-//css_inc AntiBotLinksUtility
-//css_ref ImageProcessing
-//css_ref ProcessingImagesUsingLockBits
-//css_inc GetestCaptcha
-
 
 public class btcsamsity : FaucetScript
 {
