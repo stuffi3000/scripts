@@ -229,9 +229,9 @@ class RollerCoin : FaucetScript
 
             Wait ( 15,20 );
 
-            var captchaImg = ElementByName("//div[contains(@class,'captcha-window')]//img[contains(@src,'data:image')]");
-            var captchaBox= ElementByName("//div[contains(@class,'captcha-window')]//input[@type='text']");
-            var captchaButtonSubmit=ElementByName("/div[contains(@class,'captcha-window')]//button[@type='button']");
+            var captchaImg = ElementByXPath("//div[contains(@class,'captcha-window')]//img[contains(@src,'data:image')]");
+            var captchaBox= ElementByXPath("//div[contains(@class,'captcha-window')]//input[@type='text']");
+            var captchaButtonSubmit=ElementByXPath("//div[contains(@class,'captcha-window')]//button[@type='button']");
 
             if(IsVisible(captchaImg) && IsVisible(captchaBox) &&IsVisible(captchaButtonSubmit) )
             {
