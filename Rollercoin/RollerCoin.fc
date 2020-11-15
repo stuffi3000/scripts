@@ -192,9 +192,19 @@ class RollerCoin : FaucetScript
     }
     public override int DoSolveFaucet ( )
     {
-        GoToUrl ( "https://rollercoin.com/game/choose_game" );
-        Wait ( 1 );
 
+        var gamesButton=ElementByXPath("//a[contains(@class,'games-button')]");
+        if ( IsVisible(gamesButton) )
+        {
+            Click
+                (gamesButton);
+        }
+        else
+        {
+            GoToUrl("https://rollercoin.com/game/choose_game");
+        }
+
+        Wait ( 1,2 );
 
 
         var GameSelected=   (Games) Enum.Parse ( typeof ( Games ) , GetSetting ( "Game" ));
@@ -217,7 +227,24 @@ class RollerCoin : FaucetScript
 
             }
 
-            Wait ( 15 );
+            Wait ( 15,20 );
+
+            var captchaImg = ElementByName("//div[contains(@class,'captcha-window')]//img[contains(@src,'data:image')]");
+            var captchaBox= ElementByName("//div[contains(@class,'captcha-window')]//input[@type='text']");
+            var captchaButtonSubmit=ElementByName("/div[contains(@class,'captcha-window')]//button[@type='button']");
+
+            if(IsVisible(captchaImg) && IsVisible(captchaBox) &&IsVisible(captchaButtonSubmit) )
+            {
+              var result=DoSolveImageCaptcha(captchaImg , captchaBox);
+                if ( result>0 )
+                {
+                    return result;
+                }
+
+                Click(captchaButtonSubmit);
+                Wait(4 , 6);
+            }
+
             Log ( "Game successfully played" );
             IsSuccess=true;
             ClaimSuccess ( );
@@ -232,6 +259,8 @@ class RollerCoin : FaucetScript
 
         return base.DoSolveFaucet ( );
     }
+
+
 
 
 }
