@@ -1,7 +1,8 @@
 
+
 //========================================//
 //script Written by: ••AviramDayan•• 01/01/2020 20:30PM - Version 1
-//Last Update: 16/01/2020 03:20AM - Version 5
+//Last Update: 16/01/2020 05:20AM - Version 5
 //=======================================//
 
 /*
@@ -141,7 +142,9 @@ public class btcsamsity : FaucetScript
                 new FaucetSetting(){Name="Roll_Alternative_Random_HighLow",Display="Roll Alternative - Random HighLow - ON/OFF",Type=EditorType.CheckBox,Default=false},
 
                 new FaucetSetting(){Name="LotteryGame",Display="Lottery Game - ON/OFF",Type=EditorType.CheckBox,Default=false},
-                new FaucetSetting(){Name="Menu_Amount_Tokens_Lottery",Display="Lottery Game - Menu Amount Tokens",Type=EditorType.ComboBox,Default="100 tickets",Items=new System.Collections.Generic.List<string>{"1 ticket","10 tickets","100 tickets","1k tickets","10k tickets","100k tickets","1m tickets","All"}},
+                new FaucetSetting(){Name="Menu_Amount_Tokens_Buy_Lottery",Display="Lottery Game - Menu Amount Buy Tokens",Type=EditorType.ComboBox,Default="none",Items=new System.Collections.Generic.List<string>{"none","1 ticket","10 tickets","100 tickets","1k tickets","10k tickets","100k tickets","1m tickets","All"}},
+                new FaucetSetting(){Name="Menu_Amount_Tokens_Free_Lottery",Display="Lottery Game - Menu Amount Free Tokens",Type=EditorType.ComboBox,Default="All",Items=new System.Collections.Generic.List<string>{"none","1 ticket","10 tickets","100 tickets","1k tickets","10k tickets","100k tickets","1m tickets","All"}},
+
 				
                 //insert user settings here
                 //new FaucetSetting { 
@@ -412,68 +415,194 @@ public class btcsamsity : FaucetScript
         Wait();		
         Wait(2);
         Log("go to LotteryGame");
-		  
-        var Menu_Amount_Tokens_Lottery_Var = GetSetting("Menu_Amount_Tokens_Lottery");
+		
+		//===//
+		//BUY
+		//===//
+        var Menu_Amount_Tokens_Buy_Lottery_Var = GetSetting("Menu_Amount_Tokens_Buy_Lottery");
 
-        if(Menu_Amount_Tokens_Lottery_Var=="1 ticket")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="none")  
+        {
+         Log("Buy_Lottery - none"); 
+		}
+
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="1 ticket")  
         {
          var Lottery_Token1 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'1,')]"); //1
+         if (IsVisible(Lottery_Token1))
+		 {
 		 Click(Lottery_Token1);
          Log("click - 1 ticket");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="10 tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="10 tickets")  
         {
          var Lottery_Token10 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'10,')]"); //10
+         if (IsVisible(Lottery_Token10))
+		 {
 		 Click(Lottery_Token10);
          Log("click - 10 tickets");
+		 }
 		}	
 		
-        if(Menu_Amount_Tokens_Lottery_Var=="100 tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="100 tickets")  
         {
          var Lottery_Token100 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'100,')]"); //100
+         if (IsVisible(Lottery_Token100))
+		 {
 		 Click(Lottery_Token100);
          Log("click - 100 tickets");
+		 }
 		}	
 		
-        if(Menu_Amount_Tokens_Lottery_Var=="1k tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="1k tickets")  
         {
          var Lottery_Token1000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'1000,')]"); //1000
+         if (IsVisible(Lottery_Token1000))
+		 {
 		 Click(Lottery_Token1000);
          Log("click - 1k tickets");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="10k tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="10k tickets")  
         {
          var Lottery_Token10000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'10000,')]"); //10000
+         if (IsVisible(Lottery_Token10000))
+		 {
 		 Click(Lottery_Token10000);
          Log("click - 10k tickets");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="100k tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="100k tickets")  
         {
          var Lottery_Token100000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'100000,')]"); //100000
+         if (IsVisible(Lottery_Token100000))
+		 {
 		 Click(Lottery_Token100000);
          Log("click - 100k tickets");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="1m tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="1m tickets")  
         {
          var Lottery_Token1000000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'buyTickets(1000000')]"); //1000000
+         if (IsVisible(Lottery_Token1000000))
+		 {
 		 Click(Lottery_Token1000000);
          Log("click - 1m tickets");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="All")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="All")  
         {
          var Lottery_Token_All = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'1 &&')]"); //All
+         if (IsVisible(Lottery_Token_All))
+		 {
 		 Click(Lottery_Token_All);
          Log("click - ALL tickets");
+		 }
 		}
+		//===//
+		
+
+		//===//
+		//FREE
+		//===//
+        var Menu_Amount_Tokens_Free_Lottery_Var = GetSetting("Menu_Amount_Tokens_Free_Lottery");
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="none")  
+        {
+         Log("Free_Lottery - none"); 
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="1 ticket")  
+        {
+         var Lottery_Token1 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'1,')]"); //1
+         if (IsVisible(Lottery_Token1))
+		 {		 
+		 Click(Lottery_Token1);
+         Log("click - 1 ticket");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="10 tickets")  
+        {
+         var Lottery_Token10 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'10,')]"); //10
+         if (IsVisible(Lottery_Token10))
+		 {		 
+		 Click(Lottery_Token10);
+         Log("click - 10 tickets");
+		 }
+		}	
+		
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="100 tickets")  
+        {
+         var Lottery_Token100 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'100,')]"); //100
+         if (IsVisible(Lottery_Token100))
+		 {		 
+		 Click(Lottery_Token100);
+         Log("click - 100 tickets");
+		 }
+		}	
+		
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="1k tickets")  
+        {
+         var Lottery_Token1000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'1000,')]"); //1000
+         if (IsVisible(Lottery_Token1000))
+		 {		 
+		 Click(Lottery_Token1000);
+         Log("click - 1k tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="10k tickets")  
+        {
+         var Lottery_Token10000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'10000,')]"); //10000
+         if (IsVisible(Lottery_Token10000))
+		 {		 
+		 Click(Lottery_Token10000);
+         Log("click - 10k tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="100k tickets")  
+        {
+         var Lottery_Token100000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'100000,')]"); //100000
+         if (IsVisible(Lottery_Token100000))
+		 {		 
+		 Click(Lottery_Token100000);
+         Log("click - 100k tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="1m tickets")  
+        {
+         var Lottery_Token1000000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'buyTickets(1000000')]"); //1000000
+         if (IsVisible(Lottery_Token1000000))
+		 {		 
+		 Click(Lottery_Token1000000);
+         Log("click - 1m tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="All")  
+        {
+         var Lottery_Token_All = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'1 &&')]"); //All
+         if (IsVisible(Lottery_Token_All))
+		 {		 
+		 Click(Lottery_Token_All);
+         Log("click - ALL tickets");
+		 }
+		}
+		//===//
+		
 		
       } // LotteryGame
-
-
+      //=============//
+	  
 	
       //=============//
       //MultiplierGame
