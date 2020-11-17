@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 01/11/2020 14:00AM - Version 23
+//Last Update: 17/11/2020 22:00PM - Version 23
 //==================//
 
 using System;
@@ -164,7 +164,7 @@ public class stake : FaucetScript
 	 if (!IsVisible(ExitButton))
 	 {
 
-		GoToUrl("https://stake.com/?modal=login");
+		GoToUrl("https://stake.com/?action=login&modal=auth");
 		Wait();		
 		Wait(2);
 
@@ -177,7 +177,9 @@ public class stake : FaucetScript
         */
 
         Driver.Navigate().Refresh(); //that not enter multiple content in input
-        
+		
+		Wait(3);        
+		
 		var box_user = ElementByXPath("//input[contains(@name,'email')]");
         SetText(box_user, GetSetting("Email"));
 		
@@ -383,7 +385,7 @@ public class stake : FaucetScript
 	      Wait();
 	      Wait(2);	
 
-          var RakebackAvailable = ElementByXPath("//a[contains(@href,'Rakeback')]/span[contains(text(),'Rakeback')]"); 
+          var RakebackAvailable = ElementByXPath("//button[contains(@class,'Button__StyledButton')]/span[contains(text(),'Rakeback')]");  
 		  
           if (!IsVisible(RakebackAvailable))
           {
@@ -410,7 +412,7 @@ public class stake : FaucetScript
 	      Wait();
 	      Wait(2);	
 
-          var ReloadAvailable = ElementByXPath("//a[contains(@href,'Reload')]/span[contains(text(),'Reload')]"); 
+          var ReloadAvailable = ElementByXPath("//button[contains(@class,'Button__StyledButton')]/span[contains(text(),'Reload')]"); 
 		  
           if (!IsVisible(ReloadAvailable))
           {
@@ -1198,4 +1200,3 @@ public class stake : FaucetScript
 	
 	
 } //end public class
-
