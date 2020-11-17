@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/11/2020 08:30AM - Version 1
-//Last Update: 14/11/2020 08:30AM - Version 1
+//Last Update: 16/11/2020 12:05AM - Version 2
 //==================//
 
 using System;
@@ -283,7 +283,7 @@ public class btcsamsity : FaucetScript
 				
 	    Wait(2);
 	
-        var Button_Claim = ElementByXPath("//button[contains(text(),'Roll')]");  
+        var Button_Claim = ElementByXPath("//button[contains(text(),'Roll') or contains(text(),'ROLL')]");  
         if (IsVisible(Button_Claim))
 		{
 		Click(Button_Claim);		
