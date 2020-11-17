@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 17/11/2020 22:20PM - Version 24
+//Last Update: 18/11/2020 01:10AM - Version 25
 //==================//
 
 using System;
@@ -429,7 +429,6 @@ public class stake : FaucetScript
 		//======//
 
 
-
 		//======//
 		//ExclusiveBonusDrop_Telegram//
 		//======//
@@ -443,42 +442,50 @@ public class stake : FaucetScript
           GoToUrl("https://t.me/s/StakeCasino");
 	      Log("Go to try - ExclusiveBonusDrop_Telegram");	
 	      Wait();
-	      Wait(7);	
+	      Wait(5);	
 
-          var ExclusiveBonusDrop_Telegram_Last = ElementByXPath("//div[contains(@class,'js-message_text') and contains(., 'rop') ]//a[position() = last() ]"); 
-          if (IsVisible(ExclusiveBonusDrop_Telegram_Last))
-          {          
-	  
+            //Vertical - scrollHeight | scrollTop   //Horizontal - | scrollWidth | scrollLeft
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //if some elements not found in html - just before need to do `scrollTop` to find some elements
+            Wait(5);
 
-			Click(ExclusiveBonusDrop_Telegram_Last);
-	        Log("ExclusiveBonusDrop_Telegram_Last - here");
+            var ExclusiveBonusDrop_Telegram_Last = ElementsByXPath("//div[contains(@class,'tgme_widget_message_text js-message_text before_footer') and contains(., 'Drop') ]//a[position() = last() ]");
+            var ElementsToCheck = ExclusiveBonusDrop_Telegram_Last.LastOrDefault();
 
-            Driver.SwitchTo().Window(Driver.WindowHandles[1]); 
-			
-			Wait(5);
-			
-			Choose_Coin_Function();
-			
-			Wait(5);
-			
-            var Redeem_VAR = ElementByXPath("//span/span[contains(text(),'Redeem')]"); 
-		    if (IsVisible(Redeem_VAR))
-            {				
-	          Log("ExclusiveBonusDrop_Telegram_Last - here");			
-			  Click(Redeem_VAR);
-			  Wait(7);			  
+            if (ElementsToCheck ==null) // Not Visible
+            {
+	           Log("ElementsToCheck - NOT found");
 			}
 			
-            Driver.SwitchTo().Window(Driver.WindowHandles[0]); 
-			
-            CheckForPopupsEnabled = true;     //enable
-            CheckForPopups();    //call		
-			
-	        Title="stake.com";		  
-            GoToUrl("https://stake.com");	  
-			
-          }
-		
+            if (ElementsToCheck !=null) //Visible  
+            {
+			   Click(ElementsToCheck);
+	           Log("ElementsToCheck - here");
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[1]); 
+			   
+			   Wait(5);
+			   
+			   Choose_Coin_Function();
+			   
+			   Wait(5);
+			   
+               var Redeem_VAR = ElementByXPath("//span/span[contains(text(),'Redeem')]"); 
+		       if (IsVisible(Redeem_VAR))
+               {				
+	             Log("ExclusiveBonusDrop_Telegram_Last - here");			
+			     Click(Redeem_VAR);
+			     Wait(7);			  
+			   }
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[0]); 
+			   
+               CheckForPopupsEnabled = true;     //enable
+               CheckForPopups();    //call		
+			   
+	           Title="stake.com";		  
+               GoToUrl("https://stake.com");	  
+            }
+	
         } //end ExclusiveBonusDrop_Telegram
 		//======//
 
@@ -565,8 +572,9 @@ public class stake : FaucetScript
              var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
              if (IsVisible(CheckAvailableGeneral))
              {
-               var XpathTimeVAR = ElementByXPath("//div[contains(@class,'ModalFormWrap')]/p[1]/span/span");
-		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text, "t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+	           Log("DateTime.ParseExact - here"); 
+               var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
                return (int)((TimeVAR - DateTime.Now).TotalSeconds);
 		     }
 		   } // end Reload_SiteTimeDate
@@ -605,6 +613,23 @@ public class stake : FaucetScript
           Choose_Coin_Function(); //call
 		  
           var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+
+          if (IsVisible(CheckAvailableGeneral)) 
+          {	
+	        var NextAvailable = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span"); 
+		    if (IsVisible(NextAvailable)) 
+		    {		
+			Log("Next claim available at " + NextAvailable.Text );
+		    }	
+			
+		    if (!IsVisible(NextAvailable)) 
+		    {		
+			Log("try next time");
+		    }	
+
+		  } //end CheckAvailableGeneral - Visible 
+
+
           if (!IsVisible(CheckAvailableGeneral)) 
           {	
 		    Log("faucet visible - do stuff");
@@ -640,7 +665,7 @@ public class stake : FaucetScript
 
             } //CheckClaim
 		  
-		  }//end CheckAvailableGeneral
+		  }//end CheckAvailableGeneral - NOT Visible
 
 
 
@@ -726,7 +751,7 @@ public class stake : FaucetScript
       public int Choose_Coin_Function()
       {	
 
-        var MenuVAR = ElementByXPath("//button[contains(@class,'Button__StyledButton-sc-8bd3dp-0 jXTFLj')]"); 
+        var MenuVAR = ElementByXPath("//div[contains(@class,'styles__StyledStack')]//button[contains(@class,'iWspNF')]"); 
         if (IsVisible(MenuVAR))
         {
           Log("Menu_Function");				  
@@ -739,56 +764,56 @@ public class stake : FaucetScript
 	    
         if(MenuCoinsVAR=="btc")
         {
-        var btc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[1]/button[contains(@class,'Button__StyledButton')]");
+        var btc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[1]/button");
         Log("choose - btc");
         Click(btc);
 	    }// end btc
 
         if(MenuCoinsVAR=="eth")
         {
-        var eth = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[2]/button[contains(@class,'Button__StyledButton')]");
+        var eth = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[2]/button");
         Log("choose - eth");
         Click(eth);
 	    }// end eth	  
 
         if(MenuCoinsVAR=="ltc")
         {
-        var ltc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[3]/button[contains(@class,'Button__StyledButton')]");
+        var ltc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[3]/button");
         Log("choose - ltc");
         Click(ltc);
 	    }// end ltc	  
 	    
         if(MenuCoinsVAR=="doge")
         {
-        var doge = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[4]/button[contains(@class,'Button__StyledButton')]");
+        var doge = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[4]/button");
         Log("choose - doge");
         Click(doge);
 	    }// end doge 
 	    
         if(MenuCoinsVAR=="bch")
         {
-        var bch = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[5]/button[contains(@class,'Button__StyledButton')]");
+        var bch = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[5]/button");
         Log("choose - bch");
         Click(bch);
 	    }// end bch
 	    
         if(MenuCoinsVAR=="xrp")
         {
-        var xrp = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[6]/button[contains(@class,'Button__StyledButton')]");
+        var xrp = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[6]/button");
         Log("choose - xrp");
         Click(xrp);
 	    }// end xrp
 	    
         if(MenuCoinsVAR=="trx")
         {
-        var trx = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[7]/button[contains(@class,'Button__StyledButton')]");
+        var trx = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[7]/button");
         Log("choose - trx");
         Click(trx);
 	    }// end trx
 	    
         if(MenuCoinsVAR=="eos")
         {
-        var eos = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[8]/button[contains(@class,'Button__StyledButton')]");
+        var eos = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[8]/button");
         Log("choose - eos");
         Click(eos);
 	    }// end eos
