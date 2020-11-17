@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 17/11/2020 22:00PM - Version 23
+//Last Update: 17/11/2020 22:20PM - Version 24
 //==================//
 
 using System;
@@ -380,7 +380,7 @@ public class stake : FaucetScript
 		//======//
         if (GetBoolSetting("Rakeback"))
         {	
-          GoToUrl("https://stake.com/?currency=btc&modal=vipRakeback");
+          GoToUrl("https://stake.com/?modal=vip&tab=rakeback");
 	      Log("Go to try - Rakeback");	
 	      Wait();
 	      Wait(2);	
@@ -407,7 +407,7 @@ public class stake : FaucetScript
 		//======//
         if (GetBoolSetting("Reload"))
         {	
-          GoToUrl("https://stake.com/?currency=btc&modal=vipReload");
+          GoToUrl("https://stake.com/?currency=btc&modal=vip&tab=reload");
 	      Log("Go to try - Reload");	
 	      Wait();
 	      Wait(2);	
@@ -556,7 +556,7 @@ public class stake : FaucetScript
            if (GetBoolSetting("Reload_SiteTimeDate"))
            {
              Title = "stake.com";
-             GoToUrl("https://stake.com/?currency=btc&modal=vipReload");
+             GoToUrl("https://stake.com/?currency=btc&modal=vip&tab=reload");
 	         Log("Go to try - Reload to return to time");	
 	         Wait();
 	         Wait(5);	
