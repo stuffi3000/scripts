@@ -14,7 +14,8 @@ class HitBits : FaucetScript
                 new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 new FaucetSetting(){Name="UseSolvemedia",Type=EditorType.CheckBox,Default=true,Display="UseSolvemedia"},
-                new FaucetSetting(){Name="Fight",Type=EditorType.Numeric,Default=0,Display="Number of raid to fight before claim [0  is disabled]"}
+                new FaucetSetting(){Name="Fight",Type=EditorType.Numeric,Default=0,Display="Number of raid to fight before claim [0  is disabled]"},
+                new FaucetSetting(){Name="ClaimDaily", Type=EditorType.TextBox,Default=true,Display="Claim daily reward"}
             };
 
         }
@@ -117,6 +118,19 @@ class HitBits : FaucetScript
             Wait(2);
         }
     }
+
+    private void TryClaimDaily()
+    {
+        if (GetBoolSetting("ClaimDaily"))
+        {
+            var claimDaily = ElementByXPath("//button[@type='button' and @class='button is-success is-small']//span[contains(text(),'Claim')]");
+            if (IsVisible(claimDaily))
+            {
+                Click(claimDaily);
+                Wait(2, 3);
+            }
+        }
+    }
     public override int DoSolveFaucet ( )
     {
         if ( Driver.Url!=FaucetUrl )
@@ -124,6 +138,9 @@ class HitBits : FaucetScript
             GoToUrl ( FaucetUrl );
             Wait ( 2 , 3 );
         }
+
+        TryClaimDaily();
+
         var GotoFaucetButton=ElementByXPath("//a[@class='button is-success is-medium' and @href='/faucet']");
         if ( IsVisible ( GotoFaucetButton ) )
         {
