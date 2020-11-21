@@ -1,8 +1,7 @@
 
-
 //========================================//
 //script Written by: ••AviramDayan•• 01/01/2020 20:30PM - Version 1
-//Last Update: 16/01/2020 05:20AM - Version 5
+//Last Update: 21/11/2020 07:10AM - Version 7
 //=======================================//
 
 /*
@@ -82,11 +81,12 @@ using System;
 using System.IO;
 using FaucetCollector.Script;
 using OpenQA.Selenium;
+using System.Globalization;
 //css_inc ShortLinkUtilities
 //css_inc RecaptchaUtilities
 
 
-public class btcsamsity : FaucetScript
+public class CoinPot : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
@@ -351,7 +351,7 @@ public class btcsamsity : FaucetScript
     if(ad)
 	{
         ad=false; //solve the problem in start - after he return to script again
-        return GetWaitSetting();  	
+        //return GetWaitSetting();  	
     }	//end ad
 		
 		
@@ -681,8 +681,7 @@ public class btcsamsity : FaucetScript
 		
       } //end MultiplierGame
 
-  
-	  ad = true; //call to timer / and do success	 
+	 return Time_Function();
 		
  //This faucet has nothing to do here. We will let Faucet Collector handle it.
  return base.DoSolveFaucet();
@@ -714,6 +713,46 @@ public class btcsamsity : FaucetScript
         return base.CheckFaucetResult();
     }
 	
+
+
+        //=================//
+       //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+           //site time with date - example 10:00 PM | 10:00 AM
+           var XpathTimeVAR = ElementByXPath("//div[contains(@class,'ModalFormWrap')]/p[1]/span/span");
+           if (IsVisible(XpathTimeVAR))
+           {
+	         Log("DateTime.ParseExact - here"); 
+		     var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+             return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+		   }
+		   		   
+		   //site time with normal counter
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+           return 0;		
+        }//end Time_Function
+        //=================//	
+
 
 
       //===============================================================//
