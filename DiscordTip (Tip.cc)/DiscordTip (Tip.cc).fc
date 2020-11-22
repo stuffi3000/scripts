@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 01/11/2020 01:40AM - Version 73
+//Last Update: 22/11/2020 04:05AM - Version 74
 //==================//
 
 using System;
@@ -603,6 +603,26 @@ public class DiscordScript: FaucetScript
         //================//
         if (GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
         {
+			
+           TopSite_Function(); //call
+		   
+		   //first go to server
+	       Title = "Discord";	
+		   GoToUrl("https://discord.gg/kJJYWxQChK");
+		   Wait();	
+		   Wait(5);		
+		   
+           Driver.Navigate().Refresh();
+		   Wait();	
+		   
+           NitroGames_Function(); //call
+		   
+		   Wait(2);	
+		   
+           inviteServer_Elements_Function(); //call
+		   
+           Wait(3);		
+			
            Title = "Discordtip";
            ADFunction_String_URL_Discordtip_Tippi(); //call to Discordtip_Tippi
            Wait();
