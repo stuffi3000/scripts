@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 18/11/2020 01:10AM - Version 25
+//Last Update: 23/11/2020 08:30AM - Version 26
 //==================//
 
 using System;
@@ -164,6 +164,11 @@ public class stake : FaucetScript
 	 if (!IsVisible(ExitButton))
 	 {
 
+        //====================================//
+        // only this section is different vs - | Primedice.com | //
+        //====================================//
+		 
+
 		GoToUrl("https://stake.com/?action=login&modal=auth");
 		Wait();		
 		Wait(2);
@@ -179,6 +184,9 @@ public class stake : FaucetScript
         Driver.Navigate().Refresh(); //that not enter multiple content in input
 		
 		Wait(3);        
+
+        //====================================//
+
 		
 		var box_user = ElementByXPath("//input[contains(@name,'email')]");
         SetText(box_user, GetSetting("Email"));
@@ -446,9 +454,11 @@ public class stake : FaucetScript
 
             //Vertical - scrollHeight | scrollTop   //Horizontal - | scrollWidth | scrollLeft
             ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //if some elements not found in html - just before need to do `scrollTop` to find some elements
-            Wait(5);
-
-            var ExclusiveBonusDrop_Telegram_Last = ElementsByXPath("//div[contains(@class,'tgme_widget_message_text js-message_text before_footer') and contains(., 'Drop') ]//a[position() = last() ]");
+            Wait(3);
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //again
+            Wait(3);
+			
+            var ExclusiveBonusDrop_Telegram_Last = ElementsByXPath("//div[contains(@class,'tgme_widget_message_text js-message_text') and contains(., 'Drop') ]//a[position() = last() ]");
             var ElementsToCheck = ExclusiveBonusDrop_Telegram_Last.LastOrDefault();
 
             if (ElementsToCheck ==null) // Not Visible
