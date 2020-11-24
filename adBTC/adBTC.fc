@@ -87,20 +87,8 @@ namespace Adbtc
 
         private void CheckCloudFlare( )
         {
-            if ( IsVisible(ElementByXPath("//h1[@data-translate='challenge_headline']")) )
-            {
-
-                var result=DoSolveCaptcha();
-                if ( result>0 )
-                {
-                    return;
-                }
-
-                FaucetCollector.Captcha.RecaptchaUtility recaptchaUtility=new FaucetCollector.Captcha.RecaptchaUtility(this);
-                recaptchaUtility.DoSolve( );
-                Wait(1);
-
-            }
+            FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+            cloudUtils.DoSolve();
         }
         public override int DoLogin( )
         {
@@ -345,6 +333,15 @@ namespace Adbtc
                     //We  are ready to see the ad
                     else
                     {
+                        if (IsVisible(ElementByXPath("//a[contains(@class,'red') and contains(@class,'btn')]")))
+                        {
+
+                            Log("We have finished the surfing ads since the active ads are visible");
+                            Finished = true;
+                            break;
+                        }
+
+
                         var bt = ElementByXPath("//a[contains(@class,'pulse animated') and contains(@class,'valign-wrapper')]")??ElementByXPath("//a[contains(@class,'btn') and @id]");
                         if ( IsVisible(bt) )
                         {
