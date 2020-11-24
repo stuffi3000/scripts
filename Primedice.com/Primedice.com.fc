@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 23/11/2020 08:30AM - Version 13
+//Last Update: 24/11/2020 12:15AM - Version 13
 //==================//
 
 using System;
@@ -589,10 +589,16 @@ public class Primedice : FaucetScript
              if (IsVisible(CheckAvailableGeneral))
              {
 	           Log("DateTime.ParseExact - here"); 
-               var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
-		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
-			   return (int)((TimeVAR - DateTime.Now).TotalSeconds);
-		     }
+               
+			   var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+			   //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+
+			   var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+			   
+		     } //end CheckAvailableGeneral
+			 
 		   } // end Reload_SiteTimeDate
 
 		   		   
