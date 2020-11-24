@@ -133,11 +133,9 @@ class HitBits : FaucetScript
     }
     public override int DoSolveFaucet ( )
     {
-        if ( Driver.Url!=FaucetUrl )
-        {
-            GoToUrl ( FaucetUrl );
-            Wait ( 2 , 3 );
-        }
+
+        GoToUrl("https://hitbits.io/home");
+        Wait(1);
 
         TryClaimDaily();
 
