@@ -87,20 +87,8 @@ namespace Adbtc
 
         private void CheckCloudFlare( )
         {
-            if ( IsVisible(ElementByXPath("//h1[@data-translate='challenge_headline']")) )
-            {
-
-                var result=DoSolveCaptcha();
-                if ( result>0 )
-                {
-                    return;
-                }
-
-                FaucetCollector.Captcha.RecaptchaUtility recaptchaUtility=new FaucetCollector.Captcha.RecaptchaUtility(this);
-                recaptchaUtility.DoSolve( );
-                Wait(1);
-
-            }
+            FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+            cloudUtils.DoSolve();
         }
         public override int DoLogin( )
         {
