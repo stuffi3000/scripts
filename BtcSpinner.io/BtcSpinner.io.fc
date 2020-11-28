@@ -19,7 +19,7 @@ public class BtcSpinner : FaucetScript
             {
                 new FaucetSetting(){Name="User",Display="Email",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
-                new FaucetSetting(){Name="Spin",Display="Spin For(minutes) 0 disabled", Type=EditorType.Numeric,Default=5 }                
+                new FaucetSetting(){Name="Spin",Display="Spin For(minutes) 0 disabled", Type=EditorType.Numeric,Default=1 }                
                 //insert user settings here
                 //new FaucetSetting { 
                 //    Name = "Name of your setting", 
@@ -54,7 +54,7 @@ public class BtcSpinner : FaucetScript
     {
         //In here we can check for the presence of an element that is only present when you are logged in.
         //In this case we check for en element with the class "loggedIn"
-        return ElementByXPath("//a[contains(text(),'Logout')]") != null;
+        return ElementByXPath("//a[contains(@href,'logout')]") != null;
     }
 
 
@@ -77,6 +77,20 @@ public class BtcSpinner : FaucetScript
         // GO TO URL IF IM NOT HERE
         GotoiFimNot("https://btcspinner.io/login");
         // INPUT USER
+        RetryLogin();
+
+        if(IsVisible(ElementByXPath("//strong[contains(text(),'Please solve the captcha') ]")))
+        {
+            RetryLogin();
+        }
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoLogin();
+    }
+
+
+    private int RetryLogin()
+    {
         var User_Box = ElementByXPath("//input[@id='email']");
         if (!IsVisible(User_Box))
         {
@@ -95,12 +109,23 @@ public class BtcSpinner : FaucetScript
         {
             return Fail("Button Is not visible");
         }
+
+        if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
+        {
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+
+            Wait();
+        }
+
         Click(button);
         Wait();
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoLogin();
-    }
 
+        return 0;
+    } 
 
     /// </summary>
     public override int GetFaucetWaitTime()
@@ -143,10 +168,11 @@ public class BtcSpinner : FaucetScript
         if (spinTime > 0)
         {
             GotoiFimNot("https://btcspinner.io/game");
+            Wait(4, 5);
 
             var spinner = ElementByXPath("//div[@class='spinner']");
             DateTime spinTimeout = DateTime.Now.AddMinutes(spinTime);
-            Actions actionBuilder = new Actions(Driver).MoveToElement(spinner, 40, 40).ClickAndHold().MoveByOffset(50, 300).Release();
+            Actions actionBuilder = new Actions(Driver).MoveToElement(spinner, 20, 20).ClickAndHold().MoveByOffset(0, 300).Release();
 
             while (IsVisible(spinner) && DateTime.Now < spinTimeout)
             {
@@ -169,6 +195,17 @@ public class BtcSpinner : FaucetScript
         if (!IsVisible(captchaSolvedBtn))
         {
             return Fail("captcha solved btn is not visible");
+        }
+
+        if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
+        {
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+
+            Wait();
         }
 
         Click(captchaSolvedBtn);
