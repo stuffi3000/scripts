@@ -394,7 +394,7 @@ public class TimeBucks : FaucetScript
 		//==========//
 		//ClaimRoll//
 		//==========//
-        if (GetBoolSetting("ClaimRoll"))
+        if (GetBoolSetting("Roll"))
         {
 			Title = "Earn";
             GoToUrl("https://timebucks.com/publishers/index.php?pg=earn&tab=catpcha_new");
@@ -408,6 +408,12 @@ public class TimeBucks : FaucetScript
                 if (result>0)
                 {
                     return result;
+                }
+
+                var captchaForm = ElementById("captchaForm");
+                if (IsVisible(captchaForm))
+                {
+                    captchaForm.Submit();
                 }
 
                 var captchaSolvedBtn = ElementByXPath("//a[@class='btnCaptcha']//input[@class='gradient install-btn']");
