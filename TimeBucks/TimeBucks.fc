@@ -410,11 +410,7 @@ public class TimeBucks : FaucetScript
                     return result;
                 }
 
-                var captchaForm = ElementById("captchaForm");
-                if (IsVisible(captchaForm))
-                {
-                    captchaForm.Submit();
-                }
+                ExecuteScript("correctCaptcha("+Context.CaptchaResult.Result+");");
 
                 var captchaSolvedBtn = ElementByXPath("//a[@class='btnCaptcha']//input[@class='gradient install-btn']");
                 if (!IsVisible(captchaSolvedBtn))
