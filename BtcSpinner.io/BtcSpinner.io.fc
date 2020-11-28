@@ -1,7 +1,8 @@
-﻿using System;
-using FaucetCollector.Script;
-using OpenQA.Selenium;
+﻿using FaucetCollector.Script;
+
 using OpenQA.Selenium.Interactions;
+
+using System;
 
 public class BtcSpinner : FaucetScript
 {
@@ -48,7 +49,7 @@ public class BtcSpinner : FaucetScript
         base.Start();
     }
 
-   
+
     public override bool IsLoggedIn()
     {
         //In here we can check for the presence of an element that is only present when you are logged in.
@@ -56,7 +57,7 @@ public class BtcSpinner : FaucetScript
         return ElementByXPath("//a[contains(text(),'Logout')]") != null;
     }
 
-    
+
     private bool GotoiFimNot(string url)
     {
         if (!Driver.Url.Contains(url))
@@ -89,7 +90,7 @@ public class BtcSpinner : FaucetScript
             return Fail("Fail, Pass Box not visible");
         }
         SetText(Pass_Box, GetPassword("Pass"));
-        var button = ElementByXPath("//button[@type='submit']");
+        var button = ElementByXPath("//button[@data-action='login']");
         if (!IsVisible(button))
         {
             return Fail("Button Is not visible");
@@ -100,39 +101,26 @@ public class BtcSpinner : FaucetScript
         return base.DoLogin();
     }
 
-    /// <summary>
-    /// This method gets called after the DoLogin method.
-    /// </summary>
-    public override int AfterLogin()
-    {
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterLogin();
-    }
 
-    /// <summary>
-    /// This method gets called after the login methods are successful, so we are logged into the faucet.
-    /// If the faucet is not yet ready to claim you should return a TimeStamp value to return how long it takes before the Faucet claim can be done.
-    /// This is used to pause the script while the faucet its timer runs out.
-    /// Return the number of seconds the bot should wait.
     /// </summary>
     public override int GetFaucetWaitTime()
     {
         GotoiFimNot("https://btcspinner.io/faucet");
 
         var timeout = ElementByXPath("//div[@id='timeout']");
-        if (IsVisible(timeout) && !string.IsNullOrEmpty(timeout.Text) && timeout.Text.Contains(":")) 
+        if (IsVisible(timeout) && !string.IsNullOrEmpty(timeout.Text) && timeout.Text.Contains(":"))
         {
             try
             {
-                int  m, s;
+                int m, s;
 
                 var splitedTimer = timeout.Text.Split(':');
 
-                
-                
+
+
                 int.TryParse(splitedTimer[1], out s);
                 int.TryParse(splitedTimer[0], out m);
-                
+
 
                 int time = m * 60 + s;
                 return time;
@@ -163,12 +151,12 @@ public class BtcSpinner : FaucetScript
             while (IsVisible(spinner) && DateTime.Now < spinTimeout)
             {
                 actionBuilder.Build().Perform();
-                Wait(4,5);
+                Wait(4, 5);
 
             }
         }
 
-       
+
         return base.BeforeSolveFaucet();
     }
     public override int DoSolveFaucet()
@@ -189,5 +177,5 @@ public class BtcSpinner : FaucetScript
         return base.DoSolveFaucet();
     }
 
-  
+
 }
