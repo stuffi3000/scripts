@@ -410,7 +410,7 @@ public class TimeBucks : FaucetScript
                     return result;
                 }
 
-                ExecuteScript("correctCaptcha("+Context.CaptchaResult.Result+");");
+          
 
                 var captchaSolvedBtn = ElementByXPath("//a[@class='btnCaptcha']//input[@class='gradient install-btn']");
                 if (!IsVisible(captchaSolvedBtn))
@@ -431,9 +431,22 @@ public class TimeBucks : FaucetScript
         return GetWaitSetting();
     }
 
+    public override bool SetHCaptchaResponse(string response)
+    {
+        try
+        { 
+                ExecuteScript("$('.h-captcha').find('iframe').attr('data-hcaptcha-response','"+response+"');");
+   
+        }
+        catch (Exception)
+        {
 
+        }
 
-        public int Recaptcha_Function()
+        return base.SetHCaptchaResponse(response);
+    }
+
+    public int Recaptcha_Function()
         {
 			
           //DoSolveImageCaptcha
