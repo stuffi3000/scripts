@@ -42,7 +42,12 @@ namespace NewScripts.BtcMaker
             base.Start();
         }
 
+        public override int BeforeLogin()
+        {
+            GoToUrl("https://btcmaker.io/login.php");
 
+            return base.BeforeLogin();
+        }
         public override int DoLogin()
         {
             var emailBox = ElementByXPath("//input[@id='user_email']");
@@ -52,16 +57,20 @@ namespace NewScripts.BtcMaker
             }
             SetText(emailBox, GetSetting("User"));
 
-            var passwordBox = ElementByXPath("");
+
+            var passwordBox = ElementByXPath("//input[@id='password']");
+
+
             if (!IsVisible(passwordBox))
             {
                 return Fail("Password box is not visible");
             }
+
             SetText(passwordBox, GetPassword("Pass"));
 
 
             var result = DoSolveCaptcha();
-            if (result>0)
+            if (result > 0)
             {
                 return result;
             }
@@ -88,7 +97,7 @@ namespace NewScripts.BtcMaker
 
         public override bool IsLoggedIn()
         {
-            return ElementByXPath("//a[@onclick='process_logout()']") != null;
+            return ElementByXPath("//a[@onclick='process_logout()']") != null && ElementByXPath("//a[contains(@href,'login')]") == null;
         }
 
         public override int DoSolveCaptcha()
@@ -106,6 +115,9 @@ namespace NewScripts.BtcMaker
 
         public override int DoSolveFaucet()
         {
+
+
+
             var captchaSolvedBtn = ElementByXPath("//button[@id='process_claim_hourly_faucet']");
             if (!IsVisible(captchaSolvedBtn))
             {
@@ -136,7 +148,7 @@ namespace NewScripts.BtcMaker
 
                 int m, s;
 
-                if(int.TryParse(minutesText,out m) && int.TryParse(secondsText,out s))
+                if (int.TryParse(minutesText, out m) && int.TryParse(secondsText, out s))
                 {
                     return m * 60 + s;
                 }
