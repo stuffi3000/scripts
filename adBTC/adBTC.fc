@@ -335,57 +335,94 @@ namespace Adbtc
                     {
                         if (IsVisible(ElementByXPath("//a[contains(@class,'red') and contains(@class,'btn')]")))
                         {
+                            Log("Active ads started");
 
-                            Log("We have finished the surfing ads since the active ads are visible");
-                            Finished = true;
-                            break;
-                        }
-
-
-                        var bt = ElementByXPath("//a[contains(@class,'pulse animated') and contains(@class,'valign-wrapper')]")??ElementByXPath("//a[contains(@class,'btn') and @id]");
-                        if ( IsVisible(bt) )
-                        {
-                            try
+                            var openAdBtn = ElementByXPath("//a[@id='open']");
+                            if (IsVisible(openAdBtn))
                             {
-                                ErrorCount=0;
-                                CheckForPopupsEnabled=false;
-                                // Unique .click 
-                                var Reward = ElementsByXPath("//b[contains(text(),'satoshi')]").Where(x => IsVisible(x)).LastOrDefault();
-                                if ( Reward!=null )
+                                try
                                 {
-                                    Log("Viewing ad you will be credited with "+Reward.Text);
-                                }
+                                CheckForPopupsEnabled = false;
+                                Click(openAdBtn,false);
 
-                                Click(bt , false);
-                                Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
-                                DateTime t1 = DateTime.Now.AddMinutes(3);
-                                Wait(5);
-                                while ( IsVisible(ElementByXPath("//div[@class='preloader-wrapper big active']")) )
-                                {
-                                    Wait( );
-                                    if ( DateTime.Now>t1 )
+                                Wait(2);
+                                    Driver.SwitchTo().Window(Driver.WindowHandles.LastOrDefault());
+
+                                    var imgs = ElementsByXPath("//a[@class='res']//img");
+                                    DateTime timeout = DateTime.Now.AddSeconds(30);
+                                    while (imgs.Count == 0 && DateTime.Now<timeout)
                                     {
-                                        break;
+                                        Wait();
+                                         imgs = ElementsByXPath("//a[@class='res']//img");
+                                    }
 
+                                    bool solved = SolveIcons();
+                                    if (!solved)
+                                    {
+                                        Log("Something is wrong with the ad");
                                     }
                                 }
-                            }
-                            finally
-                            {
-                                Wait(2);
-                                CheckForPopupsEnabled=true;
-                                CheckForPopups( );
+                                finally
+                                {
+                                    CheckForPopupsEnabled = true;
+                                    CheckForPopups();
+                                    Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+
+                                    Driver.SwitchTo().DefaultContent();
+
+                                }
                             }
                         }
+
                         else
                         {
-                            ErrorCount++;
-                            Log("Something is wrong Button to see ad isn't visible, Probably there is a problem with the site or we already have finished view the ads");
-                            Wait(5);
-                            if ( ErrorCount>=2 )
+
+
+                            var bt = ElementByXPath("//a[contains(@class,'pulse animated') and contains(@class,'valign-wrapper')]") ?? ElementByXPath("//a[contains(@class,'btn') and @id]");
+                            if (IsVisible(bt))
                             {
-                                Log("We finished view of the ads");
-                                break;
+                                try
+                                {
+                                    ErrorCount = 0;
+                                    CheckForPopupsEnabled = false;
+                                    // Unique .click 
+                                    var Reward = ElementsByXPath("//b[contains(text(),'satoshi')]").Where(x => IsVisible(x)).LastOrDefault();
+                                    if (Reward != null)
+                                    {
+                                        Log("Viewing ad you will be credited with " + Reward.Text);
+                                    }
+
+                                    Click(bt, false);
+                                    Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+                                    DateTime t1 = DateTime.Now.AddMinutes(3);
+                                    Wait(5);
+                                    while (IsVisible(ElementByXPath("//div[@class='preloader-wrapper big active']")))
+                                    {
+                                        Wait();
+                                        if (DateTime.Now > t1)
+                                        {
+                                            break;
+
+                                        }
+                                    }
+                                }
+                                finally
+                                {
+                                    Wait(2);
+                                    CheckForPopupsEnabled = true;
+                                    CheckForPopups();
+                                }
+                            }
+                            else
+                            {
+                                ErrorCount++;
+                                Log("Something is wrong Button to see ad isn't visible, Probably there is a problem with the site or we already have finished view the ads");
+                                Wait(5);
+                                if (ErrorCount >= 2)
+                                {
+                                    Log("We finished view of the ads");
+                                    break;
+                                }
                             }
                         }
 
