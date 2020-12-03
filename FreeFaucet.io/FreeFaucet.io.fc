@@ -1,6 +1,6 @@
 //==================//
 //script Written by: ••AviramDayan•• 05/11/2019 00:00PM - Version 1
-//Last Update: 11/03/2020 07:20AM - Version 2
+//Last Update: 03/12/2020 07:00AM - Version 3
 //==================//
 
 using System;
@@ -10,9 +10,9 @@ using OpenQA.Selenium;
 
 using OpenQA.Selenium.Support.UI;
 using System.Linq;
-using System.Collections.Generic;
 
-//css_ref FaucetCollector.Utilities
+//css_inc ShortLinkUtilities
+//css_inc RecaptchaUtilities
 
 public class BloxawardsScript : FaucetScript
 {
@@ -25,22 +25,13 @@ public class BloxawardsScript : FaucetScript
             {
                 new FaucetSetting() { Name = "Email", Display = "E-mail", Type = EditorType.TextBox, Required = true },
                 new FaucetSetting() { Name = "Password", Display = "Password", Type = EditorType.Password, Required = true },
-                new FaucetSetting(){Name="AutoExchange",Display="AutoExchange - ON/OFF - Exchange all coins to BRAZ - note - open account in 'southxchange' to exchange BRAZ to any coin",Type=EditorType.CheckBox,Default=true},
-                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - ON/OFF ",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting(){Name="AutoExchange",Display="AutoExchange - ON/OFF - Exchange all coins to BRAZ - note - open account in 'southxchange' to exchange BRAZ to any coin",Type=EditorType.CheckBox,Default=true},	
+                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - ON/OFF ",Type=EditorType.CheckBox,Default=true},	
                 new FaucetSetting() { Name = "AdressBRAZ", Display = "AdressBRAZ", Type = EditorType.TextBox, Required = false },
-                new FaucetSetting(){
-                    Name="CoinClaim",
-                    Display="Select Coin To Claim",
-                    Default="Bitcoin",
-                    Items=availableFaucets,
-                    Type=EditorType.ComboBox
-                }
             };
         }
     }
 
-    private readonly List<string> availableFaucets = new List<string>(){"Bitcoin","Brazio","Litecoin","Ethereum","Dogecoin","Bitcoin SV","Veggie"
-        ,"Buenos","Ravencoin","Monero","Electroneum","Plusonecoin","Bitcoin ABC","Bitcoin Gold"};
 
     string DomainName_String = "https://FreeFaucet.io/";
 
@@ -198,20 +189,7 @@ public class BloxawardsScript : FaucetScript
         return base.BeforeSolveFaucet();
     }
 
-    private IWebElement GetCorrectButton()
-    {
-        string coinSetting = GetSetting("CoinClaim").ToLower();
 
-        var correctButton = ElementsByXPath("//input[@type='submit' and @name='claim']")
-            .FirstOrDefault(x=>IsVisible(x) 
-        && !string.IsNullOrEmpty(x.GetAttribute("value")) 
-        && x.GetAttribute("value").Trim().ToLower()==coinSetting);
-
-
-
-        return correctButton;
-
-    }
 
 //=============//
 //DoSolveFaucet
@@ -230,14 +208,14 @@ public class BloxawardsScript : FaucetScript
         GoToUrl(DomainName_String+"/faucets");
         Wait();		
         Wait(2);
+		
+	    //GoToUrl(DomainName_String+"/claim/index.php?coin_name=bitcoin&*"); // it's impossible to do direct to specific url coin
 
-            //GoToUrl(DomainName_String+"/claim/index.php?coin_name=bitcoin&*"); // it's impossible to do direct to specific url coin
-
-            var coinCardHere = GetCorrectButton();
-        if (IsVisible(coinCardHere))
+        var BitcoinCardHere = ElementByXPath("//input[@value='Claim Bitcoin']"); 
+        if (BitcoinCardHere !=null) // Visible
         {
-            Log("BitcoinCardHere - here");
-            Click(coinCardHere);
+        Log("BitcoinCardHere - here");
+        Click(BitcoinCardHere);
         }
 
         Wait();		
@@ -245,7 +223,7 @@ public class BloxawardsScript : FaucetScript
 		
         var ZeroNotAvailable = ElementByXPath("//span[@class='alert alert-success' and contains(text(),'LEFT') and contains(text(),'0') ]");
 
-        if (IsVisible(ZeroNotAvailable))
+        if (ZeroNotAvailable !=null) // Visible
         {
             //We couldn't find the button, return we have a failure.
             Log("Claim - not available today");
@@ -254,7 +232,7 @@ public class BloxawardsScript : FaucetScript
 
         Wait(2);
 
-        if (!IsVisible(ZeroNotAvailable))
+        if (ZeroNotAvailable ==null) // not Visible
         {
 
 			Log("claimButton - now");
@@ -311,6 +289,7 @@ public class BloxawardsScript : FaucetScript
 		//ad = true; //Success
         return GetWaitSetting();	
 		
+        return base.DoSolveFaucet();
     }
 //=============//
 //DoSolveFaucet
@@ -392,7 +371,7 @@ public class BloxawardsScript : FaucetScript
             {
                 return Fail("Fail solving captcha");
             }
-            FaucetCollector.Captcha.RecaptchaUtility utility = new FaucetCollector.Captcha.RecaptchaUtility(this);
+            RecaptchaUtility utility = new RecaptchaUtility(this);
             utility.DoSolve();
            }
 		
