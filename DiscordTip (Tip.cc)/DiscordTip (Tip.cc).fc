@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 22/11/2020 04:05AM - Version 74
+//Last Update: 04/12/2020 02:00AM - Version 75
 //==================//
 
 using System;
@@ -225,10 +225,10 @@ public class DiscordScript: FaucetScript
             //go to normal login
             GoToUrl("https://discordapp.com/login");
 
-            var box_user = ElementByXPath("//input[@type='email']");
+            var box_user = ElementByXPath("//input[@name='email']");
             SetText(box_user, GetSetting("Email"));
 
-            var box_pass = ElementByXPath("//input[@type='password']");
+            var box_pass = ElementByXPath("//input[@name='password']");
             SetText(box_pass, GetPassword("Pass"));
 
             Wait(1);
