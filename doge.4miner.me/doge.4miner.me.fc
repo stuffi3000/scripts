@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 03/12/2020 08:00AM - Version 1
+//Last Update: 03/12/2020 20:15PM - Version 2
 //==================//
 
 using System;
@@ -31,10 +31,10 @@ public class doge_4miner : FaucetScript
             {
                 //new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
                 //new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
-				
+                new FaucetSetting(){Name="DogeAddress",Display="DogeAddress",Type=EditorType.TextBox,Required=true},				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
-                new FaucetSetting(){Name="DogeAddress",Display="DogeAddress",Type=EditorType.TextBox,Required=true},
-               
+                new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=true},		
+        
 			
                 //insert user settings here
                 //new FaucetSetting { 
@@ -222,7 +222,62 @@ public class doge_4miner : FaucetScript
 //=============//
     public override int DoSolveFaucet()
     {
-	
+
+      //=============//
+      //AutoWithdraw
+      //=============//
+      if (GetBoolSetting("AutoWithdraw"))
+      {
+        Log("AutoWithdraw");			  
+        GoToUrl("https://doge.4miner.me/freedogecoin/#ref");
+        Wait(2);
+
+        var Email_VAR = ElementByXPath("//input[contains(@id,'coin_address')]");  
+        if (IsVisible(Email_VAR))
+        {
+		 Log("FaucetClaim - set DogeAddress");  
+         SetText(Email_VAR, GetSetting("DogeAddress"));
+        }
+		
+		Wait(2);
+		
+        var LoginVAR = ElementByXPath("//button[@type='submit']");  
+        if (IsVisible(LoginVAR))
+		{
+		 Log("FaucetClaim - LoginVAR");  
+         Click(LoginVAR);	
+		}	
+
+		Wait(8);
+		
+        var BalanceVAR = ElementByXPath("//span[@id='normal_balance']");
+        string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
+        if (IsVisible(BalanceVAR) && BalanceINT == 0) // under 0
+        {
+           Log("AutoWithdraw - the balance under = 0 - not good");
+           //do all stuff
+        }
+
+        if (IsVisible(BalanceVAR) && BalanceINT > 0) // above 0
+        {
+            Log("AutoWithdraw - the balance above > 0 - good");
+            Wait(2);
+            var WithdrawStartVAR = ElementByXPath("//button[contains(text(),'Withdraw')]");
+			Click(WithdrawStartVAR);
+            Wait(3);
+            var WalletVAR = ElementByXPath("//button[contains(text(),'Wallet') or contains(text(),'wallet')]");
+			Click(WalletVAR);
+            Wait(2);
+            Driver.SwitchTo().Alert().Accept(); // To click on the 'OK' button of the alert.	
+            Wait(2);
+            Driver.SwitchTo().Alert().Accept(); // To click on the 'OK' button of the alert.
+        }		  
+		  
+	  } //end AutoWithdraw
+
+	  
       //=============//
       //FaucetClaim
       //=============//
@@ -259,7 +314,6 @@ public class doge_4miner : FaucetScript
         if (IsVisible(NotReady))
 		{
 		 Log("FaucetClaim - NotReady");  
-		 return Time_Function(); //call to function time
 		}
 
 		Wait(3);
@@ -281,11 +335,10 @@ public class doge_4miner : FaucetScript
 		
       } //end FaucetClaim
 
-
-		return Time_Function(); //call to function time
+	  return Time_Function(); //call to function time
 	
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoSolveFaucet();
+      //This faucet has nothing to do here. We will let Faucet Collector handle it.
+      return base.DoSolveFaucet();
     }
 	
 
@@ -333,23 +386,33 @@ public class doge_4miner : FaucetScript
                return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
 			   
 		     } //end CheckAvailableGeneral
-   		   
-		   //site time with normal counter
-           var MinVar = ElementByXPath("//p[contains(@id,'msgpool')]") ;
 
-           if (IsVisible(MinVar))
-           {
-	         Log("Time_Function - WaitTimerText apper - return to site time"); 
-             int min;
-             min = Convert.ToInt32(MinVar.Text.Trim().Replace("Not ready yet, try here in ", "").Replace(" min", "") )*60;
-             return min;
-           } 
+ 
+           var NotReady = ElementByXPath("//p[contains(@id,'msgpool') and contains(text(),'Not ready') ]");
+           if (IsVisible(NotReady))
+		   {
+ 
+		      //site time with normal counter
+              var MinVar = ElementByXPath("//p[contains(@id,'msgpool')]") ;
+		      
+              if (IsVisible(MinVar))
+              {
+	            Log("Time_Function - WaitTimerText apper - return to site time"); 
+                int min;
+                min = Convert.ToInt32(MinVar.Text.Trim().Replace("Not ready yet, try here in ", "").Replace(" min", "") )*60;
+                return min;
+              } 
+		      
+              if (!IsVisible(MinVar))
+              {
+	               Log("Time_Function - return to your time"); 
+		           return GetWaitSetting();
+              }
 
-           if (!IsVisible(MinVar))
-           {
-	            Log("Time_Function - return to your time"); 
-		        return GetWaitSetting();
-           }
+		   }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
 
            return 0;		
         }//end Time_Function
