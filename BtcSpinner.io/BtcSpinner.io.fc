@@ -1,5 +1,6 @@
 ﻿using FaucetCollector.Script;
 
+using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
 using System;
@@ -79,7 +80,8 @@ public class BtcSpinner : FaucetScript
         // INPUT USER
         RetryLogin();
 
-        if(IsVisible(ElementByXPath("//strong[contains(text(),'Please solve the captcha') ]")))
+        if (IsVisible(ElementByXPath("//strong[contains(text(),'Please solve the captcha') ]"))
+            || IsVisible(ElementByXPath("//input[@id='email']")))
         {
             RetryLogin();
         }
@@ -88,7 +90,14 @@ public class BtcSpinner : FaucetScript
         return base.DoLogin();
     }
 
-
+    private void DismissModal()
+    {
+        var closeModalBtn = ElementByXPath("//button[contains(text(),'Later')]");
+        if (IsVisible(closeModalBtn))
+        {
+            Click(closeModalBtn);
+        }
+    }
     private int RetryLogin()
     {
         var User_Box = ElementByXPath("//input[@id='email']");
@@ -125,7 +134,7 @@ public class BtcSpinner : FaucetScript
         Wait();
 
         return 0;
-    } 
+    }
 
     /// </summary>
     public override int GetFaucetWaitTime()
@@ -133,11 +142,11 @@ public class BtcSpinner : FaucetScript
         GotoiFimNot("https://btcspinner.io/faucet");
 
         var timeout = ElementByXPath("//div[@id='timeout']");
-        if (IsVisible(timeout) && !string.IsNullOrEmpty(timeout.Text) && timeout.Text.Contains(":"))
+        if (IsVisible(timeout))
         {
             try
             {
-                int m, s;
+                int m = 30, s = 0;
 
                 var splitedTimer = timeout.Text.Split(':');
 
@@ -163,22 +172,33 @@ public class BtcSpinner : FaucetScript
     public override int BeforeSolveFaucet()
 
     {
-
+        DismissModal();
+        Wait(1);
         int spinTime = GetIntSetting("Spin");
         if (spinTime > 0)
         {
             GotoiFimNot("https://btcspinner.io/game");
             Wait(4, 5);
-
-            var spinner = ElementByXPath("//div[@class='spinner']");
-            DateTime spinTimeout = DateTime.Now.AddMinutes(spinTime);
-            Actions actionBuilder = new Actions(Driver).MoveToElement(spinner, 20, 20).ClickAndHold().MoveByOffset(0, 300).Release();
-
-            while (IsVisible(spinner) && DateTime.Now < spinTimeout)
+            try
             {
-                actionBuilder.Build().Perform();
-                Wait(4, 5);
+                var spinner = ElementByXPath("//div[@class='spinner']");
+                DateTime spinTimeout = DateTime.Now.AddMinutes(spinTime);
+                Actions actionBuilder = new Actions(Driver).MoveToElement(spinner)
+                    .ClickAndHold()
+                    .MoveByOffset(0, 300).Release();
 
+                while (IsVisible(spinner) && DateTime.Now < spinTimeout)
+                {
+                    actionBuilder.Build().Perform();
+                    Wait(4, 5);
+
+                }
+            }
+            catch (WebDriverException)
+            {
+                Log("There is a problem playing the game, by "
+                    + spinTime.ToString() +
+                    "Minutes, try disable adblock and try again",Level.Warning);
             }
         }
 
@@ -190,7 +210,8 @@ public class BtcSpinner : FaucetScript
         GotoiFimNot("https://btcspinner.io/faucet");
         // GET CODE TO CLAIM FAUCET
 
-
+        DismissModal();
+        Wait(1);
         var captchaSolvedBtn = ElementByXPath("//button[@type='submit']");
         if (!IsVisible(captchaSolvedBtn))
         {
