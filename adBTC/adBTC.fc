@@ -501,58 +501,36 @@ namespace Adbtc
 
                         CheckForPopupsEnabled=false;
                         Click(ads[n] , false);
-                        Driver.SwitchTo( ).Window(Driver.WindowHandles[1]);
-                        Wait( );
-                        DateTime t1 = DateTime.Now.AddSeconds(60);
-                        var Icons=ElementsByXPath("//img[contains(@src,'/icons/')]");
-                        while ( !Icons.All(x => IsVisible(x))||Icons.Count==0 )
+                        Wait(2);
+                        Driver.SwitchTo().Window(Driver.WindowHandles.LastOrDefault());
+
+                        var imgs = ElementsByXPath("//a[@class='res']//img");
+                        DateTime timeout = DateTime.Now.AddSeconds(30);
+                        while (imgs.Count == 0 && DateTime.Now < timeout)
                         {
-                            Wait(4);
-                            if ( t1<DateTime.Now )
-                            {
-                                break;
-                            }
-                            var Tmr = ElementByXPath("//span[@id='tmr']");
-                            if ( IsVisible(Tmr)&&!string.IsNullOrWhiteSpace(Tmr.Text) )
-                            {
-                                Log(Tmr.Text);
-                            }
+                            Wait();
+                            imgs = ElementsByXPath("//a[@class='res']//img");
                         }
-                        Wait( );
+
                         bool solved = SolveIcons();
-                        if ( !solved )
+                        if (!solved)
                         {
-                            CountErrors++;
+                            Log("Something is wrong with the ad",Level.Error);
                         }
-                        Wait(3);
-                        if ( IsVisible(ElementByXPath("//span[@id='tmr']")) )
-                        {
-                            n++;
-                        }
-                    }
-                    catch ( Exception )
-                    {
-                        CheckForPopupsEnabled=true;
-                        CheckForPopups( );
-                        Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
-                        CountErrors++;
-                        n++;
+                        Wait(2, 3);
                     }
                     finally
                     {
-                        CheckForPopupsEnabled=true;
-                        CheckForPopups( );
-                        Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
-                        if ( Driver.Url.Contains("http://adbtc.top/surftab/inf") )
-                        {
-                            Driver.Navigate( ).Refresh( );
-                        }
-                        else
-                        {
-                            GoToUrl("http://adbtc.top/surftab/inf");
-                        }
-                        Wait(3);
-                        ads=ElementsByXPath("//a[@class='open']").Where(x => IsVisible(x)).ToList( ); ;
+                        CheckForPopupsEnabled = true;
+                        CheckForPopups();
+                        Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+
+                        Driver.SwitchTo().DefaultContent();
+
+                        ads = ElementsByXPath("//a[@class='open']").Where(x => IsVisible(x)).ToList();
+                        Log(ads.Count.ToString() + " Active ads detected");
+
+
                     }
                 }
             }
