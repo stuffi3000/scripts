@@ -97,7 +97,7 @@ namespace NewScripts.BtcMaker
 
         public override bool IsLoggedIn()
         {
-            return ElementByXPath("//a[@onclick='process_logout()']") != null && ElementByXPath("//a[contains(@href,'login')]") == null;
+            return ElementByXPath("//a[contains(@onclick,'process_logout()')]") != null && ElementByXPath("//a[contains(@href,'login')]") == null;
         }
 
         public override int DoSolveCaptcha()
