@@ -502,8 +502,10 @@ namespace Adbtc
         {
             get
             {
-                return ( IsVisible(ElementByXPath("//img[contains(@src,'adbtc.top/1captcha')]"))||IsVisible(ElementByXPath("//img[contains(@src,'data:image/png;base64,')]")) );
+
+                return SymbolsCaptchaSolver.VisibleSymbol();
             }
+
         }
 
         public bool CheckConditions(IWebElement element)
@@ -539,6 +541,7 @@ namespace Adbtc
             return base.DoSolveCaptcha( );
 
         }
+        
         public bool SolveIcons( )
         {
             try
