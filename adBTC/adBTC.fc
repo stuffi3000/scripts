@@ -265,7 +265,8 @@ namespace Adbtc
                     else
                     {
 
-                            var bt = ElementByXPath("//a[contains(@class,'pulse animated') and contains(@class,'valign-wrapper')]") ?? ElementByXPath("//a[contains(@class,'btn') and @id]");
+                        var bt = ElementByXPath("//a[contains(@class,'pulse animated') and contains(@class,'valign-wrapper')]");
+
                             if (IsVisible(bt))
                             {
                                 try
@@ -365,6 +366,10 @@ namespace Adbtc
 
             if ( GetBoolSetting("SA") )
             {
+                if (!Driver.Url.Contains("adbtc"))
+                {
+                    GoToUrl("http://adbtc.top/surftab/inf");
+                }
                 OpenMenu( );
                 var GotoSurfAds = ElementByXPath("//a[@href='http://adbtc.top/surftab/inf']");
                 if ( IsVisible(GotoSurfAds) )
@@ -380,6 +385,8 @@ namespace Adbtc
                 Log(ads.Count.ToString( )+" Active ads detected");
                 int n = 0;
                 int CountErrors = 0;
+                int adsCount = ads.Count; 
+
                 while ( ads.Count>n&&CountErrors<=3 )
                 {
                     try
@@ -415,6 +422,12 @@ namespace Adbtc
                         Driver.SwitchTo().DefaultContent();
 
                         ads = ElementsByXPath("//a[@class='open']").Where(x => IsVisible(x)).ToList();
+                        if(adsCount == ads.Count)
+                        {
+                            n++;
+                        }
+                        adsCount = ads.Count;
+
                         Log(ads.Count.ToString() + " Active ads detected");
 
 
