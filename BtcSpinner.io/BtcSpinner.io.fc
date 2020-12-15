@@ -80,6 +80,8 @@ public class BtcSpinner : FaucetScript
         // INPUT USER
         RetryLogin();
 
+        Wait(2, 3);
+
         if (IsVisible(ElementByXPath("//strong[contains(text(),'Please solve the captcha') ]"))
             || IsVisible(ElementByXPath("//input[@id='email']")))
         {
@@ -113,10 +115,10 @@ public class BtcSpinner : FaucetScript
             return Fail("Fail, Pass Box not visible");
         }
         SetText(Pass_Box, GetPassword("Pass"));
-        var button = ElementByXPath("//button[@data-action='login']");
+        var button = ElementByXPath("//button[contains(text(),'Login')]");
         if (!IsVisible(button))
         {
-            return Fail("Button Is not visible");
+            return Fail("Button login is not visible");
         }
 
         if (IsVisible(ElementByXPath("//div[@class='h-captcha']")))
