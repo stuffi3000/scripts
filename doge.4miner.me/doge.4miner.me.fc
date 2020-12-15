@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 03/12/2020 20:15PM - Version 2
+//Last Update: 15/12/2020 15:00PM - Version 3
 //==================//
 
 using System;
@@ -34,7 +34,8 @@ public class doge_4miner : FaucetScript
                 new FaucetSetting(){Name="DogeAddress",Display="DogeAddress",Type=EditorType.TextBox,Required=true},				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
                 new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=true},		
-        
+                new FaucetSetting(){Name="AffWithdraw",Display="AffWithdraw",Type=EditorType.CheckBox,Default=false},		
+       
 			
                 //insert user settings here
                 //new FaucetSetting { 
@@ -224,32 +225,55 @@ public class doge_4miner : FaucetScript
     {
 
       //=============//
+      //AffWithdraw
+      //=============//
+      if (GetBoolSetting("AffWithdraw"))
+      {
+        Log("AffWithdraw");			  
+		
+		Wait(2);
+		
+        Set_Function(); //call
+
+        var BalanceVAR = ElementByXPath("//span[@id='ref_balance']");
+        string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
+        if (IsVisible(BalanceVAR) && BalanceINT == 0) // under 0
+        {
+           Log("AffWithdraw - the balance under = 0 - not good");
+           //do all stuff
+        }
+
+        if (IsVisible(BalanceVAR) && BalanceINT > 0) // above 0
+        {
+            Log("AffWithdraw - the balance above > 0 - good");
+            Wait(2);
+            var WithdrawStartVAR = ElementByXPath("//button[contains(text(),'Unlock') or contains(text(),'unlock')]");
+			Click(WithdrawStartVAR);
+            Wait(5);
+            Driver.SwitchTo().Alert().Accept();
+			Wait(3);
+			Driver.SwitchTo().DefaultContent(); //go back to default content in <html>
+			Wait(3);
+			Driver.Navigate().Refresh(); //Refresh
+        }		  
+		  
+	  } //end AffWithdraw
+	  
+	  
+	  
+      //=============//
       //AutoWithdraw
       //=============//
       if (GetBoolSetting("AutoWithdraw"))
       {
-        Log("AutoWithdraw");			  
-        GoToUrl("https://doge.4miner.me/freedogecoin/#ref");
-        Wait(2);
-
-        var Email_VAR = ElementByXPath("//input[contains(@id,'coin_address')]");  
-        if (IsVisible(Email_VAR))
-        {
-		 Log("FaucetClaim - set DogeAddress");  
-         SetText(Email_VAR, GetSetting("DogeAddress"));
-        }
+        Log("AutoWithdraw");
 		
 		Wait(2);
 		
-        var LoginVAR = ElementByXPath("//button[@type='submit']");  
-        if (IsVisible(LoginVAR))
-		{
-		 Log("FaucetClaim - LoginVAR");  
-         Click(LoginVAR);	
-		}	
+        Set_Function(); //call
 
-		Wait(8);
-		
         var BalanceVAR = ElementByXPath("//span[@id='normal_balance']");
         string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
         int BalanceINT = Convert.ToInt32(BalanceSTRING);
@@ -269,13 +293,17 @@ public class doge_4miner : FaucetScript
             Wait(3);
             var WalletVAR = ElementByXPath("//button[contains(text(),'Wallet') or contains(text(),'wallet')]");
 			Click(WalletVAR);
-            Wait(2);
-            Driver.SwitchTo().Alert().Accept(); // To click on the 'OK' button of the alert.	
-            Wait(2);
-            Driver.SwitchTo().Alert().Accept(); // To click on the 'OK' button of the alert.
+            Wait(5);
+            Driver.SwitchTo().Alert().Accept();
+			Wait(3);
+			Driver.SwitchTo().DefaultContent(); //go back to default content in <html>
+			Wait(3);
+			Driver.Navigate().Refresh(); //Refresh
         }		  
 		  
 	  } //end AutoWithdraw
+
+
 
 	  
       //=============//
@@ -364,6 +392,38 @@ public class doge_4miner : FaucetScript
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.CheckFaucetResult();
     }
+
+
+        //=================//
+       //Set_Function
+        //=================//
+
+        public int Set_Function()
+        {
+           GoToUrl("https://doge.4miner.me/freedogecoin/#ref");
+           Wait();		
+           Wait(5);
+		   
+           var Email_VAR = ElementByXPath("//input[contains(@id,'coin_address')]");  
+           if (IsVisible(Email_VAR))
+           {
+		    Log("set DogeAddress");  
+            SetText(Email_VAR, GetSetting("DogeAddress"));
+           }
+		   
+		   Wait(2);
+		   
+           var LoginVAR = ElementByXPath("//button[@type='submit']");  
+           if (IsVisible(LoginVAR))
+		   {
+		    Log("LoginVAR");  
+            Click(LoginVAR);	
+	        Wait(8);
+		   }	
+		   		   
+		return 0;
+        }//end Set_Function
+        //=================//	
 	
 	
         //=================//
