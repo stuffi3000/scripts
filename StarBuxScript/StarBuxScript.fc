@@ -21,19 +21,7 @@ public class StarBuxScript : FaucetScript
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 new FaucetSetting(){Name="UseSolvemedia",Display="UseSolvemedia",Type=EditorType.CheckBox,Default=true },
 
-                new FaucetSetting()
-                {
-                    Name="DoShortLink",Display="DoShortLink",Type=EditorType.CheckBox,Default=true
-                }
-                //insert user settings here
-                //new FaucetSetting { 
-                //    Name = "Name of your setting", 
-                //    Display = "Display shown in Faucet Collector", 
-                //    Type = EditorType.TextBox | EditorType.Password | EditorType.CheckBox | EditorType.Wallet | EditorType.Numeric | EditorType.ComboBox | EditorType.CheckComboBox, 
-                //    Required = true | false, 
-                //    Default = "Optionally a default value" | true | false | null.
-                //    Items = new List<string> { "item1", "item2" } (only valid for ComboBox or CheckComboBox)
-                //} 
+              
             };
         }
     }
@@ -88,90 +76,6 @@ public class StarBuxScript : FaucetScript
     }
 
     public const string ShortUrl = "https://starbux.io/shortlinks.html";
-    public override int BeforeSolveFaucet()
-    {
-        if (GetBoolSetting("DoShortLink"))
-        {
-            GoToUrl(ShortUrl);
-            Wait();
-            var Shortlinks = manager.GetShortlinks();
-            if (Shortlinks.Count > 0)
-            {
-                int NShort = Random(0, Shortlinks.Count - 1);
-
-                try
-                {
-
-
-
-                    FaucetCollector.Captcha.IconCaptchaSolver solver = new FaucetCollector.Captcha.IconCaptchaSolver(this);
-                    Click(Shortlinks[NShort]);
-                    Wait();
-                    int count = 0;
-                    while (IsVisible(Shortlinks[NShort]) && !solver.IsVisibleIconCaptcha() && count < 5)
-                    {
-                        Click(Shortlinks[NShort]);
-                        Wait();
-                        count++;
-
-                    }
-
-                    if (solver.IsVisibleIconCaptcha())
-                    {
-                        solver.DoSolve();
-                        Wait(4, 5);
-                        if (!solver.IsVisibleIconCaptcha())
-                        {
-                            FaucetCollector.Utilities.ShortLinkBypasser bypasser = new FaucetCollector.Utilities.ShortLinkBypasser(this);
-                            if (bypasser.IsValidShortLink())
-                            {
-                                bool cs = bypasser.DoShortLink();
-
-                                if (cs)
-                                {
-                                    Log("ShortlinkSuccess");
-                                }
-                                else
-                                {
-                                    Log("Something is wrong with the shortlink");
-                                }
-
-                            }
-                            else
-                            {
-                                GoToUrl(ShortUrl);
-                                return Fail("Something went wrong shortlink this is not a shortlink");
-                            }
-                        }
-                        else
-                        {
-                            return Fail("Icon captcha incorrectly solved");
-                        }
-
-                    }
-
-
-                }
-                finally
-                {
-                    if (!Driver.Url.Contains(ShortUrl))
-                    {
-
-                        GoToUrl(ShortUrl);
-                    }
-
-                }
-
-            }
-            else
-            {
-                Log("No more shortlinks available");
-            }
-
-        }
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeSolveCaptcha();
-    }
 
     /// <summary>
     /// This method gets called after the BeforeSolveFaucet. You can do the actual claiming of the faucet in here.
