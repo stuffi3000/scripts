@@ -1,0 +1,260 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+namespace FaucetCollectorScripts.Scripts
+{
+    public class BtcBuxScript : FaucetScript
+    {
+        public override FaucetSettings Settings
+        {
+            get
+            {
+                return new FaucetSettings("https://btcbux.io/")
+            {
+                new FaucetSetting()
+                {
+                    Display="Email Address",
+                    Type=EditorType.TextBox,
+                    Required=true,
+                    Name="User"
+                },
+                new FaucetSetting()
+                {
+                    Display="Password",
+                    Type=EditorType.Password,
+                    Required=true,
+                    Name="Pass"
+                },
+                new FaucetSetting()
+                {
+                    Display="Selected Captcha",
+                    Type=EditorType.ComboBox,
+                    Items=AvailableCaptchas,
+                    Default=AvailableCaptchas.LastOrDefault(),
+                    Name="Captcha"
+                }
+            };
+
+            }
+        }
+
+
+        private readonly List<string> AvailableCaptchas = Enum
+            .GetNames(typeof(CaptchaType)).ToList();
+
+
+        public override void Start()
+        {
+            SuccessXPath = "//div[@class='toast-message']|//p[@id='lastFaucetClaim']";
+            FailXPath = "//div[@class='invalid-feedback']";
+
+            Title = "BTCBux";
+            base.Start();
+        }
+
+        private bool NeedChange
+        {
+            get
+            {
+                var selectedCaptcha = SelectedCaptcha;
+
+                if (selectedCaptcha == CaptchaType.reCaptcha && IsVisible(ElementByXPath("//iframe[contains(@src,'recaptcha')]")))
+                {
+                    return false;
+                }
+                else if (selectedCaptcha == CaptchaType.hCaptcha && IsVisible(ElementByXPath("//iframe[contains(@src,'hcaptcha')]")))
+                {
+                    return false;
+                }
+
+                return true;
+
+            }
+        }
+
+        private CaptchaType SelectedCaptcha
+        {
+            get
+            {
+                string selectedCaptcha = GetSetting("Captcha");
+                CaptchaType captchaSelected = CaptchaType.reCaptcha;
+
+                if (string.IsNullOrEmpty(selectedCaptcha))
+                {
+                    Log("There is a problem getting the captcha, we set the default: " + Enum.GetName(typeof(CaptchaType), captchaSelected), Level.Warning);
+                    return CaptchaType.reCaptcha;
+                }
+
+
+                if (!Enum.TryParse(selectedCaptcha, out captchaSelected))
+                {
+                    Log("There is a problem getting the captcha, we set the default: " + Enum.GetName(typeof(CaptchaType), captchaSelected), Level.Warning);
+                }
+
+                return captchaSelected;
+            }
+        }
+
+        enum CaptchaType
+        {
+            hCaptcha,
+            reCaptcha
+        };
+
+
+
+
+
+        public override int DoLogin()
+        {
+            GoToUrl("https://btcbux.io/login");
+            Wait(2);
+            var emailBox = ElementByXPath("//input[@id='inputEmail']");
+            if (!IsVisible(emailBox))
+            {
+                return Fail("email box is not visible");
+            }
+
+            SetText(emailBox, GetSetting("User"));
+            var passwordBox = ElementByXPath("//input[@id='inputPassword']");
+            if (!IsVisible(passwordBox))
+            {
+                return Fail("Password box is not visible");
+            }
+            SetText(passwordBox, GetPassword("Pass"));
+
+
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+            var loginBtn = ElementByXPath("//button[@type='submit']");
+            if (!IsVisible(loginBtn))
+            {
+                return Fail("login button is not visible");
+            }
+
+            Click(loginBtn);
+
+            var error = ElementByXPath("//div[@class='invalid-feedback']");
+            if (IsVisible(error))
+            {
+                Log(error.Text);
+            }
+
+
+            return base.DoLogin();
+        }
+
+        public override int DoSolveCaptcha()
+        {
+            var changeCaptcha = ElementByXPath("//select[@id='selectCaptchaType']");
+            var selectedCaptcha = SelectedCaptcha;
+            if (NeedChange && IsVisible(changeCaptcha))
+            {
+                string neededValue = selectedCaptcha == CaptchaType.hCaptcha ? "hcaptcha" : "recaptcha";
+
+                SelectOptionByValue(changeCaptcha, neededValue);
+                Wait(2, 3);
+            }
+
+            var result = base.DoSolveCaptcha();
+            if (result > 0 || selectedCaptcha != CaptchaType.reCaptcha)
+            {
+                return result;
+            }
+
+            RecaptchaUtility recaptchaUtility = new RecaptchaUtility(this);
+            recaptchaUtility.DoSolve();
+
+            return result;
+
+        }
+
+        public override int DoSolveFaucet()
+        {
+
+            GoToUrl("https://btcbux.io/faucet");
+            Wait(2, 3);
+
+            var faucetFormBtn = ElementByXPath("//button[@id='btnShowClaimFaucetForm']");
+            if (!IsVisible(faucetFormBtn))
+            {
+                return Fail("Faucet form button not found or not visible");
+            }
+            Click(faucetFormBtn);
+            Wait();
+
+            var btnClaimFaucet = ElementByXPath("//button[@id='btnClaimFaucet']");
+            if (!IsVisible(btnClaimFaucet))
+            {
+                return Fail("btn claim faucet is not visible");
+            }
+
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+            Click(btnClaimFaucet);
+
+            return base.DoSolveFaucet();
+        }
+
+        public override bool IsLoggedIn()
+        {
+            return ElementByXPath("//a[contains(@href,'logout')]") != null;
+        }
+
+
+        public override int GetFaucetWaitTime()
+        {
+            if (IsVisible(ElementByXPath("//div[@id='faucetClaimCountdownTimer']")))
+            {
+                var timerElements = ElementsByXPath("//div[@id='faucetClaimCountdownTimer']//div//span");
+
+                if (timerElements.Count == 4)
+                {
+                    int aux = 4;
+                    int waitTime = timerElements.Select(timer => TryConvertInt(timer.Text)).Aggregate(0, (before, next) =>
+                     {
+                         aux--;
+                         //day (probably it will be always 0 but since the timer have the day counter we catch it )
+                         return aux == 3 ? (before + next * 86400) :
+                          //hour
+                          aux == 2 ? (before + next * 3600) :
+                          //minute
+                          aux == 1 ? (before + next * 60) :
+                          //second
+                          before + next;
+
+                     });
+
+
+                    return waitTime;
+
+                }
+            }
+
+
+            return base.GetFaucetWaitTime();
+        }
+
+        private int TryConvertInt(string text)
+        {
+            int n = 0;
+            int.TryParse(text, out n);
+
+            return n;
+        }
+
+    }
+
+
+}
