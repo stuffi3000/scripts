@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 06/04/2020 00:15PM - Version 1
-//Last Update: 15/12/2020 04:30AM - Version 3
+//Last Update: 18/12/2020 19:30PM - Version 4
 //==================//
 
 using System;
@@ -262,22 +262,20 @@ public class Paradice : FaucetScript
       if (GetBoolSetting("DailyBonus"))
       {
         Log("DailyBonus - go to page to check");
-		GoToUrl("https://paradice.in/?modal=/bonuses"); //All bonuses page
+		GoToUrl("https://paradice.in/?modal=/daily-goals"); //daily bonus page
 	    Wait();
-	    Wait(10);	
-		   
+	    Wait(15);	
+		  
         var DailyBonus_Start_Check = ElementByXPath("//div[contains(@class,'daily_goal')]//span[contains(@class,'small') and contains(text(),':')]"); //check if time run
 
-        if (!IsVisible(DailyBonus_Start_Check))
+        if (IsVisible(DailyBonus_Start_Check))
         {
            Log("DailyBonus - try next time"); 
 
 		}
 
-        if (IsVisible(DailyBonus_Start_Check))
-        {	  
-           Log("DailyBonus - Available"); 
-		   
+        if (!IsVisible(DailyBonus_Start_Check))
+        {	  		   
            var DailyBonus_Check = ElementByXPath("//button[contains(@aria-label,'Close') and contains(text(),'Close') ]"); //check
            if (IsVisible(DailyBonus_Check))
            {
@@ -312,9 +310,9 @@ public class Paradice : FaucetScript
         Log("LuckySpin - go to page");
 		GoToUrl("https://paradice.in/?modal=/lucky-spin");
 	    Wait();
-	    Wait(10);
+	    Wait(15);
 
-        var LuckySpin_Check = ElementByXPath("//span[contains(@class,'small purple') and contains(text(),':')]"); //check if time run
+        var LuckySpin_Check = ElementByXPath("//div[contains(@class,'lucky-spin')]/div[contains(@class,'next-spin text-center')]//span[contains(@class,'small')] "); //check if time run 
         if (IsVisible(LuckySpin_Check))
         {
          Log("LuckySpin - already received - try tomorrow");
@@ -422,9 +420,34 @@ public class Paradice : FaucetScript
         //=================//
         public int Time_Function()
         {
-		
-          Log("Time_Function - return to your time"); 					
-	      return GetWaitSetting();  
+
+		   GoToUrl("https://paradice.in/?modal=/bonuses");
+	       Wait();
+	       Wait(10);	
+		   
+	       var TimeCheck = ElementByXPath("//div[contains(@class,'lucky_spin')]//span[contains(@class,'small') and contains(text(),':')]") ;
+   
+		   //site time with normal counter
+           var TimeVAR = ElementByXPath("//div[contains(@class,'lucky_spin')]//span[contains(@class,'small')]") ;
+
+           if (IsVisible(TimeCheck))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int hour,min,sec;
+             hour = Convert.ToInt32(TimeVAR.Text.Trim().Split(':')[0])*3600;
+             min = Convert.ToInt32(TimeVAR.Text.Trim().Split(':')[1])*60;
+             sec = Convert.ToInt32(TimeVAR.Text.Trim().Split(':')[2]);
+             return hour+min+sec;
+           } 
+
+           if (!IsVisible(TimeCheck))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
 
          return 0;		
         }//end Time_Function
