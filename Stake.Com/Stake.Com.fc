@@ -576,10 +576,10 @@ public class stake : FaucetScript
              GoToUrl("https://stake.com/?currency=btc&modal=vip&tab=reload");
 	         Log("Go to try - Reload to return to time");	
 	         Wait();
-	         Wait(10);	
 			   
              //site time with date - example 10:00 PM | 10:00 AM
-             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]",10); //wait method - more faster - find the element within time - no need to wait to max 10sec
+
              if (IsVisible(CheckAvailableGeneral))
              {
 	           Log("DateTime.ParseExact - here"); 
