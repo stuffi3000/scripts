@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 24/11/2020 12:15AM - Version 13
+//Last Update: 20/12/2020 18:40PM - Version 14
 //==================//
 
 using System;
@@ -329,6 +329,35 @@ public class Primedice : FaucetScript
  public override int DoSolveFaucet()
   {
 
+
+	//===================//
+    //Set English Language
+	//===================//
+    var CheckLanguage = ElementByXPath("//button[contains(@class,'JGufU')]//img[contains(@src,'gb.svg')] | //button[contains(@class,'fNCTAa')]//img[contains(@src,'gb.svg')]"); 
+          
+	if (IsVisible(CheckLanguage)) 
+    {
+	 Log("Already English Language");
+    }	
+
+    if (!IsVisible(CheckLanguage)) 
+    {
+     var OpenMenuLeftSide = ElementByXPath("//button[contains(@class,'JGufU')]/span[contains(@class,'iHjwOk')]/span[contains(@class,'iHjwOk')]"); 
+     Click(OpenMenuLeftSide);
+	 Log("OpenMenuLeftSide");
+	 
+	 Wait(3);
+	 
+     var ChooseEnglish = ElementByXPath("//ul[contains(@class,'hPNxpF')]//img[contains(@src,'gb.svg')]"); 
+     Click(ChooseEnglish);
+	 Log("ChooseEnglish");
+	 
+	 Wait();
+	 
+	}
+	//===================//
+	
+
      //=======//
      //Vault
      //=======//
@@ -582,7 +611,7 @@ public class Primedice : FaucetScript
              GoToUrl("https://Primedice.com/?currency=btc&modal=vip&tab=reload");
 	         Log("Go to try - Reload to return to time");	
 	         Wait();
-	         Wait(5);	
+	         Wait(15);	
 			   
              //site time with date - example 10:00 PM | 10:00 AM
              var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
