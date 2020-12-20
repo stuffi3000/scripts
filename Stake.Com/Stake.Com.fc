@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 20/12/2020 18:30PM - Version 29
+//Last Update: 20/12/2020 19:00PM - Version 29
 //==================//
 
 using System;
@@ -157,8 +157,12 @@ public class stake : FaucetScript
 //========//
     public override int DoLogin()
     {
+		
+
+     Set_English_Language_Function(); //call
+
 	
-      var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
+     var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
 	
 	 //if i NOT Login - go to Login Page
 	 if (!IsVisible(ExitButton))
@@ -324,34 +328,8 @@ public class stake : FaucetScript
   {
 
 
-	//===================//
-    //Set English Language
-	//===================//
-    var CheckLanguage = ElementByXPath("//button[contains(@class,'JGufU')]//img[contains(@src,'gb.svg')] | //button[contains(@class,'fNCTAa')]//img[contains(@src,'gb.svg')]"); 
-          
-	if (IsVisible(CheckLanguage)) 
-    {
-	 Log("Already English Language");
-    }	
-
-    if (!IsVisible(CheckLanguage)) 
-    {
-     var OpenMenuLeftSide = ElementByXPath("//button[contains(@class,'JGufU')]/span[contains(@class,'iHjwOk')]/span[contains(@class,'iHjwOk')]"); 
-     Click(OpenMenuLeftSide);
-	 Log("OpenMenuLeftSide");
+     Set_English_Language_Function(); //call
 	 
-	 Wait(3);
-	 
-     var ChooseEnglish = ElementByXPath("//ul[contains(@class,'hPNxpF')]//img[contains(@src,'gb.svg')]"); 
-     Click(ChooseEnglish);
-	 Log("ChooseEnglish");
-	 
-	 Wait();
-	 
-	}
-	//===================//
-
-
 
      //=======//
      //Vault
@@ -647,6 +625,43 @@ public class stake : FaucetScript
         }//end Time_Function
         //=================//	
 
+
+
+      //============================//
+      //Set_English_Language_Function
+      //============================//
+      public int Set_English_Language_Function()
+      {	
+	  
+          var CheckLanguage = ElementByXPath("//button[contains(@class,'JGufU')]//img[contains(@src,'gb.svg')] | //button[contains(@class,'fNCTAa')]//img[contains(@src,'gb.svg')]"); 
+                
+	      if (IsVisible(CheckLanguage)) 
+          {
+	       Log("Already English Language");
+          }	
+	      
+          if (!IsVisible(CheckLanguage)) 
+          {
+           var OpenMenuLeftSide = ElementByXPath("//button[contains(@class,'JGufU')]/span[contains(@class,'iHjwOk')]/span[contains(@class,'iHjwOk')]"); 
+           Click(OpenMenuLeftSide);
+	       Log("OpenMenuLeftSide");
+	       
+	       Wait(3);
+	       
+           var ChooseEnglish = ElementByXPath("//ul[contains(@class,'hPNxpF')]//img[contains(@src,'gb.svg')]"); 
+           Click(ChooseEnglish);
+	       Log("ChooseEnglish");
+	       
+	       Wait();
+	       
+	      }
+	  
+		  return 0;
+		  		  
+      } // end Set_English_Language_Function
+		//=========//	
+	
+	
 
         //=========//
         //All_Function
