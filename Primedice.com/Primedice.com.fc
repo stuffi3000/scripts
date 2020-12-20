@@ -670,7 +670,7 @@ public class Primedice : FaucetScript
         //=========//
         //All_Function
 		//=========//
-        public void All_Function()
+        public int All_Function()
         {	
 
           Choose_Coin_Function(); //call
@@ -732,7 +732,7 @@ public class Primedice : FaucetScript
 		  
 		  }//end CheckAvailableGeneral - NOT Visible
 
-
+		  return 0;
 
 		}//end All_Function
 		//=========//
