@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 20/12/2020 16:15PM - Version 29
+//Last Update: 20/12/2020 18:30PM - Version 29
 //==================//
 
 using System;
@@ -322,6 +322,36 @@ public class stake : FaucetScript
 //==============//
  public override int DoSolveFaucet()
   {
+
+
+	//===================//
+    //Set English Language
+	//===================//
+    var CheckLanguage = ElementByXPath("//button[contains(@class,'JGufU')]//img[contains(@src,'gb.svg')] | //button[contains(@class,'fNCTAa')]//img[contains(@src,'gb.svg')]"); 
+          
+	if (IsVisible(CheckLanguage)) 
+    {
+	 Log("Already English Language");
+    }	
+
+    if (!IsVisible(CheckLanguage)) 
+    {
+     var OpenMenuLeftSide = ElementByXPath("//button[contains(@class,'JGufU')]/span[contains(@class,'iHjwOk')]/span[contains(@class,'iHjwOk')]"); 
+     Click(OpenMenuLeftSide);
+	 Log("OpenMenuLeftSide");
+	 
+	 Wait(3);
+	 
+     var ChooseEnglish = ElementByXPath("//ul[contains(@class,'hPNxpF')]//img[contains(@src,'gb.svg')]"); 
+     Click(ChooseEnglish);
+	 Log("ChooseEnglish");
+	 
+	 Wait();
+	 
+	}
+	//===================//
+
+
 
      //=======//
      //Vault
