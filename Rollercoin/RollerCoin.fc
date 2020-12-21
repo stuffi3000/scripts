@@ -94,7 +94,29 @@ class RollerCoin : FaucetScript
         return base.GetHCaptchaSiteKey( );
     }
 
+    public override bool SetHCaptchaResponse(string response)
+    {
+        if (ElementByXPath("//*[@name='g-recaptcha-response']") !=null)
+        {
+            ExecuteScript("document.querySelector('[name=g-recaptcha-response]').innerText = '"+Context.CaptchaResult.Result+"'");
+        }
+        if (ElementByXPath("//*[@name='h-captcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=h-captcha-response]').innerText = '" + Context.CaptchaResult.Result+"'");
 
+        }
+
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+        }
+
+        // return base.SetHCaptchaResponse(response);
+
+        return true;
+    }
     public override int DoLogin ( )
     {
         GoToUrl ( "https://rollercoin.com/sign-in" );
