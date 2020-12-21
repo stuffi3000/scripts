@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 19/12/2020 17:40PM - Version 28
+//Last Update: 20/12/2020 20:00PM - Version 29
 //==================//
 
 using System;
@@ -157,8 +157,12 @@ public class stake : FaucetScript
 //========//
     public override int DoLogin()
     {
+		
+
+     Set_English_Language_Function(); //call
+
 	
-      var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
+     var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
 	
 	 //if i NOT Login - go to Login Page
 	 if (!IsVisible(ExitButton))
@@ -322,6 +326,10 @@ public class stake : FaucetScript
 //==============//
  public override int DoSolveFaucet()
   {
+
+
+     Set_English_Language_Function(); //call
+	 
 
      //=======//
      //Vault
@@ -575,15 +583,13 @@ public class stake : FaucetScript
              Title = "stake.com";
              GoToUrl("https://stake.com/?currency=btc&modal=vip&tab=reload");
 	         Log("Go to try - Reload to return to time");	
-	         Wait();
-			   
+	         Wait(15);		
+			 
              //site time with date - example 10:00 PM | 10:00 AM
-             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]",10); //wait method - more faster - find the element within time - no need to wait to max 10sec
-
+             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]");
              if (IsVisible(CheckAvailableGeneral))
              {
 	           Log("DateTime.ParseExact - here"); 
-               
 			   var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
 		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
 			   //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
@@ -620,10 +626,47 @@ public class stake : FaucetScript
         //=================//	
 
 
+
+      //============================//
+      //Set_English_Language_Function
+      //============================//
+      public int Set_English_Language_Function()
+      {	
+	  
+          var CheckLanguage = ElementByXPath("//button[contains(@class,'JGufU')]//img[contains(@src,'gb.svg')] | //button[contains(@class,'fNCTAa')]//img[contains(@src,'gb.svg')]"); 
+                
+	      if (IsVisible(CheckLanguage)) 
+          {
+	       Log("Already English Language");
+          }	
+	      
+          if (!IsVisible(CheckLanguage)) 
+          {
+           var OpenMenuLeftSide = ElementByXPath("//button[contains(@class,'JGufU')]/span[contains(@class,'iHjwOk')]/span[contains(@class,'iHjwOk')]"); 
+           Click(OpenMenuLeftSide);
+	       Log("OpenMenuLeftSide");
+	       
+	       Wait(3);
+	       
+           var ChooseEnglish = ElementByXPath("//ul[contains(@class,'hPNxpF')]//img[contains(@src,'gb.svg')]"); 
+           Click(ChooseEnglish);
+	       Log("ChooseEnglish");
+	       
+	       Wait();
+	       
+	      }
+	  
+		  return 0;
+		  		  
+      } // end Set_English_Language_Function
+		//=========//	
+	
+	
+
         //=========//
         //All_Function
 		//=========//
-        public void All_Function()
+        public int All_Function()
         {	
 
           Choose_Coin_Function(); //call
@@ -650,11 +693,13 @@ public class stake : FaucetScript
           {	
 		    Log("faucet visible - do stuff");
 
-            var CheckClaim = ElementByXPath("//div[contains(@class,'styles__Buttons')]//button[contains(@class,'Button__StyledButton') and (@disabled) ]"); 
+            var CheckClaim = ElementByXPath("//button[@type='submit' and (@disabled) ]"); 
             if (!IsVisible(CheckClaim))
             {	
 
-              var Claim1VAR = ElementByXPath("//div[contains(@class,'styles__ButtonsWrap')]//span[contains(text(),'Claim')] "); //click on the claim 1
+              Log("CheckClaim - here");
+
+              var Claim1VAR = ElementByXPath("//button[@type='submit']"); //click on the claim 1
               Click(Claim1VAR);
               Log("claim 1 - try");
 			  
@@ -664,7 +709,7 @@ public class stake : FaucetScript
 		        Log("Reload - call to solve captch");
                 var result = DoSolveCaptcha(); //call to solve captch		 
 				
-                var Claim2VAR = ElementByXPath("//div[contains(@class,'styles__ButtonsWrap')]//span[contains(text(),'Claim')] "); //click on the claim 2
+                var Claim2VAR = ElementByXPath("//button[@type='submit']"); //click on the claim 2
                 Click(Claim2VAR);
                 Log("claim 2 - Success"); // click again  
 				
@@ -683,7 +728,7 @@ public class stake : FaucetScript
 		  
 		  }//end CheckAvailableGeneral - NOT Visible
 
-
+		  return 0;
 
 		}//end All_Function
 		//=========//
