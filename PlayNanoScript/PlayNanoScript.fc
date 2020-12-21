@@ -222,7 +222,7 @@ public class PlayNanoScript : FaucetScript
     {
         try
         {
-            var primaryAd=ElementByXPath("//*[contains(@style,'display: block !important')]//div[@data-name='stitialer']/..//div[contains(@style,'right: 0px;')]//div");
+            var primaryAd=ElementByXPath("//*[contains(@style,'display: block !important')]//div[@data-name='stitialer']/..//div[contains(@style,'right: 0px;')]//div|//*[contains(@style,'display: block !important')]//a[@id='close']");
             if ( IsVisible(primaryAd) )
             {
                 Click(primaryAd);
