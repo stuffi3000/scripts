@@ -1,9 +1,11 @@
 ﻿using FaucetCollector.Script;
+using FaucetCollector.Utilities;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
+//css_ref FaucetCollector.Utilities
 namespace FaucetCollectorScripts.Scripts
 {
     public class GGFaucetScript : FaucetScript
@@ -47,6 +49,14 @@ namespace FaucetCollectorScripts.Scripts
             {"bch","https://bch.ggfaucet.com/" }
         };
 
+        public override int BeforeCreateDriver()
+        {
+            // We need to get the cookie before access to the site 
+            CloudFlareUtilities cloudFlareUtilities = new CloudFlareUtilities(this);
+            cloudFlareUtilities.TryGetCloudflareCookieUsingChrome(FaucetUrl);
+       
+            return base.BeforeCreateDriver();
+        }
 
         private string FaucetUrl
         {
@@ -93,35 +103,6 @@ namespace FaucetCollectorScripts.Scripts
 
 
             return base.DoInit();
-        }
-
-        public override int DoLogin()
-        {
-
-            GoToUrl(SelectedFaucetUrl);
-
-            Wait(6, 8);
-
-            var userBox = ElementByXPath("//input[@name='wantusername']");
-            if (!IsVisible(userBox))
-            {
-                return Fail("userbox is not visible or not found");
-            }
-            SetText(userBox, GetSetting("User"));
-
-
-            var startClaimBtn = ElementByXPath("//button[@type='submit']");
-            if (!IsVisible(startClaimBtn))
-            {
-                return Fail("Start claim btn is not visible or not found");
-            }
-            Click(startClaimBtn);
-            return base.DoLogin();
-        }
-
-        public override bool IsLoggedIn()
-        {
-            return ElementByXPath("//a[@href='logout.php']") != null;
         }
 
         public override int DoSolveFaucet()
@@ -171,6 +152,37 @@ namespace FaucetCollectorScripts.Scripts
 
             return base.DoSolveFaucet();
         }
+        public override int DoLogin()
+        {
+
+            GoToUrl(SelectedFaucetUrl);
+
+            Wait(6, 8);
+
+            var userBox = ElementByXPath("//input[@name='wantusername']");
+            if (!IsVisible(userBox))
+            {
+                return Fail("userbox is not visible or not found");
+            }
+            SetText(userBox, GetSetting("User"));
+
+
+            var startClaimBtn = ElementByXPath("//button[@type='submit']");
+            if (!IsVisible(startClaimBtn))
+            {
+                return Fail("Start claim btn is not visible or not found");
+            }
+            Click(startClaimBtn);
+            return base.DoLogin();
+        }
+
+        public override bool IsLoggedIn()
+        {
+            return ElementByXPath("//a[@href='logout.php']") != null;
+        }
+        
+
+      
 
         public override int GetFaucetWaitTime()
         {
