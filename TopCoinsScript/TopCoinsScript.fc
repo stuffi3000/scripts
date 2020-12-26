@@ -1,38 +1,189 @@
 ﻿using FaucetCollector.Script;
+using FaucetCollector.Utilities;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//css_ref FaucetCollector.Utilities
 
-namespace FaucetCollectorScripts.Scripts
+public class TopCoinsScript : FaucetScript
 {
-    public class TopCoinsScript:FaucetScript
+    public override FaucetSettings Settings
     {
-        public override FaucetSettings Settings
-        { 
-            get
-            {
-                return new FaucetSettings("https://topcoins.pw/profile")
+        get
+        {
+            return new FaucetSettings("https://topcoins.pw/profile")
                 {
-                    new FaucetSetting(){Name="User",Display="Email",
+                    new FaucetSetting()
+                    {
+                    Name="User",
+                     Display="Email",
                     Type=EditorType.TextBox,
-                    Required=true},
+                    Required=true
+                    },
                     new FaucetSetting()
                     {
                         Name="Pass",
                         Required=true,
                         Type=EditorType.Password,
                         Display="Password"
-                    }
+                    },
+                    new FaucetSetting(){
+
+                        Name="Faucet",
+                        Type=EditorType.ComboBox,
+                        Display="Selected faucet",
+                        Default=AvailableFaucets.Keys.FirstOrDefault(),
+                        Items=AvailableFaucets.Keys.ToList()
+                   }
                 };
 
+        }
+    }
+
+
+    private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>()
+        {
+            {"BNB","https://topcoins.pw/free/bnb" },
+             {"TRX","https://topcoins.pw/free/trx" },
+             {"BCH","https://topcoins.pw/free/bch" },
+             {"BAT","https://topcoins.pw/free/bat" }
+        };
+
+
+
+    private string SelectedFaucetUrl
+    {
+        get
+        {
+            string selectedFaucet = GetSetting("Facet");
+
+            if (AvailableFaucets.ContainsKey(selectedFaucet))
+            {
+                return AvailableFaucets[selectedFaucet];
             }
+
+
+            return AvailableFaucets.Values.FirstOrDefault();
+        }
+    }
+    public override void Start()
+    {
+        Title = "User";
+        SuccessXPath = "//p[@class='won']";
+        FailXPath = "//p[@class='error']";
+        base.Start();
+    }
+
+
+    public override int DoLogin()
+    {
+        GoToUrl("https://topcoins.pw/profile");
+        Wait(1, 2);
+
+        var emailBox = ElementByXPath("//input[@name='user_email']");
+        if (!IsVisible(emailBox))
+        {
+            return Fail("Email is not visible or not found");
+        }
+        SetText(emailBox, GetSetting("User"));
+
+        var passwordBox = ElementByXPath("//input[@name='user_pass']");
+        if (!IsVisible(passwordBox))
+        {
+            return Fail("Password box not found or not visible");
+
         }
 
-        Dictionary<string,<string> AvailableCoins =new System.Collections.Generic.Dictionary<string, , string>
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
 
+
+        SetText(passwordBox, GetPassword("Pass"));
+        var loginBtn = ElementByXPath("//button[@name='user_login']");
+        if (!IsVisible(loginBtn))
+        {
+            return Fail("login btn not visible or not found");
+        }
+
+
+        Click(loginBtn);
+        return base.DoLogin();
 
     }
+
+    public override bool IsLoggedIn()
+    {
+
+
+        return ElementByXPath("//a[contains(@href,'logout')]") != null;
+    }
+
+    public override int DoSolveFaucet()
+    {
+
+        GoToUrl(SelectedFaucetUrl);
+
+        Wait(1, 2);
+        var claimBtn = ElementByXPath("//button[@id='claim']");
+        if (!IsVisible(claimBtn))
+        {
+            return Fail("Claim btn is not visible or not found");
+        }
+
+        Click(claimBtn);
+        Wait(1, 2);
+
+        var nextStepBtn = ElementByXPath("//a[@rel='nofollow']");
+        if (!IsVisible(nextStepBtn))
+        {
+            return Fail("Next step btn is not visible or not found");
+        }
+        ShortLinkBypasser bypasser = new ShortLinkBypasser(this);
+        Click(nextStepBtn);
+
+
+        var result = bypasser.DoShortLink();
+
+        if (result)
+        {
+            Log("Successfully solved the shortlink");
+        }
+
+        return base.DoSolveFaucet();
+    }
+
+    public override int GetFaucetWaitTime()
+    {
+        GoToUrl(SelectedFaucetUrl);
+
+        var countDownElements = ElementsByXPath("//span[@class='countdown-amount']").Where(x => IsVisible(x)).ToList();
+        if (countDownElements.Count > 0)
+        {
+            //[0]minute - [1]second
+            int[] timers = new int[2];
+            timers = countDownElements.Select(timer => timer.Text).Aggregate(new List<int>(), (before, next) =>
+             {
+                 int time;
+                 if (int.TryParse(next, out time))
+                 {
+                     before.Add(time);
+                 }
+                 else
+                 {
+                     before.Add(0);
+                 }
+
+                 return before;
+
+             }).ToArray();
+
+            return timers[0] * 60 + timers[1];
+        }
+
+        return base.GetFaucetWaitTime();
+    }
+
 }
