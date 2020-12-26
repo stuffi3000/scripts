@@ -1,0 +1,38 @@
+﻿using FaucetCollector.Script;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FaucetCollectorScripts.Scripts
+{
+    public class TopCoinsScript:FaucetScript
+    {
+        public override FaucetSettings Settings
+        { 
+            get
+            {
+                return new FaucetSettings("https://topcoins.pw/profile")
+                {
+                    new FaucetSetting(){Name="User",Display="Email",
+                    Type=EditorType.TextBox,
+                    Required=true},
+                    new FaucetSetting()
+                    {
+                        Name="Pass",
+                        Required=true,
+                        Type=EditorType.Password,
+                        Display="Password"
+                    }
+                };
+
+            }
+        }
+
+        Dictionary<string,<string> AvailableCoins =new System.Collections.Generic.Dictionary<string, , string>
+
+
+    }
+}
