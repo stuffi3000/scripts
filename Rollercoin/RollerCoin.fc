@@ -52,7 +52,7 @@ class RollerCoin : FaucetScript
         Title="Rollercoin";
 
         SuccessXPath="//div[@class='react-responsive-spritesheet-container__move']";
-        FailXPath="//*[contains(@text(),'')]";
+        FailXPath="//*[contains(@text(),'THE CAPTCHA CODE YOU ENTERED')]";
 
         base.Start ( );
     }
