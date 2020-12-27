@@ -49,15 +49,7 @@ namespace FaucetCollectorScripts.Scripts
             {"bch","https://bch.ggfaucet.com/" }
         };
 
-        public override int BeforeCreateDriver()
-        {
-            // We need to get the cookie before access to the site 
-            CloudFlareUtilities cloudFlareUtilities = new CloudFlareUtilities(this);
-            cloudFlareUtilities.TryGetCloudflareCookieUsingChrome(FaucetUrl);
-       
-            return base.BeforeCreateDriver();
-        }
-
+     
         private string FaucetUrl
         {
             get
@@ -95,8 +87,47 @@ namespace FaucetCollectorScripts.Scripts
             base.Start();
         }
 
+        public void SolveCloudflare()
+        {
+            
+
+            CloudFlareUtilities cloudFlareUtilities = new CloudFlareUtilities(this);
+            if (cloudFlareUtilities.IsVisibleCloudflare())
+            {
+                cloudFlareUtilities.DoSolve();
+            }
+        }
+        public override string GetHCaptchaSiteKey()
+        {
+            var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+            if (hcaptchaIframe != null)
+            {
+                string src = hcaptchaIframe.GetAttribute("src");
+
+                if (!string.IsNullOrEmpty(src))
+                {
+                    // we find the sitekey 
+                    var queryParams = src.Split('&').ToList();
+                    // we remove the host part 
+
+                    queryParams.RemoveAt(0);
+
+                    //we find the sitekey 
+
+                    string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                    return siteKey;
+
+                }
+            }
+
+            return base.GetHCaptchaSiteKey();
+        }
         public override int DoInit()
         {
+           
             var selectedUrl = SelectedFaucetUrl;
             Url = selectedUrl;
 
@@ -107,8 +138,10 @@ namespace FaucetCollectorScripts.Scripts
 
         public override int DoSolveFaucet()
         {
-
+           
+            Wait(1);
             GoToUrl(FaucetUrl);
+          
             Wait(2, 3);
 
             var startClaimBtn = ElementByXPath("//button[@id='proceed']");
@@ -156,8 +189,9 @@ namespace FaucetCollectorScripts.Scripts
         {
 
             GoToUrl(SelectedFaucetUrl);
-
-            Wait(6, 8);
+            Wait(1, 2);
+            SolveCloudflare();
+            Wait(2, 4);
 
             var userBox = ElementByXPath("//input[@name='wantusername']");
             if (!IsVisible(userBox))
