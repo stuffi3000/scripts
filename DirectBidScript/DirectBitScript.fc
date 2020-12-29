@@ -1,0 +1,235 @@
+﻿using FaucetCollector.Script;
+using FaucetCollector.Utilities;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+//css_ref FaucetCollector.Utilities
+
+public class DirectBitScript:FaucetScript
+    {
+
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("about:blank")
+                {
+                    new FaucetSetting()
+                    {
+                        Name="User",
+                        Display="Address",
+                        Type=EditorType.TextBox,
+                        Required=true,
+                    },
+                    new FaucetSetting()
+                    {
+                        Name="Faucet",
+                        Display="Selected Faucet",
+                        Type=EditorType.ComboBox,
+                        Items=AvailableFaucets.Keys.Select(x=>x.ToUpper()).ToList(),
+                        Default=AvailableFaucets.Keys.FirstOrDefault().ToUpper()
+
+                    }
+
+                };
+
+        }
+    }
+
+    private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>()
+        {
+            {"btc","https://directbid.net/" },
+            {"eth","https://eth.directbid.net/" },
+            {"doge","https://doge.directbid.net/" },
+            {"ltc","https://ltc.directbid.net/" },
+            {"bch","https://bch.directbid.net/" }
+        };
+
+
+    private string FaucetUrl
+    {
+        get
+        {
+            return SelectedFaucetUrl + "index.php";
+        }
+    }
+
+    private string SelectedFaucetUrl
+    {
+        get
+        {
+            try
+            {
+                string selectedSetting = GetSetting("Faucet").ToLower();
+
+                return AvailableFaucets[selectedSetting];
+
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return AvailableFaucets.Values.FirstOrDefault();
+        }
+    }
+
+
+    public override void Start()
+    {
+        SuccessXPath = "//div[contains(@class,'alert alert-success')]";
+        FailXPath = "//div[contains(@class,'alert alert-danger')]";
+        Title = "Directbid.net";
+        base.Start();
+    }
+
+    public void SolveCloudflare()
+    {
+
+
+        CloudFlareUtilities cloudFlareUtilities = new CloudFlareUtilities(this);
+        if (cloudFlareUtilities.IsVisibleCloudflare())
+        {
+            cloudFlareUtilities.DoSolve();
+        }
+    }
+    public override string GetHCaptchaSiteKey()
+    {
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            string src = hcaptchaIframe.GetAttribute("src");
+
+            if (!string.IsNullOrEmpty(src))
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey();
+    }
+    public override int DoInit()
+    {
+
+        var selectedUrl = SelectedFaucetUrl;
+        Url = selectedUrl;
+
+
+
+        return base.DoInit();
+    }
+
+    public override int DoSolveFaucet()
+    {
+
+        Wait(1);
+        GoToUrl(FaucetUrl);
+
+        Wait(2, 3);
+
+        var startClaimBtn = ElementByXPath("//button[@id='proceed']");
+        if (!IsVisible(startClaimBtn))
+        {
+            return Fail("start claim btn not found or not visible");
+        }
+        Click(startClaimBtn);
+        Wait(3, 4);
+
+        var s1ProccedBtn = ElementByXPath("//button[@id='s11proceed']");
+        if (!IsVisible(s1ProccedBtn))
+        {
+            return Fail("s1 procced btn is not visible");
+        }
+        Click(s1ProccedBtn);
+
+        DateTime timeout = DateTime.Now.AddSeconds(20);
+        while (!IsVisible(ElementByXPath("//img[@src='images/car.png']")) && DateTime.Now < timeout)
+        {
+            Wait();
+        }
+        Wait();
+
+        var carBtn = ElementByXPath("//img[@src='images/car.png']");
+        if (!IsVisible(carBtn))
+        {
+            return Fail("captcha solution is broken, car is not visible");
+        }
+        Click(carBtn);
+
+        Wait(5, 6);
+
+        var s3ProccedBtn = ElementByXPath("//button[@id='s31proceed']");
+        if (!IsVisible(s3ProccedBtn))
+        {
+            return Fail("final btn is not visible or not found");
+        }
+        Click(s3ProccedBtn);
+
+
+        return base.DoSolveFaucet();
+    }
+    public override int DoLogin()
+    {
+
+        GoToUrl(SelectedFaucetUrl);
+        Wait(1, 2);
+        SolveCloudflare();
+        Wait(2, 4);
+
+        var userBox = ElementByXPath("//input[@name='wantusername']");
+        if (!IsVisible(userBox))
+        {
+            return Fail("userbox is not visible or not found");
+        }
+        SetText(userBox, GetSetting("User"));
+
+
+        var startClaimBtn = ElementByXPath("//button[@type='submit']");
+        if (!IsVisible(startClaimBtn))
+        {
+            return Fail("Start claim btn is not visible or not found");
+        }
+        Click(startClaimBtn);
+        return base.DoLogin();
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return ElementByXPath("//a[@href='logout.php']") != null;
+    }
+
+
+
+
+    public override int GetFaucetWaitTime()
+    {
+        GoToUrl(FaucetUrl);
+
+        Wait(2, 3);
+        //if is visible refresh button we have already claimed , as this faucet doesn't contains a timer we return max wait time (3 minutes)
+        if (IsVisible(ElementByXPath("//a[contains(text(),'Refresh page')]")))
+        {
+            return 180;
+        }
+
+        return base.GetFaucetWaitTime();
+
+    }
+
+}
