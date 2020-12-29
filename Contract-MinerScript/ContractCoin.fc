@@ -17,7 +17,11 @@ public class ContractMiner : FaucetScript
                 new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 new FaucetSetting(){Name="LoginW",Display="Login With",Type=EditorType.ComboBox,Items=new System.Collections.Generic.List<string>{"Solvemedia","Recaptcha"},Default="Recaptcha"},
-                new FaucetSetting(){Name="MinerTap",Display="MinerTap",Type=EditorType.CheckBox,Default=true}
+                new FaucetSetting(){Name="MinerTap",Display="MinerTap",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting()
+                {
+                    Name="HourlyPot",Display="Hourly pot",Type=EditorType.CheckBox,Default=true
+                }
 
 
             };
@@ -189,7 +193,7 @@ public class ContractMiner : FaucetScript
         {
             Click(KeepSign);
         }
-        var LoginBtn = ElementsByXPath("//button[contains(@class,'btn btn-primary')]").FirstOrDefault();
+        var LoginBtn = ElementsByXPath("//button[@id='submit']").FirstOrDefault();
         if (!IsVisible(LoginBtn))
         {
             return Fail("Button login is not visible");
@@ -335,10 +339,38 @@ public class ContractMiner : FaucetScript
             {
 
                 TryUseShortlink();
+                beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+                if (IsVisible(beginClaimBtn))
+                {
+
+                    Click(beginClaimBtn);
+                }
             }
 
 
 
+        }
+
+        if (GetBoolSetting("HourlyPot"))
+        {
+            GoToUrl("https://www.contract-miner.com/?app=hourly-pot");
+            Wait();
+            var beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+            if (IsVisible(beginClaimBtn))
+            {
+                Click(beginClaimBtn);
+            }
+            else
+            {
+                TryUseShortlink();
+                beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+                if (IsVisible(beginClaimBtn))
+                {
+
+                    Click(beginClaimBtn);
+                }
+            }
+            TryUseShortlink();
         }
 
 
