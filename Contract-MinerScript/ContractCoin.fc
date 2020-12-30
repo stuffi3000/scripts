@@ -21,6 +21,13 @@ public class ContractMiner : FaucetScript
                 new FaucetSetting()
                 {
                     Name="HourlyPot",Display="Hourly pot",Type=EditorType.CheckBox,Default=true
+                },
+                new FaucetSetting()
+                {
+                    Name="SaveSession",
+                    Type=EditorType.CheckBox,
+                    Default=true,
+                    Display="Click on remember me"
                 }
 
 
@@ -188,11 +195,18 @@ public class ContractMiner : FaucetScript
             FaucetCollector.Captcha.RecaptchaUtility utility = new FaucetCollector.Captcha.RecaptchaUtility(this);
             utility.DoSolve();
         }
-        var KeepSign = ElementByXPath("//input[@name='remember_me_login']");
-        if (IsVisible(KeepSign))
+        if (GetBoolSetting("SaveSession"))
         {
-            Click(KeepSign);
+            var KeepSign = ElementByXPath("//input[@id='stay_signed_in']");
+            if (IsVisible(KeepSign))
+            {
+                Click(KeepSign);
+            }
+
         }
+    
+
+
         var LoginBtn = ElementsByXPath("//button[@id='submit']").FirstOrDefault();
         if (!IsVisible(LoginBtn))
         {
