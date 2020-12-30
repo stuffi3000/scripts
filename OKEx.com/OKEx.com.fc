@@ -1,0 +1,586 @@
+
+//==================//
+//script Written by: ••AviramDayan•• 30/12/2020 06:00AM - Version 1
+//Last Update: 30/12/2020 06:00AM - Version 1
+//==================//
+
+using System;
+using System.IO;
+using FaucetCollector.Script;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using System.Collections.Generic;
+using System.Globalization;
+
+//css_ref FaucetCollector.Utilities
+//css_inc RecaptchaUtilities
+
+
+public class btcsamsity : FaucetScript
+{
+    /// <summary>
+    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
+    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
+    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
+    /// </summary>
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://OKEx.com")
+            {
+                new FaucetSetting(){Name="Email",Display="Email",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
+				
+                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="CustomWaitForCode",Display="Custom Wait For Code in Login - in sec ",Type=EditorType.Numeric,Default=60},
+                
+			
+                //insert user settings here
+                //new FaucetSetting { 
+                //    Name = "Name of your setting", 
+                //    Display = "Display shown in Faucet Collector", 
+                //    Type = EditorType.TextBox | EditorType.Password | EditorType.CheckBox | EditorType.Wallet | EditorType.Numeric | EditorType.ComboBox | EditorType.CheckComboBox, 
+                //    Required = true | false, 
+                //    Default = "Optionally a default value" | true | false | null.
+                //    Items = new List<string> { "item1", "item2" } (only valid for ComboBox or CheckComboBox)
+                //} 
+            };
+        }
+    }
+
+
+    //My DomainName
+    //string DomainName_String = "https://OKEx.com";
+	//example - GoToUrl(DomainName_String);
+    //==========//
+	
+	
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+    public override void Start()
+    {
+		ad=false;
+		
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "";
+
+        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
+        SuccessXPath = "//*"; //*[text()='']
+        FailXPath = "//*"; //*[text()='']
+
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+	
+	
+	
+	bool ad;
+	
+	
+    public override int DoInit()
+    {
+
+	   
+        //Let Faucet Collector continue.
+        return base.DoInit();
+    }
+
+	
+	
+	
+//==================//
+//save Login Cookies 
+//==================//
+    public override bool IsLoggedIn()
+    {
+
+        //In this case we check for en element with the class "loggedIn"
+		return ElementByXPath("//a[@class='link link-problem-feedback']") != null;
+		//return true;
+    }
+//==================//
+//save Login Cookies 
+//==================//
+	
+	
+	
+	
+	
+    /// <summary>
+    /// This method gets called if IsLoggedIn returned false, right before the DoLogin method is called.
+    /// </summary>
+    public override int BeforeLogin()
+    {
+		
+		
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeLogin();
+    }
+	
+	
+	
+
+//========//
+//DoLogin
+//========//
+ public override int DoLogin()
+ {
+	
+  var ExitButton = ElementByXPath ("//a[@class='link link-problem-feedback']"); 
+
+  //if i NOT Login - go to Login Page
+  if (!IsVisible(ExitButton))
+  {
+
+        GoToUrl("https://www.okex.com/account/login");
+        Wait();		
+        Wait(2);
+
+		Captcha_Function (); //call if apper
+
+        Wait(2);
+		
+        var Email_VAR = ElementByXPath("//div[contains(@class,'login-name')]//input");      
+        if (IsVisible(Email_VAR))
+        {
+         SetText(Email_VAR, GetSetting("Email"));
+        }
+        
+        Wait(2);
+
+        var Password_VAR = ElementByXPath("//div[@class='okui-input input-md']//input");      
+        if (IsVisible(Password_VAR))
+        {
+         SetText(Password_VAR, GetPassword("Password"));
+        }
+		
+		Wait(4);
+		
+		Captcha_Function(); //call
+		
+		Wait(2);		
+		
+        var ButtonLog = ElementByXPath("//button[contains(@class,'login-btn undefined')]");  
+        if (IsVisible(ButtonLog))
+        {
+         Click(ButtonLog);
+        }
+
+        var EmailCode = ElementByXPath("//div[contains(text(),'2-step')]"); 
+        if (IsVisible(EmailCode))
+        {		
+		  Log("Login: we waiting " + GetSetting("CustomWaitForCode") + " sec - Please enter the code that sent to your email " + GetSetting("Email") );			  
+          int MyCustomTimeINT;
+          MyCustomTimeINT = GetIntSetting("CustomWaitForCode"); 
+          Wait(MyCustomTimeINT);
+        }
+		
+		Wait(3);	
+		
+        var Continue_Button = ElementByXPath("//button[contains(@class,'okui-btn btn-md btn-primary login-btn verify-btn')]"); 
+        if (IsVisible(Continue_Button))
+        {	
+		Click(Continue_Button); //click again
+		}
+		
+		Wait();	
+
+		Captcha_Function (); //call if apper
+		
+		Wait();	
+				
+  } // end ExitButton
+
+        
+       return base.DoLogin();
+    }
+//========//
+//DoLogin
+//========//
+	
+
+	
+	
+	
+	
+//==========//
+//AfterLogin
+//=========//
+ public override int AfterLogin()
+ {
+ 
+	 
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterLogin();
+ }
+//==========//
+//AfterLogin
+//=========//
+	
+	
+	
+
+	
+//=============//
+//GetFaucetWaitTime
+//=============//
+ public override int GetFaucetWaitTime()
+ {
+
+    if(ad)
+	{
+        ad=false; //solve the problem in start - after he return to script again
+        return GetWaitSetting();  
+    }	//end ad
+		
+   //let Faucet Collector continue.
+   return base.GetFaucetWaitTime();
+ }
+//=============//
+//GetFaucetWaitTime
+//=============//
+	
+	
+	
+	
+
+    public override int BeforeSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+
+
+    public override int DoSolveCaptcha()
+    {
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveCaptcha();
+    }
+
+
+    public override int AfterSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveCaptcha();
+    }
+	
+	
+
+    public override int BeforeSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+	
+	
+	
+
+
+//=============//
+//DoSolveFaucet
+//=============//
+    public override int DoSolveFaucet()
+    {
+	
+      //=============//
+      //FaucetClaim
+      //=============//
+      if (GetBoolSetting("FaucetClaim"))
+      {
+	    Title = "Freebitcoin";
+		GoToUrl("https://www.okex.com/freebitcoin");
+	    Wait();
+	    Wait(4);
+		
+		Captcha_Function (); //call if apper
+		
+	    Wait(2);
+		
+        var Check_User_Authorization = ElementByXPath("//div[contains(@class,'user-auth')]");
+        
+		if (IsVisible(Check_User_Authorization))
+        {
+         Log("User_Authorization - you need to pass - Mobile or Photo verification");
+        }
+		
+        if (!IsVisible(Check_User_Authorization)) //not visible
+        {	
+		
+           CheckForPopupsEnabled = false;  //disable		
+		
+           Log("User_Authorization - User verified");
+           Wait(3);
+		   
+		   //ad1
+           if (!IsVisible(ElementByXPath("//li[1]/div[@class='task-shade']") ))	
+		   {
+			   Title = "Freebitcoin";
+			   var AD_1_VAR = ElementByXPath("//div[contains(@id,'dailyMission')]//li[1]");
+			   Click(AD_1_VAR);
+               Log("AD_1_VAR");
+			   
+			   Stuff_Function(); //call
+		   }
+		   
+		   //ad2
+           if (!IsVisible(ElementByXPath("//li[2]/div[@class='task-shade']") ))	
+		   {
+			   Title = "Freebitcoin";
+			   var AD_2_VAR = ElementByXPath("//div[contains(@id,'dailyMission')]//li[2]");
+			   Click(AD_2_VAR);
+               Log("AD_2_VAR");	
+			   
+			   Stuff_Function(); //call
+		   }	
+		   
+		   //ad3
+           if (!IsVisible(ElementByXPath("//li[3]/div[@class='task-shade']") ))	
+		   {
+			   Title = "Freebitcoin";
+			   var AD_3_VAR = ElementByXPath("//div[contains(@id,'dailyMission')]//li[3]");
+			   Click(AD_3_VAR);
+               Log("AD_3_VAR");
+			   
+			   Stuff_Function(); //call  
+		   }	
+		   
+		   //ad4
+           if (!IsVisible(ElementByXPath("//li[4]/div[@class='task-shade']") ))	
+		   {
+			   Title = "Freebitcoin";
+			   var AD_4_VAR = ElementByXPath("//div[contains(@id,'dailyMission')]//li[4]");
+			   Click(AD_4_VAR);
+               Log("AD_4_VAR");	
+			   
+			   Stuff_Function(); //call  
+		   }
+		   
+		   //ad5
+           if (!IsVisible(ElementByXPath("//li[5]/div[@class='task-shade']") ))	
+		   {
+			   Title = "Freebitcoin";
+			   var AD_5_VAR = ElementByXPath("//div[contains(@id,'dailyMission')]//li[5]");
+			   Click(AD_5_VAR);
+               Log("AD_5_VAR");	
+			   
+			   Stuff_Function(); //call
+			   
+		   }
+
+           var Success_VAR = ElementByXPath("//li[5]/div[@class='task-shade']"); //5 - mean we did all
+           if (IsVisible(Success_VAR))
+		   {
+		     Log("FaucetClaim - Success_Claim ");  
+		     ClaimSuccess(); //Marks the claim as a success		   
+		   }
+
+		 
+		} //end Check_User_Authorization - not visible
+		
+		
+	    Wait();		
+		
+      } //end FaucetClaim
+
+        //ad = true; //call to timer / and do success	
+		//return GetWaitSetting();
+		return Time_Function(); //call to function time
+	
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveFaucet();
+    }
+	
+	
+
+
+    public override int AfterSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveFaucet();
+    }
+	
+	
+	
+
+    /// <summary>
+    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
+    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
+    /// These properties should contain XPath expressions to find certain elements on the page.
+    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
+    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
+    /// </summary>
+    public override int CheckFaucetResult()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.CheckFaucetResult();
+    }
+	
+	
+       //=================//
+       //Stuff_Function
+        //=================//
+        public int Stuff_Function()
+        {
+		   Title = "Academy";
+		   Log("waiting for seconds to end..");		   
+           Wait(70);
+		   
+		   Title = "Freebitcoin";
+		   
+           Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+
+           Wait(2);
+		   
+           CheckForPopupsEnabled = true;     //enable
+           CheckForPopups();    //call	
+		   
+		   //Driver.Navigate().Refresh(); //Refresh
+		   
+           Wait(2);		   
+			   
+           return 0;		
+        }//end Stuff_Function
+        //=================//	
+		
+	
+        //=================//
+       //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+           //site time with date - example 10:00 PM | 10:00 AM  OR UTC LocalTime
+           var CheckAvailableGeneral = ElementByXPath("//div[contains(@id,'result') and contains(text(),'wait') or contains(text(),'UTC') ]");
+           if (IsVisible(CheckAvailableGeneral))
+           {
+	         Log("ParseExact - here");             
+	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+	         var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
+	         //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+	         //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+	 
+             var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+             return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		  
+           } //end CheckAvailableGeneral
+		   		   
+		   //site time with normal counter
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
+
+           return 0;		
+        }//end Time_Function
+        //=================//	
+		
+	
+        //=================//
+       //invisible_Captcha_Function
+        //=================//
+        public int invisible_Captcha_Function()
+        {
+			
+          var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]");  
+          if (RecaptchaOpen_Iframe !=null)          
+		  {
+            //SolveCaptcha if apper
+            Log("DO invisible_Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+		    RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		    
+            Wait();
+		    
+            //ExecuteScript("afterResolveCaptcha");
+		  }
+		
+		return 0;
+        }//end invisible_Captcha_Function
+        //=================//	
+
+
+
+        //=================//
+       //Captcha_Function
+        //=================//
+        public int Captcha_Function()
+        {
+	
+          //DifferentImageCaptcha
+          var DifferentImageCaptcha = ElementByXPath("//div[contains(@class,'img-rec')]//img"); 
+          if (IsVisible(DifferentImageCaptcha))
+		  {  
+             Log("DO DifferentImageCaptcha");	  
+	         var result_3 = DoSolveImageCaptcha(ElementByXPath("//div[contains(@class,'img-rec')]//img"),ElementByXPath("//input[contains(@id,'inpCode')]") ); 
+             if (result_3 > 0)
+             {
+                 return Fail("DifferentImageCaptcha - Fail solving captcha");
+             }
+			 
+             Wait();
+			 
+			 var Cap_Submit = ElementByXPath("//input[@id='btnSumbit']"); 
+			 Click(Cap_Submit);
+		  }
+
+			
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']") ); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+		return 0;
+        }//end Captcha_Function
+        //=================//	
+	
+	
+} //public class
