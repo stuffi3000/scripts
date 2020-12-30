@@ -1,4 +1,5 @@
 ﻿using FaucetCollector.Script;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,9 +37,9 @@ public class KeranScript : FaucetScript
     }
 
     // base domain a schema of the site
-    private const string BASEURL="https://keran.co/";
+    private const string BASEURL = "https://keran.co/";
     // Coin pairs with the domains
-    private readonly Dictionary<string , string> CoinSitePairs=new Dictionary<string, string>
+    private readonly Dictionary<string, string> CoinSitePairs = new Dictionary<string, string>
     {
         {"BTC",BASEURL+"BTC" },
         {"BCH",BASEURL+"BCH" },
@@ -49,20 +50,20 @@ public class KeranScript : FaucetScript
         {"DGB",BASEURL+"DGB" },
         {"TRX",BASEURL+"TRX" }
     };
-    public override void Start( )
+    public override void Start()
     {
 
-        SuccessXPath="//div[@class='alert alert-success']";
-        FailXPath="//div[@class='alert alert-danger']";
+        SuccessXPath = "//div[@class='alert alert-success']";
+        FailXPath = "//div[@class='alert alert-danger']";
 
-        Title="KERAN.CO|"+PairSelected;
+        Title = "KERAN.CO|" + PairSelected;
         // We update the url
-        Url=SelectedUrl;
-        adblock=new FaucetCollector.Utilities.Adblock(this);
-        base.Start( );
+        Url = SelectedUrl;
+        adblock = new FaucetCollector.Utilities.Adblock(this);
+        base.Start();
     }
 
-    FaucetCollector.Utilities.Adblock adblock; 
+    FaucetCollector.Utilities.Adblock adblock;
 
     private string PairSelected
     {
@@ -72,7 +73,7 @@ public class KeranScript : FaucetScript
             {
                 return GetSetting("Coin");
             }
-            catch ( Exception )
+            catch (Exception)
             {
                 // If something goes wrong we catch the exception and return empty 
                 Log("Something went wrong getting the coin");
@@ -86,9 +87,9 @@ public class KeranScript : FaucetScript
     {
         get
         {
-            string pairSelected=PairSelected;
+            string pairSelected = PairSelected;
 
-            if ( string.IsNullOrEmpty(pairSelected) )
+            if (string.IsNullOrEmpty(pairSelected))
             {
                 return string.Empty;
             }
@@ -97,7 +98,7 @@ public class KeranScript : FaucetScript
             {
                 return CoinSitePairs[pairSelected];
             }
-            catch ( Exception )
+            catch (Exception)
             {
                 Log("Something went wrong getting the url");
 
@@ -110,17 +111,17 @@ public class KeranScript : FaucetScript
     {
         string url = SelectedUrl;
 
-        if ( Driver.Url!=url )
+        if (Driver.Url != url)
         {
             GoToUrl(url);
         }
-        else if ( reload )
+        else if (reload)
         {
-            Driver.Navigate( ).Refresh( );
+            Driver.Navigate().Refresh();
         }
-        Wait( );
+        Wait();
     }
-    public override int DoInit( )
+    public override int DoInit()
     {
         GoToSelectedUrl(true);
         // We go to the selected url 
@@ -128,16 +129,16 @@ public class KeranScript : FaucetScript
 
 
 
-        return base.DoInit( );
+        return base.DoInit();
     }
 
-    public override bool IsLoggedIn( )
+    public override bool IsLoggedIn()
     {
-        GoToSelectedUrl( );
-        adblock.DestroyAds( );
-        var navBarBrand=ElementByXPath("//a[@class='navbar-brand']");
+        GoToSelectedUrl();
+        adblock.DestroyAds();
+        var navBarBrand = ElementByXPath("//a[@class='navbar-brand']");
         // We check if the site are correctly loaded before check for the  login btn 
-        if ( navBarBrand==null )
+        if (navBarBrand == null)
         {
 
             Fail("We have a problem loading the site please check your internet connection and try again");
@@ -145,98 +146,110 @@ public class KeranScript : FaucetScript
         }
 
 
-        return ElementByXPath("//button[contains(text(),'GET STARTED')]")==null;
+        return ElementByXPath("//button[contains(text(),'GET STARTED')]") == null;
     }
 
-    private object InjectSuccessCheck( )
+    private object InjectSuccessCheck()
     {
         // We need to use javasscript to find if we have claimed succesfully or not since there is not a way to select correctly the element using relative 
         // or absolute xpath
-       return ExecuteScript("function checkSuccess(){  var arr = Array.from(document.getElementsByClassName(\"alert\")); return arr.find(x=>x.textContent.indexOf(\"You can claim again in \")!=-1)!=null }return checkSuccess();");
+        return ExecuteScript("function checkSuccess(){  var arr = Array.from(document.getElementsByClassName(\"alert\")); return arr.find(x=>x.textContent.indexOf(\"You can claim again in \")!=-1)!=null }return checkSuccess();");
     }
 
-    public override int GetFaucetWaitTime( )
+    public override int GetFaucetWaitTime()
     {
-        var success= Convert.ToBoolean( InjectSuccessCheck( ));
+        var success = Convert.ToBoolean(InjectSuccessCheck());
 
-        if ( success )
+        if (success)
         {
             return 600;
         }
 
-        return base.GetFaucetWaitTime( );
+        return base.GetFaucetWaitTime();
     }
-    public override int DoLogin( )
+    public override int DoLogin()
     {
-        GoToSelectedUrl( );
+        GoToSelectedUrl();
 
-        adblock.DestroyAds( );
-        var modalBtn=ElementByXPath("//button[@data-target='#myModal']");
-        if ( !IsVisible(modalBtn) )
+        adblock.DestroyAds();
+        var modalBtn = ElementByXPath("//button[@data-target='#myModal']");
+        if (!IsVisible(modalBtn))
         {
             return Fail("modalBtn not visible or not found");
         }
         // We prefer click with javascript this time so we don't oppen a popups
-        ExecuteScript("arguments[0].click();" , modalBtn);
+        ExecuteScript("arguments[0].click();", modalBtn);
         Wait(1);
 
-        var addressBox=ElementByXPath("//input[@name='address']");
-        if ( !IsVisible(addressBox) )
+        var addressBox = ElementByXPath("//input[@name='address']");
+        if (!IsVisible(addressBox))
         {
             return Fail("addressBox not visible or not found");
         }
 
-        SetText(addressBox , GetSetting("User"));
+        SetText(addressBox, GetSetting("User"));
 
-        var loginBtn=ElementByXPath("//button[@class='btn btn-primary btn-block']");
-        if ( !IsVisible(loginBtn) )
+        var loginBtn = ElementByXPath("//button[@class='btn btn-primary btn-block']");
+        if (!IsVisible(loginBtn))
         {
             return Fail("loginBtn not visible or not found");
         }
         // We prefer click with javascript this time so we don't oppen a popups
-        ExecuteScript("arguments[0].click();" , loginBtn);
+        ExecuteScript("arguments[0].click();", loginBtn);
         Wait(1);
 
 
-        var errorLogin=ElementByXPath("//div[@class='alert alert-danger']");
+        var errorLogin = ElementByXPath("//div[@class='alert alert-danger']");
 
-        if ( IsVisible(errorLogin) )
+        if (IsVisible(errorLogin))
         {
 
-            string errorText=errorLogin.Text;
+            string errorText = errorLogin.Text;
 
-            if ( errorText.Contains("Login not Valid, Please reLogin") )
+            if (errorText.Contains("Login not Valid, Please reLogin"))
             {
                 //If login is not valid we need to delete the cookies
-                Driver.Manage( ).Cookies.DeleteAllCookies( );
+                Driver.Manage().Cookies.DeleteAllCookies();
             }
             return Fail(errorText);
         }
 
 
-        return base.DoLogin( );
+        return base.DoLogin();
     }
 
-    public override int DoSolveFaucet( )
+    public void SolveCloudflare()
     {
-        adblock.DestroyAds( );
-        var btnGoCaptcha=ElementByXPath("//button[@class='btn btn-primary btn-block col-lg-3']");
-        if ( !IsVisible(btnGoCaptcha) )
+
+
+        FaucetCollector.Utilities.CloudFlareUtilities cloudFlareUtilities = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+        if (cloudFlareUtilities.IsVisibleCloudflare())
+        {
+            cloudFlareUtilities.DoSolve();
+        }
+    }
+    public override int DoSolveFaucet()
+    {
+        adblock.DestroyAds();
+        var btnGoCaptcha = ElementByXPath("//button[@class='btn btn-primary btn-block col-lg-3']");
+        if (!IsVisible(btnGoCaptcha))
         {
             return Fail("btnGoCaptcha not found or not visible");
         }
         Click(btnGoCaptcha);
         Log("Waiting for cloudflare");
-        // Waiting for cloudflare
-        DateTime timeout=DateTime.Now.AddSeconds(35);
-        while(!IsVisible(ElementByXPath("//button[@data-target='#myModal']")) && DateTime.Now<timeout )
+
+        SolveCloudflare();
+        DateTime timeout = DateTime.Now.AddSeconds(35);
+
+        while (!IsVisible(ElementByXPath("//button[@data-target='#myModal']")) && DateTime.Now < timeout)
         {
-            Wait(1,2);
+            Wait(1, 2);
         }
         Log("Wait end");
-        adblock.DestroyAds( );
-        var modalBtn=ElementByXPath("//button[@data-target='#myModal']");
-        if ( !IsVisible(modalBtn) )
+        adblock.DestroyAds();
+        var modalBtn = ElementByXPath("//button[@data-target='#myModal']");
+        if (!IsVisible(modalBtn))
         {
             return Fail("modalBtn not visible or not found");
         }
@@ -245,15 +258,15 @@ public class KeranScript : FaucetScript
 
         Wait(1);
 
-        var result=DoSolveCaptcha();
-        if ( result>0 )
+        var result = DoSolveCaptcha();
+        if (result > 0)
         {
             return result;
         }
 
-        var btnConfirmClaim=ElementByXPath("//div[contains(@style,'display: block;')]//button[contains(@class,'btn btn-primary')]");
+        var btnConfirmClaim = ElementByXPath("//div[contains(@style,'display: block;')]//button[contains(@class,'btn btn-primary')]");
 
-        if ( !IsVisible(btnConfirmClaim) )
+        if (!IsVisible(btnConfirmClaim))
         {
             return Fail("btnConfirmClaim is not visible");
         }
@@ -266,27 +279,27 @@ public class KeranScript : FaucetScript
 
 
 
-        return base.DoSolveFaucet( );
+        return base.DoSolveFaucet();
     }
 
 
-    public override int CheckFaucetResult( )
+    public override int CheckFaucetResult()
     {
 
-       
+
         Wait(1);
 
-        var success= Convert.ToBoolean( InjectSuccessCheck( ));
+        var success = Convert.ToBoolean(InjectSuccessCheck());
 
-        if ( success )
+        if (success)
         {
-            IsSuccess=true;
-            ClaimSuccess( );
-            Log("You have claimed successfully" , Level.Payout);
+            IsSuccess = true;
+            ClaimSuccess();
+            Log("You have claimed successfully", Level.Payout);
             return 0;
         }
 
-        return base.CheckFaucetResult( );
+        return base.CheckFaucetResult();
     }
 
 }
