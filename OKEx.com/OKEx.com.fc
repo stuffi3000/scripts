@@ -130,7 +130,9 @@ public class btcsamsity : FaucetScript
 //========//
  public override int DoLogin()
  {
-	
+
+  Title = "OKEx";
+
   var ExitButton = ElementByXPath ("//a[@class='link link-problem-feedback']"); 
 
   //if i NOT Login - go to Login Page
