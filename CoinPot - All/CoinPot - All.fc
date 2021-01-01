@@ -1,7 +1,7 @@
 
 //========================================//
 //script Written by: ••AviramDayan•• 01/01/2020 20:30PM - Version 1
-//Last Update: 01/01/2020 09:00AM - Version 8
+//Last Update: 01/01/2020 19:20AM - Version 8
 //=======================================//
 
 /*
@@ -1723,7 +1723,7 @@ public class CoinPot : FaucetScript
 
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  
-          if (GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900 || ErrorVAR ==null && BalanceINT < 100 )
+          if ( ( GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900) || (ErrorVAR ==null && BalanceINT < 100 ) )
 		  {
 		   Log("Approve_900_100_on_off - ON - do random token when 900 100 - active");   
            var Multiplier_1_Token = ElementByXPath("//div[@id='StakeButtons']//button[contains(text(),'1 token')]");
@@ -1798,8 +1798,7 @@ public class CoinPot : FaucetScript
 		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
 
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
-		  
-          if (GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900 || ErrorVAR ==null && BalanceINT < 100 )
+          if ( ( GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900) || (ErrorVAR ==null && BalanceINT < 100 ) )		  
           { 	
 		   Log("Approve_900_100_on_off - ON - do random token when 900 100 - active");
            var Multiplier_1_Token = ElementByXPath("//div[@id='StakeButtons']//button[contains(text(),'1 token')]");
