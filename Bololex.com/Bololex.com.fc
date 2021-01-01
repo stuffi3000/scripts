@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 14/08/2020 11:00AM - Version 1
-//Last Update: 20/08/2020 04:45AM - Version 4
+//Last Update: 01/01/2021 02:15AM - Version 5
 //==================//
 
 using System;
@@ -377,11 +377,11 @@ public class Bololex : FaucetScript
         {
 		  Log("AirDrop_Wheel - you are login");  
 
-          var TimeToWaitForBreak = DateTime.Now.AddSeconds(90);
+          var TimeToWaitForBreak = DateTime.Now.AddSeconds(240);
           while (true)
           {
 		  
-            var Energies_Available = ElementByXPath("//div[@class='energies_capsules' and contains(@style,'width:30%') or contains(@style,'width:40%') or contains(@style,'width:50%') ] ");
+            var Energies_Available = ElementByXPath("//div[@class='energies_capsules' and contains(@style,'width:30%') or contains(@style,'width:35%') or contains(@style,'width:40%') or contains(@style,'width:45%')  or contains(@style,'width:50%') ] ");
             
 		    if (!IsVisible(Energies_Available))
 		    {
@@ -391,29 +391,53 @@ public class Bololex : FaucetScript
 		    
 		    if (IsVisible(Energies_Available))
 		    {
-	          Wait(5,8);
+	          Wait(6);
 		  	
 		      Log("AirDrop_Wheel - Energies Available - do stuff");  
 		  	
               //MoveToElement ONLY - x/y mouse position click switch - good for "canvas" TagName flash/Games
               var canvas_VAR = Driver.FindElement(By.ClassName("game-canvas"));   //was  game-canvas  
               var size = canvas_VAR.Size;
-              new Actions(Driver).MoveToElement(canvas_VAR, 364, 374).Click().Release().Perform(); //SPIN - start - 100% width 100% height
-	          Wait(5);	
-              new Actions(Driver).MoveToElement(canvas_VAR, 593, 483).Click().Release().Perform(); //OK - after - 100% width 100% height	
-			  ClaimSuccess(); //do success
+
+			  //110%
+			  Log("try - 110%");
+              new Actions(Driver).MoveToElement(canvas_VAR, 370, 370).Click().Release().Perform(); //SPIN
+	          Wait(7);	
+              new Actions(Driver).MoveToElement(canvas_VAR, 585, 477).Click().Release().Perform(); //OK
+			  //=======//
+		  
+			  //100%
+			  Log("try - 100%");
+              new Actions(Driver).MoveToElement(canvas_VAR, 415, 420).Click().Release().Perform(); //SPIN
+	          Wait(7);	
+              new Actions(Driver).MoveToElement(canvas_VAR, 659, 542).Click().Release().Perform(); //OK
+			  //=======//
+
+			  //90%
+			  Log("try - 90%");
+              new Actions(Driver).MoveToElement(canvas_VAR, 421, 416).Click().Release().Perform(); //SPIN
+	          Wait(7);	
+              new Actions(Driver).MoveToElement(canvas_VAR, 665, 541).Click().Release().Perform(); //OK
+              //=======//
+
+			  //80%
+			  Log("try - 80%");
+              new Actions(Driver).MoveToElement(canvas_VAR, 425, 416).Click().Release().Perform(); //SPIN
+	          Wait(7);	
+              new Actions(Driver).MoveToElement(canvas_VAR, 670, 536).Click().Release().Perform(); //OK
               //=======//
 		      
-	          Wait(3,5);
-		     
-              var Success_Claim = ElementByXPath("//div[contains(@class,'toast-success')]/div[@class='toast-title']");
-              if (IsVisible(Success_Claim))
-		      {
-		      Log("AirDrop_Wheel - Success_Claim ");  
-		      ClaimSuccess(); //Marks the claim as a success
-		      }
+	          Wait(3);
 		  
 		    } //end Energies_Available
+
+            var Success_Claim = ElementByXPath("//div[@class='energies_capsules' and contains(@style,'width:0%') or contains(@style,'width:5%') or contains(@style,'width:10%') or contains(@style,'width:15%') or contains(@style,'width:20%') or contains(@style,'width:25%') ] ");
+            if (IsVisible(Success_Claim))
+		    {
+		    Log("AirDrop_Wheel - Success_Claim ");  
+		    ClaimSuccess(); //Marks the claim as a success
+            break; //break the wait loop
+		    }
 		  
             if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
             {
