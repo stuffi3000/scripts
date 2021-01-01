@@ -1,7 +1,7 @@
 
 //========================================//
 //script Written by: ••AviramDayan•• 01/01/2020 20:30PM - Version 1
-//Last Update: 21/11/2020 07:10AM - Version 7
+//Last Update: 01/01/2020 19:20AM - Version 8
 //=======================================//
 
 /*
@@ -1204,12 +1204,14 @@ public class CoinPot : FaucetScript
 		  //=====//
 		  var Number_1_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit1')] ");		
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
-		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
+		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");	
+
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
 
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  Log("The Number Now is - " + BalanceINT);  
 		  
-          if (BalanceINT > 894) 
+          if (ErrorVAR ==null && BalanceINT > 894) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1220,7 +1222,7 @@ public class CoinPot : FaucetScript
             }
 		  }
 
-          if (BalanceINT < 106) 
+          if (ErrorVAR ==null && BalanceINT < 106) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1290,10 +1292,12 @@ public class CoinPot : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  Log("The Number Now is - " + BalanceINT);  
 		  
-          if (BalanceINT > 944) 
+          if (ErrorVAR ==null && BalanceINT > 944) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1304,7 +1308,7 @@ public class CoinPot : FaucetScript
             }
 		  }
 
-          if (BalanceINT < 55) 
+          if (ErrorVAR ==null && BalanceINT < 55) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1374,10 +1378,12 @@ public class CoinPot : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  Log("The Number Now is - " + BalanceINT);  
 		  
-          if (BalanceINT > 984) 
+          if (ErrorVAR ==null && BalanceINT > 984) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1388,7 +1394,7 @@ public class CoinPot : FaucetScript
             }
 		  }
 
-          if (BalanceINT < 15) 
+          if (ErrorVAR ==null && BalanceINT < 15) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1713,9 +1719,11 @@ public class CoinPot : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  
-          if (GetBoolSetting("Approve_900_100_on_off") && BalanceINT > 900 || BalanceINT < 100 )
+          if ( ( GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900) || (ErrorVAR ==null && BalanceINT < 100 ) )
 		  {
 		   Log("Approve_900_100_on_off - ON - do random token when 900 100 - active");   
            var Multiplier_1_Token = ElementByXPath("//div[@id='StakeButtons']//button[contains(text(),'1 token')]");
@@ -1787,9 +1795,10 @@ public class CoinPot : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
-		  
-          if (GetBoolSetting("Approve_900_100_on_off") && BalanceINT > 900 || BalanceINT < 100 )
+          if ( ( GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900) || (ErrorVAR ==null && BalanceINT < 100 ) )		  
           { 	
 		   Log("Approve_900_100_on_off - ON - do random token when 900 100 - active");
            var Multiplier_1_Token = ElementByXPath("//div[@id='StakeButtons']//button[contains(text(),'1 token')]");
@@ -1832,4 +1841,4 @@ public class CoinPot : FaucetScript
 
 
 
-} //public class dogeto
+} //public class
