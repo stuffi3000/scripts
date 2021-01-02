@@ -28,6 +28,20 @@ public class ContractMiner : FaucetScript
                     Type=EditorType.CheckBox,
                     Default=true,
                     Display="Click on remember me"
+                },
+                new FaucetSetting()
+                {
+                    Name="DailyClaim",
+                    Type=EditorType.CheckBox,
+                    Default=true,
+                    Display="Daily Claim"
+                },
+                new FaucetSetting()
+                {
+                    Name="LootBox",
+                    Display="Try claim loot box",
+                    Type=EditorType.CheckBox,
+                    Default=false
                 }
 
 
@@ -337,8 +351,27 @@ public class ContractMiner : FaucetScript
     /// This method gets called after the BeforeSolveFaucet. You can do the actual claiming of the faucet in here.
     /// </summary>
     /// <returns></returns>
+    /// 
+
     public override int DoSolveFaucet()
     {
+        // Daily claim area
+        if (GetBoolSetting("DailyClaim"))
+        {
+            var claimMyReward = ElementByXPath("//button[contains(text(),'Claim My Reward')]");
+            if (IsVisible(claimMyReward))
+            {
+                Log("Claim daily claim");
+                Click(claimMyReward);
+            }
+            else
+            {
+                Log("Daily reward not available");
+            }
+        }
+
+
+        // Miners tap area
 
         if (GetBoolSetting("MinerTap"))
         {
@@ -348,6 +381,10 @@ public class ContractMiner : FaucetScript
             if (IsVisible(beginClaimBtn))
             {
                 Click(beginClaimBtn);
+            }
+            else if(IsVisible(ElementByXPath("//h4[contains(text(),'Claim is pending')]")))
+            {
+                Log("Miners top is in cooldown");
             }
             else
             {
@@ -365,6 +402,7 @@ public class ContractMiner : FaucetScript
 
         }
 
+        //Hourly pot claim
         if (GetBoolSetting("HourlyPot"))
         {
             GoToUrl("https://www.contract-miner.com/?app=hourly-pot");
@@ -373,6 +411,10 @@ public class ContractMiner : FaucetScript
             if (IsVisible(beginClaimBtn))
             {
                 Click(beginClaimBtn);
+            }
+            else if (IsVisible(ElementByXPath("//h4[contains(text(),'Claim is pending')]")))
+            {
+                Log("Hourly Pot is in cooldown");
             }
             else
             {
@@ -387,6 +429,53 @@ public class ContractMiner : FaucetScript
             TryUseShortlink();
         }
 
+        if (GetBoolSetting("LootBox"))
+        {
+            GoToUrl("https://www.contract-miner.com/?app=loot-box");
+
+            Wait(2);
+
+            var boxButtons = ElementsByXPath("//button[@name='claim_box']").Where(button => IsVisible(button)).ToList();
+            if (boxButtons.Count > 0)
+            {
+                int MaxTries = boxButtons.Count;
+                int nTrie = 0; 
+                while (boxButtons.Count > 0  && nTrie < MaxTries)
+                {
+
+
+                    Click(boxButtons[0]);
+                    nTrie++;
+                    Wait(); 
+                     boxButtons = ElementsByXPath("//button[@name='claim_box']").Where(button => IsVisible(button)).ToList();
+                }
+            }
+            else
+            {
+                Log("there is not a box loot to claim");
+            }
+
+            var boxOpenButtons = ElementsByXPath("//button[@name='open_box']")
+                .Where(button => IsVisible(button)).ToList();
+            if (boxOpenButtons.Count > 0)
+            {
+                int MaxTries = boxOpenButtons.Count;
+                int nTrie = 0;
+                while(boxOpenButtons.Count >0 && nTrie< MaxTries)
+                {
+                    Click(boxOpenButtons[0]);
+                    nTrie++;
+                    Wait();
+                    boxOpenButtons = ElementsByXPath("//button[@name='open_box']")
+                .Where(button => IsVisible(button)).ToList();
+                }
+            }
+            else
+            {
+                Log("there is not a box lot to open");
+            }
+
+        }
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return GetWaitSetting();
