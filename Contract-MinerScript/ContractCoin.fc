@@ -42,6 +42,13 @@ public class ContractMiner : FaucetScript
                     Display="Try claim loot box",
                     Type=EditorType.CheckBox,
                     Default=false
+                },
+                new FaucetSetting()
+                {
+                    Name="CoinFlip",
+                    Type=EditorType.CheckBox,
+                    Display="Claim Coinflip",
+                    Default=true
                 }
 
 
@@ -475,6 +482,22 @@ public class ContractMiner : FaucetScript
                 Log("there is not a box lot to open");
             }
 
+        }
+
+        if (GetBoolSetting("CoinFlip"))
+        {
+            GoToUrl("https://www.contract-miner.com/?mini-games=rp-coinflip");
+            Wait();
+            var coinflipClaimBtn = ElementByXPath("//button[@name='play_cf']");
+            if (IsVisible(coinflipClaimBtn))
+            {
+                Log("Claim Coinflip");
+                Click(coinflipClaimBtn);
+            }
+            else
+            {
+                Log("Coinflip is in cooldown");
+            }
         }
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
