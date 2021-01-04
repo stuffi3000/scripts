@@ -175,6 +175,7 @@ public class RandomitScript :FaucetScript
         Click(carBtn);
 
         Wait(5, 6);
+        SolveNumberCaptcha();
 
         var s3ProccedBtn = ElementByXPath("//button[@id='s31proceed']");
         if (!IsVisible(s3ProccedBtn))
@@ -185,6 +186,17 @@ public class RandomitScript :FaucetScript
 
 
         return base.DoSolveFaucet();
+    }
+
+    private void SolveNumberCaptcha()
+    {
+        var codeContainer = ElementByXPath("//td[@align='center']//h2");
+        var codeTetBox = ElementById("Code");
+        if (IsVisible(codeContainer) && IsVisible(codeTetBox))
+        {
+            SetText(codeTetBox, codeContainer.Text);
+            Wait(1);
+        }
     }
     public override int DoLogin()
     {
