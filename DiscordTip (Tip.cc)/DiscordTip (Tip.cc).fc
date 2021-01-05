@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 04/12/2020 02:00AM - Version 75
+//Last Update: 05/01/2021 08:00AM - Version 76
 //==================//
 
 using System;
@@ -70,9 +70,9 @@ public class DiscordScript: FaucetScript
 				//new FaucetSetting(){Name="AutoWithdraw_GridCoin",Display="AutoWithdraw GridCoin - On/off",Type=EditorType.CheckBox,Default=false},	
 				
 				new FaucetSetting(){Name="WalletAddress_BTC",Display="WalletAddress BTC",Type=EditorType.TextBox,Required=false},
-				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_BTC",Display="AutoDisableWithdrawAfterSuccessful_BTC",Type=EditorType.TextBox,Required=false},
+				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_BTC",Display="AutoDisableWithdrawAfterSuccessful_BTC",Type=EditorType.CheckBox,Required=false},
 				new FaucetSetting(){Name="WalletAddress_DOGE",Display="WalletAddress DOGE",Type=EditorType.TextBox,Required=false},			
-				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_DOGE",Display="AutoDisableWithdrawAfterSuccessful_DOGE",Type=EditorType.TextBox,Required=false},
+				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_DOGE",Display="AutoDisableWithdrawAfterSuccessful_DOGE",Type=EditorType.CheckBox,Required=false},
 					
 				//new FaucetSetting(){Name="WalletAddress_GridCoin",Display="WalletAddress GridCoin",Type=EditorType.TextBox,Required=false},
 
@@ -412,7 +412,7 @@ public class DiscordScript: FaucetScript
 		   
             Wait(2);
 
-   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any')]");      
+   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any') or contains(., 'syntax is invalid') or contains(., 'not supported') ] ");      
 	        if (IsVisible(Error_No_Balance_Check))
             {
                 Log("You don't have any - BTC");				
@@ -443,14 +443,16 @@ public class DiscordScript: FaucetScript
                 Enter_SendKeys_General_Discord_Input_Function();
 			    
                 Wait(6);
-			     
-                var FeeVAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
-                if (IsVisible(FeeVAR) )
+
+			    var Minimom_Error_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1 and contains(., 'minimum for')]");
+                var Fee_Low_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
+                
+				if (!IsVisible(Fee_Low_VAR) || IsVisible(Minimom_Error_VAR) )
                 {
                    Log("BTC - LimitFee -> NOT good - the 'fee' is 'HIGH' and above > 0.0$ or $0.00 or $0.000 ");
                 }
 			     		    
-                if (IsVisible(FeeVAR)) 
+                if (IsVisible(Fee_Low_VAR) || !IsVisible(Minimom_Error_VAR) ) 
                 {
                    Log("BTC - LimitFee <- good - the 'fee' is 'LOW' and under < 0.0$ or $0.00 or $0.000 ");	   
                    Wait(3);
@@ -502,7 +504,7 @@ public class DiscordScript: FaucetScript
 		  
             Wait(2);
 
-   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any')]");      
+   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any') or contains(., 'syntax is invalid') or contains(., 'not supported') ] ");      
 	        if (IsVisible(Error_No_Balance_Check))
             {
                 Log("You don't have any - DOGE");				
@@ -534,13 +536,15 @@ public class DiscordScript: FaucetScript
 			    
                 Wait(6);
 			     
-                var FeeVAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
-                if (IsVisible(FeeVAR) )
+			    var Minimom_Error_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1 and contains(., 'minimum for')]");
+                var Fee_Low_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
+                
+				if (!IsVisible(Fee_Low_VAR) || IsVisible(Minimom_Error_VAR) )
                 {
                    Log("DOGE - LimitFee -> NOT good - the 'fee' is 'HIGH' and above > 0.0$ or $0.00 or $0.000 ");
                 }
 			     		    
-                if (IsVisible(FeeVAR)) 
+                if (IsVisible(Fee_Low_VAR) || !IsVisible(Minimom_Error_VAR) ) 
                 {
                    Log("DOGE - LimitFee <- good - the 'fee' is 'LOW' and under < 0.0$ or $0.00 or $0.000 ");		   
                    Wait(3);
