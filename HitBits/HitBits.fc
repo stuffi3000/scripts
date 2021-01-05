@@ -134,12 +134,17 @@ class HitBits : FaucetScript
 
         if (GetBoolSetting("DailyReward"))
         {
+            Log("Trying claim daily reward");
             var buttonDailyReward = ElementByXPath("//strong[contains(text(),'Today')]//..//..//button[contains(@class,'success')]");
             if (IsVisible(buttonDailyReward))
             {
-                Log("Trying claim daily reward");
                 Click(buttonDailyReward);
                 Wait(1);
+                Log("Daily Reward successfully claimed");
+            }
+            else
+            {
+                Log("Button to claim daily reward not found or not visible , seems that daily reward is not available");
             }
         }
 
@@ -188,17 +193,19 @@ class HitBits : FaucetScript
 
     public override int GetFaucetWaitTime()
     {
-        if (Driver.Url != FaucetUrl)
+
+        if (!Driver.Url.Contains("faucet"))
         {
-            GoToUrl(FaucetUrl);
-            Wait(2, 3);
+            GoToUrl("https://hitbits.io/home");
+
+            var GotoFaucetButton = ElementByXPath("//a[@class='button is-success is-medium' and @href='/faucet']");
+            if (IsVisible(GotoFaucetButton))
+            {
+                Click(GotoFaucetButton);
+                Wait(2);
+            }
         }
-        var GotoFaucetButton = ElementByXPath("//a[@class='button is-success is-medium' and @href='/faucet']");
-        if (IsVisible(GotoFaucetButton))
-        {
-            Click(GotoFaucetButton);
-            Wait(2);
-        }
+
 
         var Timer = ElementByXPath("//span[contains(@class,'tag is-dark is-medium')]//span[contains(text(),':')]");
 
