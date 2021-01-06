@@ -7,16 +7,13 @@
 //script Written last updates + Features by: AviramDayan 08/02/2019 15:00PM
 //============================================//
 
-using System;
+using FaucetCollector.Captcha.AntibotLinksImageType;
 using FaucetCollector.Script;
+
+using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
-//css_inc AntiBotLinksUtility
-//css_ref ImageProcessing
-//css_ref ProcessingImagesUsingLockBits
-//css_inc GetestCaptcha
+//css_ref FaucetCollector.Utilities
+//css_ref Faucetcollector.Captcha
 public class timeforbitcoScript : FaucetScript
 {
     /// <summary>
@@ -47,12 +44,12 @@ public class timeforbitcoScript : FaucetScript
             };
         }
     }
-	
-	
 
-//============================================================//
-//the number of "successes" in the script - when are finished  
-//============================================================//
+
+
+    //============================================================//
+    //the number of "successes" in the script - when are finished  
+    //============================================================//
     public override void Start()
     {
         //Title that shows in the browser. Is used to identify and close popup windows
@@ -65,57 +62,57 @@ public class timeforbitcoScript : FaucetScript
         //Let Faucet Collector start up everything
         base.Start();
     }
-//============================================================//
-//the number of "successes" in the script - when are finished  
-//============================================================//
+    //============================================================//
+    //the number of "successes" in the script - when are finished  
+    //============================================================//
 
 
 
-//======//
-//DoInit
-//======//
+    //======//
+    //DoInit
+    //======//
     public override int DoInit()
     {
         //Let Faucet Collector continue.
         return base.DoInit();
     }
-//======//
-//DoInit
-//======//
+    //======//
+    //DoInit
+    //======//
 
 
 
-//==================//
-//save Login Cookies 
-//==================//
+    //==================//
+    //save Login Cookies 
+    //==================//
     public override bool IsLoggedIn()
     {
         //In here we can check for the presence of an element that is only present when you are logged in.
         //In this case we check for en element with the class "loggedIn"
         return ElementByXPath("//a[@id='signout']") != null;
     }
-//==================//
-//save Login Cookies 
-//==================//
+    //==================//
+    //save Login Cookies 
+    //==================//
 
 
-//===========//
-//BeforeLogin
-//===========//
+    //===========//
+    //BeforeLogin
+    //===========//
     public override int BeforeLogin()
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
     }
-//===========//
-//BeforeLogin
-//===========//
+    //===========//
+    //BeforeLogin
+    //===========//
 
 
 
-//=======//
-//DoLogin
-//=======//
+    //=======//
+    //DoLogin
+    //=======//
     public override int DoLogin()
     {
         var WalletAddress = ElementByXPath("//input[@id='addressField']");
@@ -141,29 +138,29 @@ public class timeforbitcoScript : FaucetScript
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.DoLogin();
     }
-//=======//
-//DoLogin
-//=======//
+    //=======//
+    //DoLogin
+    //=======//
 
 
 
-//=======//
-//AfterLogin
-//=======//
+    //=======//
+    //AfterLogin
+    //=======//
     public override int AfterLogin()
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.AfterLogin();
     }
-//=======//
-//AfterLogin
-//=======//
+    //=======//
+    //AfterLogin
+    //=======//
 
 
 
-//================//
-//GetFaucetWaitTime
-//================//
+    //================//
+    //GetFaucetWaitTime
+    //================//
     public override int GetFaucetWaitTime()
     {
         var Continue = ElementByXPath("//div[contains(text(),'Click here to claim again')]");
@@ -192,11 +189,11 @@ public class timeforbitcoScript : FaucetScript
         }
         return base.GetFaucetWaitTime();
 
-      
+
     }
-//================//
-//GetFaucetWaitTime
-//================//
+    //================//
+    //GetFaucetWaitTime
+    //================//
 
 
     public override int BeforeSolveCaptcha()
@@ -204,40 +201,41 @@ public class timeforbitcoScript : FaucetScript
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeSolveCaptcha();
     }
-	
 
-//================//
-//DoSolveCaptcha
-//================//
+
+    //================//
+    //DoSolveCaptcha
+    //================//
     public override int DoSolveCaptcha()
     {
-	Wait();
-	 if (IsVisible(ElementByXPath("//*[@class='geetest_radar_tip']")))
+        Wait();
+        if (IsVisible(ElementByXPath("//*[@class='geetest_radar_tip']")))
         {
             int result = 0;
-            GetestCaptchaUtilities.GetestCaptcha getestCaptcha = new GetestCaptchaUtilities.GetestCaptcha(this);
-            getestCaptcha.DoInitSolve();
+            FaucetCollector.Captcha.GetestCaptcha getestCaptcha = new FaucetCollector.Captcha.GetestCaptcha(this);
+            bool res2 = getestCaptcha.DoInitSolve();
             Wait(2);
             if (IsVisible(ElementByXPath("//img[contains(@src,'data:image/png;base64,')]")))
             {
-                AntiBotLinks.AntibotLinksImageType.AntiBotLinksUtility solver = new AntiBotLinks.AntibotLinksImageType.AntiBotLinksUtility(this);
+                AntiBotLinksUtility solver = new AntiBotLinksUtility(this);
                 bool res = solver.DoInit();
-                if (!res)
+                if (!res || !res2)
                 {
                     result = 1;
                 }
             }
             return result;
         }
-        if (IsVisible(ElementByXPath("//iframe[contains(@src,'bit-puzzle')]")))
+        if (IsVisible(ElementByXPath("//iframe[contains(@src,'getyourbitco.in/bitpuzz')]")))
         {
+            //iframe[contains(@src,'getyourbitco.in/bitpuzz')]
             int result = 0;
-            AntiBotLinks.AntibotLinksImageType.PuzzleBall puzzleBallSolver = new AntiBotLinks.AntibotLinksImageType.PuzzleBall(this);
+            PuzzleBall puzzleBallSolver = new PuzzleBall(this);
             puzzleBallSolver.DoSolve();
             Wait(1);
             if (IsVisible(ElementByXPath("//img[contains(@src,'data:image/png;base64,')]")))
             {
-                AntiBotLinks.AntibotLinksImageType.AntiBotLinksUtility solver = new AntiBotLinks.AntibotLinksImageType.AntiBotLinksUtility(this);
+                AntiBotLinksUtility solver = new AntiBotLinksUtility(this);
                 bool res = solver.DoInit();
                 if (!res)
                 {
@@ -256,7 +254,7 @@ public class timeforbitcoScript : FaucetScript
             var result = 0;
             if (IsVisible(ElementByXPath("//img[contains(@src,'data:image/png;base64,')]")))
             {
-                AntiBotLinks.AntibotLinksImageType.AntiBotLinksUtility solver = new AntiBotLinks.AntibotLinksImageType.AntiBotLinksUtility(this);
+                AntiBotLinksUtility solver = new AntiBotLinksUtility(this);
                 bool res = solver.DoInit();
                 if (!res)
                 {
@@ -278,37 +276,15 @@ public class timeforbitcoScript : FaucetScript
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
     }
-//================//
-//DoSolveCaptcha
-//================//
+    //================//
+    //DoSolveCaptcha
+    //================//
 
-
-
-    public override int AfterSolveCaptcha()
-    {
-
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterSolveCaptcha();
-    }
-
-
-    public override int BeforeSolveFaucet()
-    {
-
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeSolveCaptcha();
-    }
-
-
-
-//============//
-//DoSolveFaucet
-//============//
     public override int DoSolveFaucet()
     {
         Wait();
-		//Bonus
-		BonusFunction(); //call to Function
+        //Bonus
+        BonusFunction(); //call to Function
 
         var Elem = ElementByXPath("//div[contains(text(),'Click HERE to claim again')]");
         if (IsVisible(Elem))
@@ -321,13 +297,13 @@ public class timeforbitcoScript : FaucetScript
         {
             Click(ClaimNew);
         }
-		
+
         var ClaimButton = ElementByXPath("//div[contains(text(),'Claim your Satoshi') and not(contains(@style,'display: none;'))]");
         if (IsVisible(ClaimButton))
         {
             Click(ClaimButton);
         }
-		
+
         Wait();
 
         var result = DoSolveCaptcha();
@@ -335,7 +311,7 @@ public class timeforbitcoScript : FaucetScript
         {
             return Fail("Fail solving captcha");
         }
-		Wait(2);
+        Wait(2);
         var button = ElementByXPath("//div[@id='submit'] | //button[@id='submit'] | //center/div[3] | //div[contains(text(),'Claim your Satoshi') and contains(@style,'display: block')]");
         if (!IsVisible(button))
         {
@@ -343,77 +319,77 @@ public class timeforbitcoScript : FaucetScript
         }
         Click(button);
 
-		//SuccessEnd
+        //SuccessEnd
         var SuccessEnd = ElementByXPath("//div[@class='additionally success' and contains(text(),'satoshi')]");
         if (IsVisible(button))
-		{	
-		Log(SuccessEnd.Text);
-		}
-		
+        {
+            Log(SuccessEnd.Text);
+        }
+
         Wait();
 
         //============//
         // AutoWithdraw
         //============//
-        if (GetBoolSetting("AutoWithdraw"))	
+        if (GetBoolSetting("AutoWithdraw"))
         {
-		    var PayoutTabVar = ElementByXPath("//li[text()='Payout']");     
+            var PayoutTabVar = ElementByXPath("//li[text()='Payout']");
             if (IsVisible(PayoutTabVar))
             {
-	        Click(PayoutTabVar);
+                Click(PayoutTabVar);
             }
 
             var BalanceVAR = ElementByXPath("//div[@id='balance'] | //div[@id='payout']/span[@class='h'] | //*[@id='payout']/span");
             double BalanceDOUBLE; //
             double.TryParse(BalanceVAR.Text.Trim(), out BalanceDOUBLE); //decimals  0.1  1.1  2.2  etc
-			
-            double MyAmount;		
+
+            double MyAmount;
             double.TryParse(GetSetting("LimiToWithdraw"), out MyAmount);
-			
+
             if (BalanceDOUBLE > MyAmount) // the Default Limit to withdraw is 1000
             {
-			  Wait();
-			
-               var withdrawTimerVar = ElementByXPath("//div[@id='withdrawTimer']");
-               if (!IsVisible(withdrawTimerVar)) // if the timer not visible - go to Withdraw
-               {
-                 GoToUrl("http://timeforbitco.in/main/withdrawFaucetHub");
-                 var SuccessWithdrawVar = ElementByXPath("//div[@class='additionally success']/div[@class='alert alert-success']");
-                 if (IsVisible(SuccessWithdrawVar))
-                 {
-                 Log(SuccessWithdrawVar.Text);
-                 }
-               } // end withdrawTimerVar
-			
+                Wait();
+
+                var withdrawTimerVar = ElementByXPath("//div[@id='withdrawTimer']");
+                if (!IsVisible(withdrawTimerVar)) // if the timer not visible - go to Withdraw
+                {
+                    GoToUrl("http://timeforbitco.in/main/withdrawFaucetHub");
+                    var SuccessWithdrawVar = ElementByXPath("//div[@class='additionally success']/div[@class='alert alert-success']");
+                    if (IsVisible(SuccessWithdrawVar))
+                    {
+                        Log(SuccessWithdrawVar.Text);
+                    }
+                } // end withdrawTimerVar
+
             }// end BalanceDOUBLE				
-			
+
         } // end AutoWithdraw  
-        //============//
-		  
+          //============//
+
         Wait();
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.DoSolveCaptcha();
     }
-//============//
-//DoSolveFaucet
-//============//
+    //============//
+    //DoSolveFaucet
+    //============//
 
 
 
-//===============//
-//AfterSolveFaucet
-//===============//
+    //===============//
+    //AfterSolveFaucet
+    //===============//
     public override int AfterSolveFaucet()
     {
 
-       
+
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.AfterSolveFaucet();
     }
-//===============//
-//AfterSolveFaucet
-//===============//
+    //===============//
+    //AfterSolveFaucet
+    //===============//
 
 
 
@@ -429,34 +405,34 @@ public class timeforbitcoScript : FaucetScript
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.CheckFaucetResult();
     }
-	
-		//=============//
-        //BonusFunction
-		//=============//
-        private bool BonusFunction()
+
+    //=============//
+    //BonusFunction
+    //=============//
+    private bool BonusFunction()
+    {
+
+        if (GetBoolSetting("Bonus"))
         {
-			
-            if (GetBoolSetting("Bonus"))
-            {		
-	 
+
             var BonusVar = ElementByXPath("//*[@id='bonusAds']");
             if (IsVisible(BonusVar))
             {
-              Click(BonusVar);
-              Wait(); 
-              var GetBonusVar = ElementByXPath("//input[@id='getBonusBut']");
-              Click(GetBonusVar);
-              Wait();
-              var SuccessFaucet = ElementByXPath("//*[@id='centerArea']/div[2]");
-			  Log (SuccessFaucet.Text);
-		      Driver.Navigate().Refresh();
+                Click(BonusVar);
+                Wait();
+                var GetBonusVar = ElementByXPath("//input[@id='getBonusBut']");
+                Click(GetBonusVar);
+                Wait();
+                var SuccessFaucet = ElementByXPath("//*[@id='centerArea']/div[2]");
+                Log(SuccessFaucet.Text);
+                Driver.Navigate().Refresh();
             }
-		 
-            } // end Bonus
-		 
+
+        } // end Bonus
+
         return true;
-        } // end BonusFunction
-		//=============//
-		
-	
+    } // end BonusFunction
+      //=============//
+
+
 } // end class
