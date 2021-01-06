@@ -1,6 +1,8 @@
-﻿using FaucetCollector.Script;
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
 
 using System.Linq;
+//css_ref FaucetCollector.Utilities
 
 namespace NewScripts.BtcMaker
 {
@@ -15,7 +17,7 @@ namespace NewScripts.BtcMaker
                 {
                     new FaucetSetting()
                     {
-                        Display="Username",
+                        Display="Username/Email",
                         Type=EditorType.TextBox,
                         Required=true,
                         Name="User"
@@ -100,19 +102,22 @@ namespace NewScripts.BtcMaker
             return ElementByXPath("//a[contains(@onclick,'process_logout()')]") != null && ElementByXPath("//a[contains(@href,'login')]") == null;
         }
 
+
         public override int DoSolveCaptcha()
         {
 
-            var captchaImg = ElementByXPath("//img[@class='captcha-image']");
-            var captchaBox = ElementByXPath("//input[@id='captcha']");
-            if (IsVisible(captchaImg) && IsVisible(captchaBox))
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
             {
-                return DoSolveImageCaptcha(captchaImg, captchaBox);
+                return result;
             }
 
-            return base.DoSolveCaptcha();
-        }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
 
+            return result;
+
+        }
         public override int DoSolveFaucet()
         {
 
