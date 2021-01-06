@@ -118,7 +118,7 @@ public class sunbtcScript : FaucetScript
             }
             return result;
         }
-        if ( IsVisible ( ElementByXPath ( "//iframe[contains(@src,'bit-puzzle')]" ) ) )
+        if ( IsVisible ( ElementByXPath ("//iframe[contains(@src,'getyourbitco.in/bitpuzz')]") ) )
         {
             int result = 0;
             PuzzleBall puzzleBallSolver = new PuzzleBall(this);
