@@ -68,6 +68,18 @@ class FreeDgbScript : FaucetScript
         return ExecuteScript("return arguments[0].textContent.trim();" , element).ToString();
 
     }
+    public override int DoSolveCaptcha()
+    {
+        var adButton = ElementByXPath("//span[@id='fbf-mobile-close-coinzilla']", 0);
+        if (IsVisible(adButton))
+        {
+            //We close the ad
+            ExecuteScript("arguments[0].click()", adButton);
+
+        }
+
+        return base.DoSolveCaptcha();
+    }
     public override int GetFaucetWaitTime()
     {
         Driver.Navigate( ).Refresh( );
@@ -131,7 +143,9 @@ class FreeDgbScript : FaucetScript
             {
                 IsSuccess=true;
                 ClaimSuccess( );
-                Log(success.Text);
+                Log(success.Text,Level.Payout);
+
+                return GetWaitSetting();
             }
         }
         else {
