@@ -65,7 +65,7 @@ public class Bitcoin_4miner : FaucetScript
 		ad=false;
 		
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "4miner.me";
+        Title = "";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
         SuccessXPath = "//div[@class='alert alert-success']"; //*[text()='']
@@ -224,9 +224,9 @@ public class Bitcoin_4miner : FaucetScript
     public override int DoSolveFaucet()
     {
 		
+      Title = "Faucet";
 
       SolveAritmeticCaptcha(); //call to check
-
 
       //=============//
       //AffWithdraw
@@ -326,6 +326,15 @@ public class Bitcoin_4miner : FaucetScript
 	    Wait();
 	    Wait(4);
 
+        var ChooseMicrowallet = ElementByXPath("//div[@id='microwalletselect']//button[contains(text(),'icrowallet')]");  
+		if (IsVisible(ChooseMicrowallet))
+        {
+		  Log("FaucetClaim - ChooseMicrowallet"); 
+		  Click(ChooseMicrowallet);
+		}
+		
+	    Wait(2);
+		
         var TimerCounterInputAddress = ElementByXPath("//div[contains(@id,'countsec') and contains(@style,'display: block')]");  
         
 		if (IsVisible(TimerCounterInputAddress))
@@ -340,7 +349,7 @@ public class Bitcoin_4miner : FaucetScript
 
 	    Wait(2);
 		
-        var Email_VAR = ElementByXPath("//div[contains(@class,'input-group')]/input");  
+        var Email_VAR = ElementByXPath("//input[contains(@id,'nbraddress')]");  
         if (IsVisible(Email_VAR))
         {
 		 Log("FaucetClaim - set BitcoinAddress");  
@@ -348,16 +357,55 @@ public class Bitcoin_4miner : FaucetScript
         }
 		
 		Wait(2);
+
+
 		
-        var GetVAR = ElementByXPath("//span[contains(@class,'input-group-btn')]/button");  
+        var GetVAR = ElementByXPath("//button[contains(@type,'submit')]");  
         if (IsVisible(GetVAR))
 		{
+         CheckForPopupsEnabled = false; //disable
+		 Title = "Bitcoin (BTC)";	
 		 Log("FaucetClaim - GetVAR");  
          Click(GetVAR);	
 		}		
 
 		Wait(2);
+
+        //if (Driver.Url.Contains("https://hope.4miner.me/#faucet")) 
+        //{
+			Driver.SwitchTo().Window(Driver.WindowHandles[1]);
+		    Log("FaucetClaim - Wait 35 sec for faucet");  
+			Wait(35);
+            var ClaimApprove = ElementByXPath("//button[contains(@type,'submit')]");  
+			if (IsVisible(ClaimApprove))
+		    {
+		    Log("FaucetClaim - ClaimApprove");
+			Click(ClaimApprove);
+			}
+			Wait(4);
+			try
+			{
+			Log("Alert - Here");
+            Driver.SwitchTo().Alert().Accept();
+			}
+			catch
+            {
+			Log("Alert - not Here");
+            }
+			Wait(4);
+            var CloseButton = ElementByXPath("//button[contains(@id,'close')]");  
+			if (IsVisible(CloseButton))
+		    {
+		    Log("FaucetClaim - CloseButton");
+			Click(CloseButton);
+			}
+			Wait(4);
+		//}
 		
+		Title = "Bitcoin Faucet 4miner.me";
+        CheckForPopupsEnabled = true;     //enable
+        CheckForPopups();    //call
+	
         invisible_Recaptcha_Function(); //call
 		
 		Wait(3);
@@ -377,13 +425,15 @@ public class Bitcoin_4miner : FaucetScript
 		}
 		
 		Wait(3);
-
+		
+        /*
         var Success_Claim = ElementByXPath("//div[@class='alert alert-success']");
         if (IsVisible(Success_Claim))
 		{
 		Log(Success_Claim.Text);  
 		ClaimSuccess(); //Marks the claim as a success
 		}
+		*/
 		
       } //end FaucetClaim
 
@@ -449,14 +499,16 @@ public class Bitcoin_4miner : FaucetScript
         public int Set_Function()
         {
 	
+	       /*
            var RefTab = ElementByXPath("//li//a[@href='#ref']");  
            if (IsVisible(RefTab))
 		   {
 		    Log("RefTab");  
             Click(RefTab);	
 		   }
+		   */
 		   
-           //GoToUrl("https://Bitcoin.4miner.me/#ref");
+           GoToUrl("https://bitcoin.4miner.me/faucet/#ref");
            Wait();		
            Wait(6);
 		   
