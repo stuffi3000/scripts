@@ -159,16 +159,16 @@ public class DirectBitScript:FaucetScript
         Click(s1ProccedBtn);
 
         DateTime timeout = DateTime.Now.AddSeconds(20);
-        while (!IsVisible(ElementByXPath("//img[@src='images/car.png']")) && DateTime.Now < timeout)
+        while (!IsVisible(ElementByXPath("//img[@src='images/dog.png']")) && DateTime.Now < timeout)
         {
             Wait();
         }
         Wait();
 
-        var carBtn = ElementByXPath("//img[@src='images/car.png']");
+        var carBtn = ElementByXPath("//img[@src='images/dog.png']");
         if (!IsVisible(carBtn))
         {
-            return Fail("captcha solution is broken, car is not visible");
+            return Fail("captcha solution is broken, dog is not visible");
         }
         Click(carBtn);
 
