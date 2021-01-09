@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 01/09/2020 13:00AM - Version 4
+//Last Update: 01/09/2020 14:00AM - Version 4
 //==================//
 
 using System;
@@ -27,11 +27,11 @@ public class Doge_4miner : FaucetScript
     {
         get
         {
-            return new FaucetSettings("https://Doge.4miner.me")
+            return new FaucetSettings("https://Doge.4miner.me/#faucet")
             {
                 //new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
                 //new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
-                new FaucetSetting(){Name="DogeAddress",Display="DogeAddress",Type=EditorType.TextBox,Required=true},				
+                new FaucetSetting(){Name="DogeAddress",Display="DogeAddress - to any wallet address",Type=EditorType.TextBox,Required=true},				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
                 new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=true},		
                 new FaucetSetting(){Name="AffWithdraw",Display="AffWithdraw",Type=EditorType.CheckBox,Default=false},		
@@ -253,7 +253,7 @@ public class Doge_4miner : FaucetScript
         {
             Log("AffWithdraw - the balance above > 0 - good");
             Wait(2);
-            var WithdrawStartVAR = ElementByXPath("//button[contains(text(),'Unlock') or contains(text(),'unlock')]");
+            var WithdrawStartVAR = ElementByXPath("//button[@onclick='show_withdraw_options_ref();']");  //("//button[contains(text(),'Unlock') or contains(text(),'unlock')]")
 			Click(WithdrawStartVAR);
             Wait(5);
             Alert_Function(); //call
@@ -289,12 +289,25 @@ public class Doge_4miner : FaucetScript
         {
             Log("AutoWithdraw - the balance above > 0 - good");
             Wait(2);
-            var WithdrawStartVAR = ElementByXPath("//button[contains(text(),'Withdraw')]");
+            var WithdrawStartVAR = ElementByXPath("//button[@onclick='show_withdraw_options();']");  //("//button[contains(text(),'Withdraw')]")
 			Click(WithdrawStartVAR);
             Wait(3);
+			
             var WalletVAR = ElementByXPath("//button[contains(text(),'Wallet') or contains(text(),'wallet')]");
-			Click(WalletVAR);
-            Wait(5);		
+            if (IsVisible(WalletVAR) )
+            {
+               Log("AutoWithdraw - normal Wallet");
+		       Click(WalletVAR);
+			}
+            var MicroWalletVAR = ElementByXPath("//div[@class='modal-body']//img[contains(@src,'microwallet.co')]");				
+            if (IsVisible(MicroWalletVAR) )
+            {
+              Log("AutoWithdraw - MicroWallet");
+		      Click(MicroWalletVAR);
+			}
+			
+            Wait(5);
+			
             Alert_Function(); //call
         }		  
 		  
@@ -309,9 +322,23 @@ public class Doge_4miner : FaucetScript
       if (GetBoolSetting("FaucetClaim"))
       {
 
-		GoToUrl("https://Doge.4miner.me"); 
+		GoToUrl("https://Doge.4miner.me/#faucet"); 
 	    Wait();
 	    Wait(4);
+
+        var TimerCounterInputAddress = ElementByXPath("//div[contains(@id,'countsec') and contains(@style,'display: block')]");  
+        
+		if (IsVisible(TimerCounterInputAddress))
+        {
+		 Log("FaucetClaim - TimerCounterInputAddress - visible - Waiting 17 sec to appear");  
+		 Wait(17);
+        }
+        if (!IsVisible(TimerCounterInputAddress))
+        {
+		 Log("FaucetClaim - TimerCounterInputAddress - NOT visible - all good");  
+        }
+
+	    Wait(2);
 		
         var Email_VAR = ElementByXPath("//div[contains(@class,'input-group')]/input");  
         if (IsVisible(Email_VAR))
@@ -429,7 +456,7 @@ public class Doge_4miner : FaucetScript
             Click(RefTab);	
 		   }
 		   
-           //GoToUrl("https://doge.4miner.me/freedogecoin/#ref");
+           //GoToUrl("https://Doge.4miner.me/#ref");
            Wait();		
            Wait(6);
 		   
