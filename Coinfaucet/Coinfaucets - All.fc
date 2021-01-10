@@ -180,6 +180,9 @@ class Coinfaucets : FaucetScript
     {
         GoToUrl(Url_);
         Wait(2);
+        FaucetCollector.Utilities.CloudFlareUtilities cloudFlareUtilities = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+
+        cloudFlareUtilities.DoSolve();
 
         return base.BeforeLogin();
 
