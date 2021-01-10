@@ -166,7 +166,7 @@ public class DirectBitScript:FaucetScript
             captchaEnunciate = ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']");
             Wait();
         }
-        Wait();
+        Wait(3,4);
 
         if(!IsVisible(captchaEnunciate))
         {
@@ -175,7 +175,7 @@ public class DirectBitScript:FaucetScript
         string enunciateText = captchaEnunciate.Text;
         
 
-        var correctCaptchaButton = ElementByXPath("//button//img[contains(@src,'images/') and contains(@src,'"+enunciateText+"')]");
+        var correctCaptchaButton = ElementByXPath("//button//img[contains(@src,'images/') and contains(@src,'"+enunciateText+ "')]|//button[@id='s11proceed']");
         if (!IsVisible(correctCaptchaButton))
         {
             return Fail("captcha solution is broken, dog is not visible");
