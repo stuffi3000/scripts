@@ -158,19 +158,29 @@ public class DirectBitScript:FaucetScript
         }
         Click(s1ProccedBtn);
 
+        var captchaEnunciate = ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']");
+
         DateTime timeout = DateTime.Now.AddSeconds(20);
-        while (!IsVisible(ElementByXPath("//img[@src='images/dog.png']")) && DateTime.Now < timeout)
+        while (!IsVisible(captchaEnunciate) && DateTime.Now < timeout)
         {
+            captchaEnunciate = ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']");
             Wait();
         }
         Wait();
 
-        var carBtn = ElementByXPath("//img[@src='images/dog.png']");
-        if (!IsVisible(carBtn))
+        if(!IsVisible(captchaEnunciate))
+        {
+            return Fail("There is a problem with the captcha");
+        }
+        string enunciateText = captchaEnunciate.Text;
+        
+
+        var correctCaptchaButton = ElementByXPath("//button//img[contains(@src,'images/') and contains(@src,'"+enunciateText+"')]");
+        if (!IsVisible(correctCaptchaButton))
         {
             return Fail("captcha solution is broken, dog is not visible");
         }
-        Click(carBtn);
+        Click(correctCaptchaButton);
 
         Wait(5, 6);
 
