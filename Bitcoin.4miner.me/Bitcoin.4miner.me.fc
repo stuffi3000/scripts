@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 01/09/2020 14:00AM - Version 1
-//Last Update: 01/09/2020 14:00AM - Version 1
+//Last Update: 01/10/2020 07:00AM - Version 2
 //==================//
 
 using System;
@@ -324,7 +324,14 @@ public class Bitcoin_4miner : FaucetScript
 
 		GoToUrl("https://Bitcoin.4miner.me/#faucet"); 
 	    Wait();
-	    Wait(4);
+	    Wait(5);
+
+        var Maintenance_Message = ElementByXPath("//div[contains(@class,'alert-info') and contains(text(),'aintenance')]");  
+		if (IsVisible(Maintenance_Message))
+        {
+		  Log("FaucetClaim - Maintenance_Message"); 
+		  return Time_Function(); //call to function time
+		}	
 
         var ChooseMicrowallet = ElementByXPath("//div[@id='microwalletselect']//button[contains(text(),'icrowallet')]");  
 		if (IsVisible(ChooseMicrowallet))
