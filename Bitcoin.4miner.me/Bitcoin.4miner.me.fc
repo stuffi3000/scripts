@@ -326,7 +326,7 @@ public class Bitcoin_4miner : FaucetScript
 	    Wait();
 	    Wait(5);
 
-        var Maintenance_Message = ElementByXPath("//div[contains(@class,'alert-info') and contains(text(),'aintenance')]");  
+        var Maintenance_Message = ElementByXPath("//div[contains(@class,'alert-info') or contains(@class,'alert-warning') and contains(text(),'aintenance')]");  
 		if (IsVisible(Maintenance_Message))
         {
 		  Log("FaucetClaim - Maintenance_Message"); 
