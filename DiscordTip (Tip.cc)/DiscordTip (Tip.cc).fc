@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 10/01/2021 07:00AM - Version 77
+//Last Update: 11/01/2021 09:00AM - Version 78
 //==================//
 
 using System;
@@ -2049,8 +2049,8 @@ public class DiscordScript: FaucetScript
 		   Wait(3);
 		   Click(ReactionButton_Clean);
 		   Wait(2);
-		   Log("Discordtip_FaucetCollector: Click On Reaction - done"); 
-	       Notification("Discordtip_FaucetCollector: Click On Reaction - done");	
+		   Log("Reaction: Click On Reaction - done"); 
+	       Notification("Reaction: Click On Reaction - done");	
 		   ClaimSuccess(); //Marks the claim as a success
 		   Wait();
           } 
