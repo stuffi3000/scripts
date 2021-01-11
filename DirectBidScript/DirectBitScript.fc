@@ -158,31 +158,16 @@ public class DirectBitScript:FaucetScript
         }
         Click(s1ProccedBtn);
 
-        var captchaEnunciate = ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']");
-
-        DateTime timeout = DateTime.Now.AddSeconds(20);
-        while (!IsVisible(captchaEnunciate) && DateTime.Now < timeout)
-        {
-            captchaEnunciate = ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']");
-            Wait();
-        }
-        Wait(3,4);
-
-        if(!IsVisible(captchaEnunciate))
-        {
-            return Fail("There is a problem with the captcha");
-        }
-        string enunciateText = captchaEnunciate.Text;
-        
-
-        var correctCaptchaButton = ElementByXPath("//button//img[contains(@src,'images/') and contains(@src,'"+enunciateText+ "')]|//button[@id='s11proceed']");
-        if (!IsVisible(correctCaptchaButton))
-        {
-            return Fail("captcha solution is broken, dog is not visible");
-        }
-        Click(correctCaptchaButton);
+        SolveImgCaptcha();
 
         Wait(5, 6);
+
+        var posibleCaptchaButton = ElementByXPath("//input[@type='submit']");
+        if (IsVisible(posibleCaptchaButton))
+        {
+            Click(posibleCaptchaButton);
+            Wait(5,6);
+        }
 
         var s3ProccedBtn = ElementByXPath("//button[@id='s31proceed']");
         if (!IsVisible(s3ProccedBtn))
@@ -193,6 +178,43 @@ public class DirectBitScript:FaucetScript
 
 
         return base.DoSolveFaucet();
+    }
+
+    public void SolveImgCaptcha()
+    {
+        var captchaEnunciate = ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']");
+
+        DateTime timeout = DateTime.Now.AddSeconds(20);
+        while (!IsVisible(captchaEnunciate) && DateTime.Now < timeout)
+        {
+            captchaEnunciate = ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']");
+            Wait();
+        }
+        Wait(3, 4);
+
+        if (!IsVisible(captchaEnunciate))
+        {
+            Fail("There is a problem with the captcha");
+            return;
+        }
+        string enunciateText = captchaEnunciate.Text;
+
+
+        var correctCaptchaButton = ElementByXPath("//button//img[contains(@src,'images/') and contains(@src,'" + enunciateText + "')]|//button[@id='s11proceed']");
+        if (!IsVisible(correctCaptchaButton))
+        {
+            Fail("captcha solution is broken, dog is not visible");
+            return; 
+        }
+        Click(correctCaptchaButton);
+
+        Wait(5, 6);
+
+        if(IsVisible(ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']")))
+        {
+            SolveImgCaptcha();
+        }
+
     }
     public override int DoLogin()
     {
