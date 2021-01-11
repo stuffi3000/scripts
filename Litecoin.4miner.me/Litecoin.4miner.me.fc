@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 09/01/2021 14:00AM - Version 1
-//Last Update: 10/01/2021 07:00AM - Version 2
+//Last Update: 11/01/2021 11:00AM - Version 3
 //==================//
 
 using System;
@@ -289,7 +289,7 @@ public class Litecoin_4miner : FaucetScript
         {
             Log("AutoWithdraw - the balance above > 0 - good");
             Wait(2);
-            var WithdrawStartVAR = ElementByXPath("//button[@onclick='show_withdraw_options();']");  //("//button[contains(text(),'Withdraw')]")
+            var WithdrawStartVAR = ElementByXPath("//button[contains(@onclick,'show_withdraw_options(')]");  //("//button[contains(text(),'Withdraw')]")
 			Click(WithdrawStartVAR);
             Wait(3);
 			
@@ -611,17 +611,30 @@ public class Litecoin_4miner : FaucetScript
         //=================//	
 	
 	
-	
 //==============//
 //AritmeticCaptcha
 //==============//
-   public bool SolveAritmeticCaptcha()
-    {
-        // we see if the captcha is visible
-        var captchaQuestion = ElementByXPath("//div[@class='col-md-12' and contains(text(),'How much is')]");
-
-        if (IsVisible(captchaQuestion))
-        {
+ public bool SolveAritmeticCaptcha()
+ {
+		var ImgIconBalk = ElementByXPath("//img[contains(@src,'4miner.me')]"); //Balk image |+| between 2 + 2       
+		if (IsVisible(ImgIconBalk))
+        {	
+	      var Question2 = ElementByXPath("//div[@class='col-md-12' and contains(text(),'How much is 2')]");
+          if (IsVisible(Question2))
+          {
+           Log("Solve ImgIconBalk - manually");
+		   var Answer4Button = ElementByXPath("//button[starts-with(text(),'4')] | //button[contains(@class,'-success') ]/img "); //click on Answer 4 Button	   
+           Click(Answer4Button); // click on 4 button
+		  }
+		}	
+		
+        if (!IsVisible(ImgIconBalk))
+        {	
+          // we see if the captcha is visible
+          var captchaQuestion = ElementByXPath("//div[@class='col-md-12' and contains(text(),'How much is')]");
+          if (IsVisible(captchaQuestion))
+          {
+             Log("Solve Aritmetic Captcha");
             // we get all posible visible solutions
             var answersCollection = ElementsByXPath("//button[@onclick]").Where(
             button => IsVisible(button)).ToList();
@@ -677,11 +690,14 @@ public class Litecoin_4miner : FaucetScript
                     }
                 }
             }
-        }
+          }
+		}	//end ImgIconBalk - NOT visible
+		
         Log("Aritmetic captcha not found or not visible");
         // So aritmetic captcha is not found or not visible
         return false;
-    }
+		
+ }
 //==============//
 
 	
