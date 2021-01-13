@@ -104,7 +104,7 @@ class Coinfaucets : FaucetScript
 
         },
         {"LINK",new Coinfaucet{
-            Url="https://freechain.link/",
+            Url="https://freechainlink.io/",
             MinWithdraw=0.1
         }
         },
@@ -131,6 +131,7 @@ class Coinfaucets : FaucetScript
                 return Faucets[Key].Url;
             }
 
+
             return Faucets.Values.FirstOrDefault().Url;
 
         }
@@ -156,6 +157,7 @@ class Coinfaucets : FaucetScript
         get
         {
             var Key = GetSetting("Faucet");
+ 
             if (Faucets.ContainsKey(Key))
             {
 
@@ -186,6 +188,59 @@ class Coinfaucets : FaucetScript
 
         return base.BeforeLogin();
 
+    }
+    public override bool SetHCaptchaResponse(string response)
+    {
+
+
+        if (ElementByXPath("//*[@name='g-recaptcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=g-recaptcha-response]').innerText = '" + response + "'");
+        }
+        if (ElementByXPath("//*[@name='h-captcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=h-captcha-response]').innerText = '" + response + "'");
+
+        }
+
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+        }
+
+        return true;
+    }
+
+
+    public override string GetHCaptchaSiteKey()
+    {
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            string src = hcaptchaIframe.GetAttribute("src");
+
+            if (!string.IsNullOrEmpty(src))
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey();
     }
     public override int DoLogin()
     {
