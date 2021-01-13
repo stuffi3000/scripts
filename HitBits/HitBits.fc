@@ -1,9 +1,13 @@
 ﻿using FaucetCollector.Script;
+using FaucetCollector.Utilities;
 
 using OpenQA.Selenium;
 
 using System;
 using System.Linq;
+
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
 
 class HitBits : FaucetScript
 {
@@ -23,6 +27,13 @@ class HitBits : FaucetScript
                     Type=EditorType.CheckBox,
                     Default=true,
                     Display="Try claim daily reward"
+                },
+                new FaucetSetting()
+                {
+                    Name="TryDoShortlink",
+                    Type=EditorType.CheckBox,
+                    Display="Try do a shortlink",
+                    Default=false
                 }
             };
 
@@ -126,6 +137,8 @@ class HitBits : FaucetScript
             Wait(2);
         }
     }
+
+    
     public override int DoSolveFaucet()
     {
         GoToUrl("https://hitbits.io/home");
@@ -226,6 +239,45 @@ class HitBits : FaucetScript
     //Everything code refered to raids
     public override int BeforeSolveFaucet()
     {
+        if (GetBoolSetting("TryDoShortlink"))
+        {
+            GoToUrl("https://hitbits.io/offerwalls/shortlinks");
+            Wait(1, 2);
+
+            var shortlinkButtons = ElementsByXPath("//a[contains(@href,'shortlinks')]").Where(button => IsVisible(button)).ToList();
+            if (shortlinkButtons.Count > 0)
+            {
+                Click(shortlinkButtons[Random(0, shortlinkButtons.Count - 1)]);
+                Wait(1, 2);
+                var visitLink = ElementByXPath("//span[contains(text(),'Visit Link')]");
+                if (IsVisible(visitLink))
+                {
+                    ShortLinkBypasser shortLinkBypasser = new ShortLinkBypasser(this);
+
+                    try
+                    {
+                        CheckForPopupsEnabled = false;
+
+                        Click(visitLink,false);
+                        if (Driver.WindowHandles.Count > 1)
+                        {
+                            Driver.SwitchTo().Window(Driver.WindowHandles[1]);
+                        }
+
+                        shortLinkBypasser.DoShortLink();
+                    }
+                    finally
+                    {
+                        CheckForPopupsEnabled = true;
+                        Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+                        CheckForPopups();
+                        
+                        GoToUrl("https://hitbits.io/home");
+                    }
+
+                }
+            }
+        }
         int RaidFightNumber = GetIntSetting("Fight");
         if (RaidFightNumber > 0)
         {
