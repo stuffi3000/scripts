@@ -187,6 +187,35 @@ class Coinfaucets : FaucetScript
         return base.BeforeLogin();
 
     }
+
+    public override string GetHCaptchaSiteKey()
+    {
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            string src = hcaptchaIframe.GetAttribute("src");
+
+            if (!string.IsNullOrEmpty(src))
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+        return base.GetHCaptchaSiteKey();
+    }
     public override int DoLogin()
     {
 
