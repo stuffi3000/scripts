@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FaucetCollector.Script;
+
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
-using FaucetCollector.Script;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
 
 public class TrafficG : FaucetScript
 {
@@ -58,7 +59,7 @@ public class TrafficG : FaucetScript
     /// </summary>
     public override int DoInit()
     {
-        
+
         //Let Faucet Collector continue.
         return base.DoInit();
     }
@@ -136,15 +137,15 @@ public class TrafficG : FaucetScript
     {
         if (d_l)
         {
-			d_l=false;
-			cs=false;
+            d_l = false;
+            cs = false;
             return 7200;
-			
+
         }
         if (cs)
         {
-			d_l=false;
-			cs=false;
+            d_l = false;
+            cs = false;
             return 60;
         }
         //let Faucet Collector continue.
@@ -196,22 +197,22 @@ public class TrafficG : FaucetScript
     /// This method gets called after the BeforeSolveFaucet. You can do the actual claiming of the faucet in here.
     /// </summary>
     /// <returns></returns>
-   
+
     public bool cs;
     public bool d_l;
     public override int DoSolveFaucet()
     {
-        GotoiFimNot("http://trafficg.com/intellisurf.php?member="+GetSetting("User"));
+        GotoiFimNot("https://trafficg.com/intellilang.php?member=" + GetSetting("User"));
 
-       
+
         Wait();
         var Start_Surf = ElementByXPath("//input[@id='imageField']");
         if (IsVisible(Start_Surf))
         {
             Click(Start_Surf);
-            Wait(2,3);
+            Wait(2, 3);
         }
-  
+
         int count = 0;
         while (count < GetIntSetting("N"))
         {
@@ -221,13 +222,13 @@ public class TrafficG : FaucetScript
             {
                 return Fail("You need add a website before use the script");
             }
-            if(IsVisible(ElementByXPath("//*[contains(text(),'Sorry you have reached our daily surfing limit')]")))
+            if (IsVisible(ElementByXPath("//*[contains(text(),'Sorry you have reached our daily surfing limit')]")))
             {
                 cs = true;
                 d_l = true;
                 Log("You have reached your daily surf limit");
                 break;
-                
+
             }
             DateTime t1 = DateTime.Now.AddSeconds(30);
             while (!countdown.Text.Contains("Go") && !countdown.Text.Contains("1") && !countdown.Text.Contains("2"))
@@ -235,19 +236,19 @@ public class TrafficG : FaucetScript
                 Wait();
                 if (DateTime.Now > t1)
                 {
-                    if(!GotoiFimNot("http://trafficg.com/intellisurf.php?member=" + GetSetting("User")))
+                    if (!GotoiFimNot("https://trafficg.com/intellilang.php?member=" + GetSetting("User")))
                     {
                         Driver.Navigate().Refresh();
                     }
-                    
+
                     break;
                 }
                 countdown = ElementByXPath("//div[@name='countdown']");
             }
-     
-       
+
+
             SolveImage();
-      
+
             Wait(2, 3);
         }
         cs = true;
@@ -262,28 +263,28 @@ public class TrafficG : FaucetScript
         Bitmap[] icons = new Bitmap[4];
         try
         {
-            Captcha = TakeScreenshot(Base.Captcha.CaptchaService.Manual, ElementByXPath("//img[@usemap='#MapMap']"));
+            Captcha = TakeScreenshot(Base.Captcha.CaptchaService.Manual, ElementByXPath("//table[contains(@background,'intelliwords')]"));
             if (Captcha.Height != 72 || Captcha.Width != 402)
             {
                 Captcha = ChangeImageSize(Captcha, 402, 72);
 
-             
+
             }
-      
-            
+
+
             icons[0] = Captcha.Clone(new Rectangle(2, 2, 97, 66), Captcha.PixelFormat);
-      
+
             icons[1] = Captcha.Clone(new Rectangle(100, 2, 97, 66), Captcha.PixelFormat);
-    
+
             icons[2] = Captcha.Clone(new Rectangle(201, 2, 97, 66), Captcha.PixelFormat);
-           
+
             icons[3] = Captcha.Clone(new Rectangle(303, 2, 97, 66), Captcha.PixelFormat);
-            
-          
+
+
         }
         catch (Exception ex)
         {
-            Captcha = GetElementScreenShort(Driver, ElementByXPath("//img[@usemap='#MapMap']"), "4");
+            Captcha = GetElementScreenShort(Driver, ElementByXPath("//table[contains(@background,'intelliwords')]"), "4");
             icons[0] = Captcha.Clone(new Rectangle(2, 2, 97, 66), Captcha.PixelFormat);
             icons[1] = Captcha.Clone(new Rectangle(100, 2, 97, 66), Captcha.PixelFormat);
             icons[2] = Captcha.Clone(new Rectangle(201, 2, 97, 66), Captcha.PixelFormat);
@@ -294,8 +295,8 @@ public class TrafficG : FaucetScript
         // delete box
         for (int i = 0; i < 4; i++)
         {
-            icons[i]=Replace_Colors(icons[i], Color.FromArgb(160, 200, 200, 200), Color.White, 3,"not");
-            icons[i]=Replace_Colors(icons[i], Color.FromArgb(160, 240, 240, 240), Color.White, 3, i.ToString());
+            icons[i] = Replace_Colors(icons[i], Color.FromArgb(160, 200, 200, 200), Color.White, 3, "not");
+            icons[i] = Replace_Colors(icons[i], Color.FromArgb(160, 240, 240, 240), Color.White, 3, i.ToString());
             icons[i] = Replace_Colors(icons[i], Color.FromArgb(160, 0, 0, 0), Color.FromArgb(160, 50, 50, 50), 3, "n");
         }
 
@@ -304,7 +305,7 @@ public class TrafficG : FaucetScript
         for (int i = 0; i < 4; i++)
         {
             icons[i] = CleanIcon(icons[i]);
-      
+
         }
 
         int[] kl = new int[4];
@@ -313,30 +314,32 @@ public class TrafficG : FaucetScript
         for (int i = 0; i < 4; i++)
         {
             kl[i] = CountSamePixels(icons[i], Color.White);
-        
-           
+
+
         }
         bool enc = false;
         bool recc = false;
-        for (int i = 0; i < icons[3].Width && recc==false; i++) {
-            for (int j = 0; j < icons[3].Height && recc == false; j++) {
-                if (IsSameColor(Color.FromArgb(60, 255, 0, 0),icons[3].GetPixel(i,j),8))
+        for (int i = 0; i < icons[3].Width && recc == false; i++)
+        {
+            for (int j = 0; j < icons[3].Height && recc == false; j++)
+            {
+                if (IsSameColor(Color.FromArgb(60, 255, 0, 0), icons[3].GetPixel(i, j), 8))
                 {
                     kl[3] -= 132;
                     recc = true;
                     break;
                 }
             }
-                }
+        }
         kl[3] = kl[3] - kl[3] / 4;
-      
+
         int solution = 0;
-  
-        for(int i = 0; i < 3; i++)
+
+        for (int i = 0; i < 3; i++)
         {
-            int nu =kl[i]-kl[3];
+            int nu = kl[i] - kl[3];
             nu = nu * nu;
-        
+
             if (i == 0)
             {
                 n_s = nu;
@@ -344,21 +347,21 @@ public class TrafficG : FaucetScript
             }
             if (n_s > nu)
             {
-              
+
                 n_s = nu;
                 solution = i;
-            } 
+            }
 
         }
-      
-      
+
+
 
         Wait();
         try
         {
-            var map = ElementsByXPath("//map[@name='MapMap']//area");
+            var map = ElementsByXPath("//a[contains(@href,'selection')]");
             Click(map[solution]);
-      
+
             IsSolved = true;
             Wait();
         }
@@ -372,31 +375,31 @@ public class TrafficG : FaucetScript
         return IsSolved;
     }
     public Bitmap ChangeImageSize(Bitmap pImg, int pWidth, int pHeigth)
-{
-
-    //Creating new bitmap
-
-    Bitmap vBitmap = new Bitmap(pWidth, pHeigth);
-
-    using (Graphics vGraphics = Graphics.FromImage((Image)vBitmap))
-
     {
 
-        //Specifi interpolation
-    
-        vGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        //Creating new bitmap
 
-        //Draw
+        Bitmap vBitmap = new Bitmap(pWidth, pHeigth);
 
-        vGraphics.DrawImage(pImg, 0, 0, pWidth, pHeigth);
+        using (Graphics vGraphics = Graphics.FromImage((Image)vBitmap))
+
+        {
+
+            //Specifi interpolation
+
+            vGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            //Draw
+
+            vGraphics.DrawImage(pImg, 0, 0, pWidth, pHeigth);
+
+        }
+
+        //return image
+
+        return vBitmap;
 
     }
-
-    //return image
-
-    return vBitmap;
-
-}
     private Bitmap GetElementScreenShort(IWebDriver driver, IWebElement element, string name)
     {
         Actions actions = new Actions(driver);
@@ -421,15 +424,15 @@ public class TrafficG : FaucetScript
         int n_colors = 0;
         var ArrayColors = new Color[50];
         var ArrayCont = new int[50];
-    
-        for(int i = 0; i < icon.Width; i++)
+
+        for (int i = 0; i < icon.Width; i++)
         {
-            for(int j = 0; j < icon.Height; j++)
+            for (int j = 0; j < icon.Height; j++)
             {
 
                 if (ArrayColors.Length == 0)
                 {
-                    ArrayColors[0]=icon.GetPixel(i, j);
+                    ArrayColors[0] = icon.GetPixel(i, j);
                     ArrayCont[0]++;
                     n_colors++;
 
@@ -437,7 +440,7 @@ public class TrafficG : FaucetScript
                 else
                 {
                     bool same = false;
-                   
+
                     for (int k = 0; k < ArrayColors.Length; k++)
                     {
                         if (IsSameColor(ArrayColors[k], icon.GetPixel(i, j), 65))
@@ -446,7 +449,7 @@ public class TrafficG : FaucetScript
                             ArrayCont[k]++;
                             break;
                         }
-                       
+
 
                     }
                     if (!same)
@@ -455,7 +458,7 @@ public class TrafficG : FaucetScript
                         ArrayColors[n_colors] = icon.GetPixel(i, j);
                         ArrayCont[n_colors]++;
                         n_colors++;
-                 
+
 
                     }
                 }
@@ -465,7 +468,7 @@ public class TrafficG : FaucetScript
 
         int highly = 0;
         int n_hig = -1;
-        for(int i = 0; i < n_colors; i++)
+        for (int i = 0; i < n_colors; i++)
         {
             if (highly < ArrayCont[i])
             {
@@ -479,25 +482,25 @@ public class TrafficG : FaucetScript
 
         if (n_hig != -1)
         {
-            icon=ReplaceAllColorsTo(icon, ArrayColors[n_hig], Color.White, 65);
+            icon = ReplaceAllColorsTo(icon, ArrayColors[n_hig], Color.White, 65);
 
         }
 
-       
+
 
         return icon;
 
     }
-    
-   
-    public int CountSamePixels(Bitmap FromPath,Color Tocount)
+
+
+    public int CountSamePixels(Bitmap FromPath, Color Tocount)
     {
-        int count=0;
-        for(int i = 0; i < FromPath.Width; i++)
+        int count = 0;
+        for (int i = 0; i < FromPath.Width; i++)
         {
-            for(int j = 0; j < FromPath.Height; j++)
+            for (int j = 0; j < FromPath.Height; j++)
             {
-                if (!comp_argb(Color.White,FromPath.GetPixel(i,j),5))
+                if (!comp_argb(Color.White, FromPath.GetPixel(i, j), 5))
                 {
                     count++;
                 }
@@ -595,7 +598,7 @@ public class TrafficG : FaucetScript
         int g = fr.G - source.G;
         int b = fr.B - source.B;
         int a = fr.A - source.A;
-        if (r * r + g * g + b * b +a*a> threshold * threshold)
+        if (r * r + g * g + b * b + a * a > threshold * threshold)
         {
             return false;
         }
@@ -668,7 +671,7 @@ public class TrafficG : FaucetScript
 
         return count_color;
     }
-   private bool IsSameColor(Color fr,Color source,double threshold)
+    private bool IsSameColor(Color fr, Color source, double threshold)
     {
         int r = fr.R - source.R;
         int g = fr.G - source.G;
@@ -683,17 +686,17 @@ public class TrafficG : FaucetScript
         }
     }
 
-    private Bitmap Replace_Colors(Bitmap fromPath, Color source,Color replace, double threshold,string n)
+    private Bitmap Replace_Colors(Bitmap fromPath, Color source, Color replace, double threshold, string n)
     {
         var thresh = threshold * threshold;
         //var target = targetColor.ToArgb();
-    
+
 
         int sR = source.R, sG = source.G, sB = source.B;
         // store the max length so we don't have to recalculate it
 
 
-      
+
         // for (var p = (int*)data.Scan0; p < length; p++)
         for (int i = 0; i < fromPath.Width; i++)
         {
@@ -712,15 +715,15 @@ public class TrafficG : FaucetScript
                     continue;
                 // poke the target color in
                 fromPath.SetPixel(i, j, replace);
-                
+
             }
         }
-       
+
 
         // unlock the bitmap
         return fromPath;
 
-       
+
     }
     private Bitmap ReplaceAllColorsTo(Bitmap fromPath, Color source, Color replace, double threshold)
     {
