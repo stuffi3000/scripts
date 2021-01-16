@@ -7,8 +7,8 @@ using System.Linq;
 
 //css_ref FaucetCollector.Utilities
 
-public class DirectBitScript:FaucetScript
-    {
+public class DirectBitScript : FaucetScript
+{
 
     public override FaucetSettings Settings
     {
@@ -166,7 +166,7 @@ public class DirectBitScript:FaucetScript
         if (IsVisible(posibleCaptchaButton))
         {
             Click(posibleCaptchaButton);
-            Wait(5,6);
+            Wait(5, 6);
         }
 
         var s3ProccedBtn = ElementByXPath("//button[@id='s31proceed']");
@@ -200,17 +200,17 @@ public class DirectBitScript:FaucetScript
         string enunciateText = captchaEnunciate.Text;
 
 
-        var correctCaptchaButton = ElementByXPath("//button//img[contains(@src,'images/') and contains(@src,'" + enunciateText + "')]|//button[@id='s11proceed']");
+        var correctCaptchaButton = ElementByXPath("//button//img[contains(@src,'images/') and contains(@src,'" + enunciateText + "')]|//button[@id='s11proceed']|//button[@id='s21proceed']");
         if (!IsVisible(correctCaptchaButton))
         {
             Fail("captcha solution is broken, dog is not visible");
-            return; 
+            return;
         }
         Click(correctCaptchaButton);
 
         Wait(5, 6);
 
-        if(IsVisible(ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']")))
+        if (IsVisible(ElementByXPath("//h3[contains(text(),'Choose the')]//font[@color='blue']")))
         {
             SolveImgCaptcha();
         }
