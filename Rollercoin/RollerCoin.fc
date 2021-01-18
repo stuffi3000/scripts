@@ -1,4 +1,5 @@
-﻿using FaucetCollector.Script;
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
 
 using OpenQA.Selenium;
 
@@ -214,6 +215,20 @@ class RollerCoin : FaucetScript
         }
         return base.BeforeSolveFaucet();
     }
+
+    public override int DoSolveCaptcha()
+    {
+        RecaptchaUtility utility = new RecaptchaUtility(this);
+
+        var result = base.DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+        utility.DoSolve();
+
+        return result;
+    }
     public override int DoSolveFaucet()
     {
 
@@ -253,21 +268,18 @@ class RollerCoin : FaucetScript
 
             Wait(15, 20);
 
-            var captchaImg = ElementByXPath("//div[contains(@class,'captcha-window')]//img[contains(@src,'data:image')]");
-            var captchaBox = ElementByXPath("//div[contains(@class,'captcha-window')]//input[@type='text']");
-            var captchaButtonSubmit = ElementByXPath("//div[contains(@class,'captcha-window')]//button[@type='button']");
-
-            if (IsVisible(captchaImg) && IsVisible(captchaBox) && IsVisible(captchaButtonSubmit))
+            var captchaModalBody = ElementByXPath("//div[@class='captcha-body modal-body']");
+            if (IsVisible(captchaModalBody))
             {
-                var result = DoSolveImageCaptcha(captchaImg, captchaBox);
+                var result = DoSolveCaptcha();
                 if (result > 0)
                 {
-                    return result;
+                    return Fail("There is a problem solving the captcha");
                 }
 
-                Click(captchaButtonSubmit);
-                Wait(4, 6);
+
             }
+
 
             Log("Game successfully played");
             IsSuccess = true;
