@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/11/2018 17:00PM
-//Last update - 19/01/2021 21:15PM - version 15
+//Last update - 20/01/2021 00:50AM - version 15
 //==================//
 
 using System;
@@ -1419,20 +1419,16 @@ Wait(1);
       while (true)
       {
 		  
-        while (IsVisible(ElementByXPath("//div[contains(@class,'col-12 col-sm-6 mt-1')]//input[contains(@type,'tel') and @disabled]") ))
-        {
-          Wait();	//so Wait until the button visible
-		  Log("Working..");
+        Wait();	//so Wait until the button visible
+		Log("Working..");
 		
-          //Balance_info 
-          var Balance_info = ElementByXPath("//span[contains(@class,'bal-amount')]"); 
-	      if (Balance_info !=null) //Visible
-	      {		
-           Log("Your Balance now is: " + Balance_info.Text);
-		  }	 
+        //Balance_info 
+        var Balance_info = ElementByXPath("//span[contains(@class,'bal-amount')]"); 
+	    if (Balance_info !=null) //Visible
+	    {		
+         Log("Your Balance now is: " + Balance_info.Text);
+		}	 
 		  
-        }//end while IsVisible
-
         var Counterbreak = ElementByXPath("//button[contains(text(),'Start autobet')]");
 	    if (Counterbreak !=null) //Visible
 	    {
