@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/11/2018 17:00PM
-//Last update - 11/01/2021 06:30AM - version 14
+//Last update - 19/01/2021 19:40PM - version 15
 //==================//
 
 using System;
@@ -11,6 +11,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 //css_ref FaucetCollector.Utilities
 //css_inc RecaptchaUtilities
@@ -48,10 +49,10 @@ public class bitsler : FaucetScript
 				new FaucetSetting(){Name="MenuCoins",Display="MenuCoins - Select Favorite Coins",Type=EditorType.ComboBox,Default="btc",Items=new System.Collections.Generic.List<string>{"btc","eth","xrp","ltc","usdt","doge","etc","bch","zec","dgb","eos","xlm","trx","dash","bsv","btg","neo","strat","kmd","lsk","qtum","waves","btslr"}},
 				
 				//Dice Game//
-				new FaucetSetting(){Name="Dice_Amount_Input",Display="Dice - Amount",Default="0.00000003",Type=EditorType.TextBox,Required=true},
+				new FaucetSetting(){Name="Dice_Amount_Input",Display="Dice - Amount",Default="0.00000001",Type=EditorType.TextBox,Required=true},
 				new FaucetSetting(){Name="Dice_PayOut_Input",Display="Dice - Dice PayOut",Default=3,Type=EditorType.Numeric,Required=true},
-				new FaucetSetting(){Name="Dice_Chance_Input",Display="Dice - Dice Chance",Default=33,Type=EditorType.Numeric,Required=true},
-				new FaucetSetting(){Name="Dice_NumberOfRoll",Display="Dice - Number Of Roll",Default=15,Type=EditorType.Numeric,Required=true},
+				//new FaucetSetting(){Name="Dice_Chance_Input",Display="Dice - Dice Chance",Default=33,Type=EditorType.Numeric,Required=true},
+				new FaucetSetting(){Name="Dice_NumberOfRoll",Display="Dice - Number Of Roll / Spins ",Default=15,Type=EditorType.Numeric,Required=true},
 				new FaucetSetting(){Name="Dice_Roll_UnderOver_Menu",Display="Dice Roll UnderOver - Select if you want to Roll 'Under' OR 'Over'",Type=EditorType.ComboBox,Default="none",Items=new System.Collections.Generic.List<string>{"none","Under","Over"}},
 				new FaucetSetting(){Name="Dice_Speed_Level_Menu",Display="Dice Speed Level - Select Speed Level (4 Level in total) ",Type=EditorType.ComboBox,Default="Level_2",Items=new System.Collections.Generic.List<string>{"none","Level_1","Level_2","Level_3","Level_4"}},
 
@@ -61,9 +62,9 @@ public class bitsler : FaucetScript
 				new FaucetSetting(){Name="Dice_Losing_Increase_Input",Display="Dice | Losing - Increase by",Default=3,Type=EditorType.Numeric,Required=true},
 	
 				//Multicolor Game//
-                new FaucetSetting(){Name="MulticolorGame_Counter",Display="Counter - Spins | How many times",Default=15,Type=EditorType.Numeric,Required=true},
+                new FaucetSetting(){Name="MulticolorGame_Counter",Display="MulticolorGame - Number Of Roll / Spins ",Default=15,Type=EditorType.Numeric,Required=true},
 
-                new FaucetSetting(){Name="InfoAllCoins",Display="InfoAllCoins - Minimum amount to gamble -> BTC: from 0.00000001, ETH: from 0.00000010, LTC: from 0.00000050, BCH: from 0.00000005, XRP: from 0.00015000, DOGE: from 0.05000000, DASH: from 0.00000020, ZEC: from 0.00000025, ETC: from 0.00000500, NEO: from 0.00000200, STRAT: from 0.00003000, KMD: from 0.00004000, BURST: from 0.10000000, BTG: from 0.00000200, ISK: from 0.00001500, DGB: from 0.10000000, QTUM: from 0.00001000, WAVES: from 0.00003000, BSV: from 0.00000020, BTSLR: from 1.00000000",Default="InfoAllCoins - Minimum amount to gamble",Type=EditorType.TextBox,Required=false},
+                new FaucetSetting(){Name="InfoAllCoins",Display="InfoAllCoins - Minimum amount to gamble -> BTC: from 0.00000001, ETH: from 0.00000010, LTC: from 0.00000050, BCH: from 0.00000005, XRP: from 0.00015000, DOGE: from 0.05000000, DASH: from 0.00000020, ZEC: from 0.00000025, ETC: from 0.00000500, NEO: from 0.00000200, STRAT: from 0.00003000, KMD: from 0.00004000, BURST: from 0.10000000, BTG: from 0.00000200, ISK: from 0.00001500, DGB: from 0.10000000, QTUM: from 0.00001000, WAVES: from 0.00003000, BSV: from 0.00000020, BTSLR: from 1.00000000",Default="InfoAllCoins - Minimum amount to gamble",Type=EditorType.Label,Required=false},
 				
                 new FaucetSetting(){Name="StarAmount",Display="Star | Amount",Default="0.00000001",Type=EditorType.TextBox,Required=true},
 				new FaucetSetting(){Name="Star",Display="Star - on off",Type=EditorType.CheckBox,Default=false},	
@@ -162,9 +163,6 @@ bool ad;
 //==================//
 	
 	
-	
-	
-	
     /// <summary>
     /// This method gets called if IsLoggedIn returned false, right before the DoLogin method is called.
     /// </summary>
@@ -221,9 +219,7 @@ bool ad;
 	   }
 	   
 	 }	
- 
-	 //============//
-	 
+	 //============//	 
 	
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
@@ -231,7 +227,6 @@ bool ad;
 	
 	
 
-	
 //=============//
 //start DoLogin
 //=============//
@@ -570,8 +565,6 @@ public override int GetFaucetWaitTime()
      //=============//
 	 
 
-	
-
 	//=========//
     //Nitro//
 	//=========//
@@ -637,7 +630,6 @@ public override int GetFaucetWaitTime()
         }// end Rain_AirDrop_Chat
  
 	
-	
  		//================//
         //Menus Vars AllGames
 		//================//
@@ -654,8 +646,6 @@ public override int GetFaucetWaitTime()
 			Log("none: we return after specific time ");
 		 }
 		//===========================//
-
-
 		
 		//===========================//
 		//AllGames - Dice - Game
@@ -682,8 +672,7 @@ public override int GetFaucetWaitTime()
 		
         }//end Dice Game
    
-   //=======================//	
-		
+   //=======================//		
 
 		//===========================//
 		//AllGames - Roulette - Game
@@ -702,9 +691,7 @@ public override int GetFaucetWaitTime()
 			Log("Roulette: we return after specific time ");
 
 		 }
-		//===========================//
-		
-		
+		//===========================//			
 		
 		//===========================//
 		//AllGames - Multicolor - Game
@@ -731,7 +718,6 @@ public override int GetFaucetWaitTime()
    }//end Multicolor Game
    
    //=======================//	
-		
 		
 
 		//===========================//
@@ -853,7 +839,7 @@ public override int GetFaucetWaitTime()
 //====================//	
 //ADFunction_CloseChat
 //====================//	
- private bool ADFunction_CloseChat()
+ public int ADFunction_CloseChat()
  {
 	 
     var ChatOpen = ElementByXPath("//div[contains(@class,'site-wrapper-chat')]"); 
@@ -871,8 +857,8 @@ public override int GetFaucetWaitTime()
       Log("CloseChat: the Chat close ");
     }
 		
- return true;
- }//end private bool
+ return 0;
+ }//end ADFunction_CloseChat
 //====================//
 
  
@@ -880,7 +866,7 @@ public override int GetFaucetWaitTime()
 //====================//	
 //Coins_Function
 //====================//	
- private bool Coins_Function()
+ public int Coins_Function()
  {
 	
       var OpenTabCoins = ElementByXPath("//button[@class='btn dropdown-toggle cs-button btn-secondary']"); 
@@ -1051,7 +1037,7 @@ public override int GetFaucetWaitTime()
       Click(btslr_coin_VAR);
 	  }// end btslr  
 	
- return true;
+ return 0;
  }//end Coins_Function
 //====================//
 
@@ -1062,7 +1048,7 @@ public override int GetFaucetWaitTime()
 //====================//	
 //ADFunction_Multicolor
 //====================//
- private bool ADFunction_Multicolor()
+ public int ADFunction_Multicolor()
  {
 	 		
     Wait(2);
@@ -1157,8 +1143,8 @@ public override int GetFaucetWaitTime()
       }//end while
 	  
  
- return true;
- }//end private bool
+ return 0;
+ }//end ADFunction_Multicolor
 	
 
 	
@@ -1167,7 +1153,7 @@ public override int GetFaucetWaitTime()
 //================//	
 //ADFunction_Dice
 //================//
- private bool ADFunction_Dice()
+ public int ADFunction_Dice()
  {
 	 
 	
@@ -1175,80 +1161,73 @@ public override int GetFaucetWaitTime()
 //Dice Game
 //=======//
 
-//Dice_My_Bets - click on my bets
-var Dice_My_Bets = ElementByXPath("//li[@id='tuto-my-bets']");
-
-//Dice_Tab_AutoGame- click on Tab AutoGame
-var Dice_Tab_AutoGame = ElementByXPath("//button[@class='btn btn-primary btn-play col-12 btn-auto']");
-
-//Dice_AmountInput
-var Dice_Amount_Input_Var = ElementByXPath("//input[@class='bet-amount form-control form-control-lg is-valid']");
-
-//Dice_X2_Button
-var Dice_X2_Button = ElementByXPath("//li[@class='col btn btn-primary' and contains(text(),'x2')]");
-//Dice_/2_Button
-var Dice_Division_2_Button = ElementByXPath("//li[@class='col btn btn-primary' and contains(text(),'/2')]");
-
-//Dice_PayOut 
-var Dice_PayOut_Button = ElementByXPath("//div[2]/div/div/div/div[1 and @class='radial-progress-inner']");
-var Dice_PayOut_Input_Var = ElementByXPath("//div[@class='radial-progress-inner' and @style='width: 68px;'] /div[@class='editable' and contains(text(),'x')]");
-
-//Dice_Chance
-var Dice_Chance_Button = ElementByXPath("//div[3]/div/div/div/div[1 and @class='radial-progress-inner'] ");
-var Dice_Chance_Input_Var = ElementByXPath("//div[@class='radial-progress-inner' and @style='width: 68px;'] /div[@class='editable' and contains(text(),'%')]");
-
-//Dice_NumberOfRoll
-var Dice_NumberOfRoll_Var = ElementByXPath("//input[@class='form-control text-center']");
-
-//===============//
-
-
 //call to close
 ADFunction_CloseChat();
 
 Wait(2);
 
+//Dice_My_Bets - click on my bets
+var Dice_My_Bets = ElementByXPath("//li[contains(text(),'My Bets')]");
 Click(Dice_My_Bets);
 Log("Dice - click on my bets");
 
 Wait(2);
 
+//Dice_Tab_AutoGame- click on Tab AutoGame
+var Dice_Tab_AutoGame = ElementByXPath("//span[contains(text(),'Auto') or contains(text(),'auto') ]");
 Click(Dice_Tab_AutoGame);
 Log("Dice - click on Tab AutoGame");
-
 Wait(2);
 
+//Dice_AmountInput
+var Dice_Amount_Input_Var = ElementByXPath("//input[contains(@id,'ctrl-bet')]");
+Click(Dice_Amount_Input_Var);
+Wait(2);
+SendKeys_Control_AND_A_AND_Delete_Function(); //call
+Wait(2);
 SetText(Dice_Amount_Input_Var, GetSetting("Dice_Amount_Input"));
 Log("Dice - set Amount to play");
 
-Wait(2);
+//Dice_X2_Button
+var Dice_X2_Button = ElementByXPath("//li[@class='col btn btn-primary' and contains(text(),'X2')]");
+//Dice_/2_Button
+var Dice_Division_2_Button = ElementByXPath("//li[@class='col btn btn-primary' and contains(text(),'/2')]");
 
-Click(Dice_PayOut_Button);
-Log("Dice - click on PayOut_Button");
+//Dice_PayOut 
+var Dice_PayOut_Input_Var = ElementByXPath("//input[@id='ctrl-payout']");
+Click(Dice_PayOut_Input_Var);
+Wait(2);
+SendKeys_Control_AND_A_AND_Delete_Function(); //call
 Wait(2);
 SetText(Dice_PayOut_Input_Var, GetSetting("Dice_PayOut_Input"));
 Log("Dice - set PayOut");
 
+//Dice_Chance
+/*
+var Dice_Chance_Input_Var = ElementByXPath("//input[@id='ctrl-chance']");
+Click(Dice_Chance_Input_Var);
 Wait(2);
-
-Click(Dice_Chance_Button);
-Log("Dice - click on Chance_Button");
+SendKeys_Control_AND_A_AND_Delete_Function(); //call
 Wait(2);
 SetText(Dice_Chance_Input_Var, GetSetting("Dice_Chance_Input"));
 Log("Dice - set Chance");
+*/
 
+//Dice_NumberOfRoll
+var Dice_NumberOfRoll_Var = ElementByXPath("//input[@class='form-control text-center']");
+Click(Dice_NumberOfRoll_Var);
 Wait(2);
-
+SendKeys_Control_AND_A_AND_Delete_Function(); //call
+Wait(2);
 SetText(Dice_NumberOfRoll_Var, GetSetting("Dice_NumberOfRoll"));
 Log("Dice - set NumberOfRoll");
-
-Wait(2);
+//===============//
 
 
 //Dice_Roll_UnderOver_Menu
 var Dice_Roll_UnderOver_Menu_Var = GetSetting("Dice_Roll_UnderOver_Menu");  	
-var Dice_Roll_Under = ElementByXPath("//div[@class='radial-progress-inner' and @style='width: 68px;'] /div[@class='editable' and contains(text(),'<')]");
-var Dice_Roll_Over = ElementByXPath("//div[@class='radial-progress-inner' and @style='width: 68px;'] /div[@class='editable' and contains(text(),'>')]");
+var Dice_Roll_Under = ElementByXPath("//div[contains(@class,'input-group ctrl-toggle')]//span[contains(text(),'under')]");
+var Dice_Roll_Over = ElementByXPath("//div[contains(@class,'input-group ctrl-toggle')]//span[contains(text(),'over')]");
 
    if(Dice_Roll_UnderOver_Menu_Var=="none")
    {
@@ -1256,20 +1235,22 @@ var Dice_Roll_Over = ElementByXPath("//div[@class='radial-progress-inner' and @s
 	Log("Dice_Roll_UnderOver_Menu - none");
    }
 
-
    if(Dice_Roll_UnderOver_Menu_Var=="Under")
    {
-	//Under
-	Log("Dice_Roll_UnderOver_Menu - Under");
-	Click(Dice_Roll_Under);
+	if (IsVisible(Dice_Roll_Over))
+	{	
+	  Click(Dice_Roll_Under);
+	  Log("Dice_Roll_UnderOver_Menu - Under");	  
+	} 
    }
-   
-   
+     
    if(Dice_Roll_UnderOver_Menu_Var=="Over")
    {
-	//Over
-	Log("Dice_Roll_UnderOver_Menu - Over");
-	Click(Dice_Roll_Over);
+	if (IsVisible(Dice_Roll_Under))
+	{	
+	  Click(Dice_Roll_Over);
+	  Log("Dice_Roll_UnderOver_Menu - Over");	  
+	} 
    }
 //===========//
 
@@ -1330,17 +1311,15 @@ var Dice_Speed_4_Level = ElementByXPath("//div[@id='speed-bet-slider']/div[@clas
 
 */
 
-
 Wait(2);
-
 
 //Dice_Winning_Menu
 var Dice_Winning_Menu_Var = GetSetting("Dice_Winning_Menu");  	
-var Dice_Winning_Return_to_base = ElementByXPath("//div[1]/div/div[2]/button[1 and @class='btn btn-primary' and contains(text(),'Reset to base')]");
-var Dice_Winning_Increase_by = ElementByXPath("//div[1]/div/div[2]/button[2 and @class='btn' and contains(text(),'Increase by')]");
+var Dice_Winning_Return_to_base = ElementByXPath("//div[@class='row auto-increase']/div[1]//button[contains(text(),'Reset to base')]");
 
-var Dice_Winning_Increase_Input_Var = ElementByXPath("//input[@class='winning__event__input']");
-
+var Dice_Winning_Increase_by = ElementByXPath("//div[@class='row auto-increase']/div[1]//button[contains(text(),'Increase by')]");
+var Dice_Winning_Increase_by_Menu = ElementByXPath("//div[@class='row auto-increase']/div[1]//li[2]");
+var Dice_Winning_Increase_by_X_Button = ElementByXPath("//div[@class='row auto-increase']/div[1]//li[2]/a");
 
    if(Dice_Winning_Menu_Var=="Return to base")
    {
@@ -1348,34 +1327,44 @@ var Dice_Winning_Increase_Input_Var = ElementByXPath("//input[@class='winning__e
 	Log("Dice_Winning_Menu - Return to base");
 	Click(Dice_Winning_Return_to_base);
    }
-   
-   
+     
    if(Dice_Winning_Menu_Var=="Increase by")
    {
 	//Increase by
-	Log("Dice_Winning_Menu - Increase by");
 	Click(Dice_Winning_Increase_by);
+	Log("Dice_Winning_Menu - Increase by");
 
     Wait(2);
+	
+	Click(Dice_Winning_Increase_by_Menu);
+	Log("Dice_Winning_Menu - Increase by - Menu");
 
+    Wait(2);	
+	
+	Click(Dice_Winning_Increase_by_X_Button);
+	Log("Dice_Winning_Menu - Increase by - X_Button");
+
+    Wait(2);	
+	
+    var Dice_Winning_Increase_Input_Var = ElementByXPath("//div[@class='row auto-increase']/div[1]//div[@class='input-group increase_by']//input");
+	Click(Dice_Winning_Increase_Input_Var);
+    Wait(2);
+    SendKeys_Control_AND_A_AND_Delete_Function(); //call
+    Wait(2);	
     SetText(Dice_Winning_Increase_Input_Var, GetSetting("Dice_Winning_Increase_Input"));
     Log("Dice - set Winning_Increase");
    }
-
-
 //===========//
-
 
 Wait(2);
 
-
 //Dice_Losing_Menu
 var Dice_Losing_Menu_Var = GetSetting("Dice_Losing_Menu");  	
-var Dice_Losing_Return_to_base = ElementByXPath("//div[2]/div/div[2]/button[1 and @class='btn btn-primary' and contains(text(),'Reset to base')]");
-var Dice_Losing_Increase_by = ElementByXPath("//div[2]/div/div[2]/button[2 and @class='btn' and contains(text(),'Increase by')]");
+var Dice_Losing_Return_to_base = ElementByXPath("//div[@class='row auto-increase']/div[2]//button[contains(text(),'Reset to base')]");
 
-var Dice_Losing_Increase_Input_Var = ElementByXPath("//input[@class='losing__event__input']");
-
+var Dice_Losing_Increase_by = ElementByXPath("//div[@class='row auto-increase']/div[2]//button[contains(text(),'Increase by')]");
+var Dice_Losing_Increase_by_Menu = ElementByXPath("//div[@class='row auto-increase']/div[2]//li[2]");
+var Dice_Losing_Increase_by_X_Button = ElementByXPath("//div[@class='row auto-increase']/div[2]//li[2]/a");
 
    if(Dice_Losing_Menu_Var=="Return to base")
    {
@@ -1383,8 +1372,7 @@ var Dice_Losing_Increase_Input_Var = ElementByXPath("//input[@class='losing__eve
 	Log("Dice_Losing_Menu - Return to base");
 	Click(Dice_Losing_Return_to_base);
    }
-   
-   
+    
    if(Dice_Losing_Menu_Var=="Increase by")
    {
 	//Increase by
@@ -1393,62 +1381,79 @@ var Dice_Losing_Increase_Input_Var = ElementByXPath("//input[@class='losing__eve
 
     Wait(2);
 
+	Log("Dice_Losing_Menu - Increase by - Menu");
+	Click(Dice_Losing_Increase_by_Menu);
+
+    Wait(2);
+
+	Log("Dice_Losing_Menu - Increase by - X_Button");
+	Click(Dice_Losing_Increase_by_X_Button);
+
+    Wait(2);
+	
+    var Dice_Losing_Increase_Input_Var = ElementByXPath("//div[@class='row auto-increase']/div[2]//div[@class='input-group increase_by']//input");
+	Click(Dice_Losing_Increase_Input_Var);
+    Wait(2);
+    SendKeys_Control_AND_A_AND_Delete_Function(); //call
+    Wait(2);	
     SetText(Dice_Losing_Increase_Input_Var, GetSetting("Dice_Losing_Increase_Input"));
     Log("Dice - set Losing_Increase");
    }
-
-
 //===========//
 
 Wait(2);
 
-
-var Dice_Spin_Button = ElementByXPath("//button[@class='btn btn-primary btn-play col-12 btn-auto']");
+var Dice_Spin_Button = ElementByXPath("//div[contains(@class,'col-10')]//button");
 Click(Dice_Spin_Button);
 Log("Dice - click on Spin_Button");
 
-
-      var AlertMessage_MinimumBet = ElementByXPath("//div[contains(text(),'Amount is less than minimum')]"); 
-	  if (IsVisible(AlertMessage_MinimumBet))
-	  {		  
-	   Log("Spin: AlertMessage_MinimumBet - we return after 60 min");
-	   ad=true;
-	  }
-		  
-		  
+var AlertMessage_MinimumBet = ElementByXPath("//div[contains(text(),'Amount is less than minimum')]"); 
+if (IsVisible(AlertMessage_MinimumBet))
+{		  
+Log("Spin: AlertMessage_MinimumBet - we return after 60 min");
+}	
+  
+Wait(1);
+	  
       while (true)
       {
 		  
-          while (IsVisible(ElementByXPath("//button[contains(text(),'Stop autobet')]")))
-          {
-			 //so Wait until the button visible
-             Wait();
-			 
-			 
-            var Counterbreak = ElementByXPath("//button[contains(text(),'Start autobet')]");
-	        if (IsVisible(Counterbreak))
-	        {
-            break; 		
-	        ad=true;
-            }	
+        while (IsVisible(ElementByXPath("//div[contains(@class,'col-12 col-sm-6 mt-1')]//input[contains(@type,'tel') and @disabled]") ))
+        {
+          Wait();	//so Wait until the button visible
+		  Log("Working..");
+		
+          //Balance_info 
+          var Balance_info = ElementByXPath("//span[contains(@class,'bal-amount')]"); 
+	      if (Balance_info !=null) //Visible
+	      {		
+           Log("Your Balance now is: " + Balance_info.Text);
+		  }	 
 		  
-          }//end while IsVisible
+        }//end while IsVisible
+
+        var Counterbreak = ElementByXPath("//button[contains(text(),'Start autobet')]");
+	    if (Counterbreak !=null) //Visible
+	    {
+        Log("break");				
+        break; 				
+        }	
 
       }//end while
-
 	   
- return true;
- } //end private bool
-	
+ return 0;
+ } //end ADFunction_Dice
+//=============// 	
 	
 	
        //=============//
        //WithdrawEndButton_Faunction
        //=============// 
-        public void WithdrawEndButton_Faunction()
-        {
+        public int WithdrawEndButton_Faunction()
+        {			
         var WithdrawEndButton = ElementByXPath ("//button[@class='btn btn-primary' and contains(text(),'Withdraw')]");  
-        Click(WithdrawEndButton);	
+        Click(WithdrawEndButton);		
+		return 0;
 		}// end WithdrawEndButton_Faunction
 		//=============// 	
 	
@@ -1487,6 +1492,32 @@ Log("Dice - click on Spin_Button");
       }//end Claim_Function
       //=================//	
 
+
+        //=================//
+        //SendKeys_Control_AND_A_AND_Delete_Function
+        //=================//
+
+        public int SendKeys_Control_AND_A_AND_Delete_Function()
+        {
+			
+            //Control + a
+            Log("Control + a");
+            Actions Builder_30_Act = new Actions(Driver);
+            Wait(3);
+            Builder_30_Act.KeyDown(Keys.Control).Build().Perform(); //go to END of content
+            Builder_30_Act.SendKeys("a").Build().Perform(); //a key
+            Builder_30_Act.KeyUp(Keys.Control).Build().Perform(); //go to START of content
+            
+            //Delete
+            Log("Delete");
+            Actions Builder_31_Act = new Actions(Driver);
+            Wait(3);
+            Builder_31_Act.SendKeys(Keys.Delete).Build().Perform();
+			
+		return 0;
+        }//end SendKeys_Control_AND_A_AND_Delete_Function
+        //=================//	
+		
 
         //=================//
        //invisible_Recaptcha_Function
@@ -1562,6 +1593,5 @@ Log("Dice - click on Spin_Button");
         //=================//	
 		
 
-	
 	
 } //public class bitsler
