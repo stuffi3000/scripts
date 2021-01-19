@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/11/2018 17:00PM
-//Last update - 19/01/2021 19:40PM - version 15
+//Last update - 19/01/2021 21:15PM - version 15
 //==================//
 
 using System;
@@ -45,7 +45,7 @@ public class bitsler : FaucetScript
 				new FaucetSetting() { Name = "Rain_AirDrop_Chat", Display = "Rain_AirDrop_Chat - ON/OFF", Type = EditorType.CheckBox, Default = false},		
                 new FaucetSetting(){Name="MessageChat",Display="Your Message In Chat - only need to be active to get any rain",Default = ".",Type=EditorType.TextBox,Required=false},
 				
-	            new FaucetSetting(){Name="AllGames_Menu",Display="AllGames_Menu - Select Favorite Game (Correctly available only 'Dice' AND 'Multicolor' Games)",Type=EditorType.ComboBox,Default="none",Items=new System.Collections.Generic.List<string>{"none","Dice","Roulette","Multicolor","CaraYcruz"}},
+	            new FaucetSetting(){Name="AllGames_Menu",Display="AllGames_Menu - Select Favorite Game (Correctly available/working only 'Dice' game) ",Type=EditorType.ComboBox,Default="none",Items=new System.Collections.Generic.List<string>{"none","Dice","Roulette","Multicolor","CaraYcruz"}},
 				new FaucetSetting(){Name="MenuCoins",Display="MenuCoins - Select Favorite Coins",Type=EditorType.ComboBox,Default="btc",Items=new System.Collections.Generic.List<string>{"btc","eth","xrp","ltc","usdt","doge","etc","bch","zec","dgb","eos","xlm","trx","dash","bsv","btg","neo","strat","kmd","lsk","qtum","waves","btslr"}},
 				
 				//Dice Game//
@@ -53,9 +53,9 @@ public class bitsler : FaucetScript
 				new FaucetSetting(){Name="Dice_PayOut_Input",Display="Dice - Dice PayOut",Default=3,Type=EditorType.Numeric,Required=true},
 				//new FaucetSetting(){Name="Dice_Chance_Input",Display="Dice - Dice Chance",Default=33,Type=EditorType.Numeric,Required=true},
 				new FaucetSetting(){Name="Dice_NumberOfRoll",Display="Dice - Number Of Roll / Spins ",Default=15,Type=EditorType.Numeric,Required=true},
+				new FaucetSetting() { Name = "Dice_break", Display = "Dice_break - when the BET numbers works - Choose after how much time you want to break inside 'while loop' - the default is 900sec = 15min", Type = EditorType.TextBox, Default = "900" },
 				new FaucetSetting(){Name="Dice_Roll_UnderOver_Menu",Display="Dice Roll UnderOver - Select if you want to Roll 'Under' OR 'Over'",Type=EditorType.ComboBox,Default="none",Items=new System.Collections.Generic.List<string>{"none","Under","Over"}},
 				new FaucetSetting(){Name="Dice_Speed_Level_Menu",Display="Dice Speed Level - Select Speed Level (4 Level in total) ",Type=EditorType.ComboBox,Default="Level_2",Items=new System.Collections.Generic.List<string>{"none","Level_1","Level_2","Level_3","Level_4"}},
-
 				new FaucetSetting(){Name="Dice_Winning_Menu",Display="Dice | Winning - Select if you want to 'Return to base' OR 'Increase by' ",Type=EditorType.ComboBox,Default="Return to base",Items=new System.Collections.Generic.List<string>{"Return to base","Increase by"}},
 				new FaucetSetting(){Name="Dice_Winning_Increase_Input",Display="Dice | Winning - Increase by",Default=3,Type=EditorType.Numeric,Required=true},
 				new FaucetSetting(){Name="Dice_Losing_Menu",Display="Dice | Losing - Select if you want to 'Return to base' OR 'Increase by' ",Type=EditorType.ComboBox,Default="Return to base",Items=new System.Collections.Generic.List<string>{"Return to base","Increase by"}},
@@ -1414,7 +1414,8 @@ Log("Spin: AlertMessage_MinimumBet - we return after 60 min");
 }	
   
 Wait(1);
-	  
+
+      var TimeToWaitForBreak = DateTime.Now.AddSeconds(GetIntSetting("Dice_break")); //900sec = 15min 
       while (true)
       {
 		  
@@ -1438,6 +1439,12 @@ Wait(1);
         Log("break");				
         break; 				
         }	
+
+        if (DateTime.Now > TimeToWaitForBreak) //if the time above sec 
+        {
+        Log("Dice_Game - break - TimeToWaitForBreak");
+        break; //break the wait loop
+        }
 
       }//end while
 	   
