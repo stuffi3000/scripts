@@ -149,6 +149,11 @@ class RollerCoin : FaucetScript
         SetText(UserBox, GetSetting("User"));
         SetText(PasswordBox, GetPassword("Pass"));
 
+        var result = DoSolveCaptcha();
+        if (result>0)
+        {
+            return result; 
+        }
 
         var KeepSigned = ElementByXPath("//label[@for='keepSigned']");
         if (IsVisible(KeepSigned))
