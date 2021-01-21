@@ -176,7 +176,10 @@ public class GetZen : FaucetScript
 	    }
 		
         Wait(2);
-		
+
+        Recaptcha_Function(); //call
+
+        Wait(2);		
         if (IsVisible(ElementByXPath ("//form[@class='login-form']//button[@type='submit']") )) 
 	    {
         var ButtonLog = ElementByXPath("//form[@class='login-form']//button[@type='submit']");
