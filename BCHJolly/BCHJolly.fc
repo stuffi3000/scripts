@@ -16,7 +16,7 @@ public class BCHJollyScript : FaucetScript
             return new FaucetSettings("https://www.bchjolly.com")
             {
                 new FaucetSetting(){Display="BCH Address",Type=EditorType.TextBox,Required=true,Name="Address"},
-				new FaucetSetting(){Display="Claims to Make",Type=EditorType.Numeric,Required=true,Name="ClaimsTM"}
+		new FaucetSetting(){Display="Claims to Make",Type=EditorType.Numeric,Required=true,Name="ClaimsTM"}
                 //insert user settings here
                 //new FaucetSetting { 
                 //    Name = "Name of your setting", 
@@ -172,22 +172,22 @@ public class BCHJollyScript : FaucetScript
     /// <returns></returns>
     public override int DoSolveFaucet( )
     {
-		Log("Faucet Solving Started");
+	Log("Faucet Solving Started");
         GoToUrl("https://www.bchjolly.com/index.php");
         Wait(1);
         var ButtonClaim1 = ElementByXPath("//button[@data-target='#claimModal']");
-		var ButtonClaim2 = ElementByXPath("//input[@id='claimFaucet']");
+	var ButtonClaim2 = ElementByXPath("//input[@id='claimFaucet']");
         int NClaims = 0;
-		int TMClaims = Int32.Parse(GetSetting("ClaimsTM"));
+	int TMClaims = Int32.Parse(GetSetting("ClaimsTM"));
         while ( IsVisible(ButtonClaim1) )
         {
-			///Log("First Claim Button is visible");
-			Click(ButtonClaim1);
-			Wait(1);
-			
-            if ( IsVisible(ButtonClaim2) )
-            {
-				var BalanceElements=ElementsByXPath("//span[@id='faucetClaimAmount2']");
+		///Log("First Claim Button is visible");
+		Click(ButtonClaim1);
+		Wait(1);
+	
+         	if ( IsVisible(ButtonClaim2) )
+            	{
+		var BalanceElements=ElementsByXPath("//span[@id='faucetClaimAmount2']");
                 string Text=string.Empty;
                 foreach(var Balanceelement in BalanceElements )
                 {
@@ -199,90 +199,90 @@ public class BCHJollyScript : FaucetScript
                     Log("Trying to claim " + Text + " Satoshis Mining Power");
                 }
 				
-				if ( IsVisible(ElementByXPath("//input[@id='claimFaucet' and starts-with(@value, 'please wait')]")) )
-				{
-					Log("You have to wait");
-					Wait(1);
-					Click(ElementByXPath("//button*[contains(text(),'OK')]"));
-					Wait(1);
-					break;
-				}
+		if ( IsVisible(ElementByXPath("//input[@id='claimFaucet' and starts-with(@value, 'please wait')]")) )
+		{
+			Log("You have to wait");
+			Wait(1);
+			Click(ElementByXPath("//button*[contains(text(),'OK')]"));
+			Wait(1);
+			break;
+		}
 				
-				Wait(1);
+		Wait(1);
                 Click(ButtonClaim2);
 				
-				if ( IsVisible(ElementByXPath("//span[@class='swal-icon--warning__body']")) )
-				{
-					Log("Maximum Claims for today reached... Try again in 24 hours");
-					Wait(1);
-					Click(ElementByXPath("//button[@class='swal-button swal-button--confirm']"));
-					Wait(1);
-				}
+		if ( IsVisible(ElementByXPath("//span[@class='swal-icon--warning__body']")) )
+		{
+			Log("Maximum Claims for today reached... Try again in 24 hours");
+			Wait(1);
+			Click(ElementByXPath("//button[@class='swal-button swal-button--confirm']"));
+			Wait(1);
+		}
 				
-				else if ( IsVisible(ElementByXPath("//div[@class='swal-icon--success__ring']")) )
-				{
-					NClaims++;
-					Log("Claim " + NClaims.ToString() + " made");
-					Wait(1);
-					Click(ElementByXPath("//button[@class='swal-button swal-button--confirm']"));
+		else if ( IsVisible(ElementByXPath("//div[@class='swal-icon--success__ring']")) )
+		{
+			NClaims++;
+			Log("Claim " + NClaims.ToString() + " made");
+			Wait(1);
+			Click(ElementByXPath("//button[@class='swal-button swal-button--confirm']"));
 					
-					///Log("Clicking DONE");
-					Wait(1);
-					Click(ElementByXPath("//input[@type='button' and @value='DONE']"));
+			///Log("Clicking DONE");
+			Wait(1);
+			Click(ElementByXPath("//input[@type='button' and @value='DONE']"));
 					
-					///Wait(1);
-					var BalanceElements1=ElementsByXPath("//span[@id='deposit']");
-					string Text1=string.Empty;
-					foreach(var Balanceelement in BalanceElements1 )
-					{
-						Text1+=Balanceelement.Text.Trim ( );
-					}
-					if ( !string.IsNullOrEmpty ( Text1 ) )
-					{
-						Log("Current Mining Power: " + Text1 + " Satoshi");
-					}
+			///Wait(1);
+			var BalanceElements1=ElementsByXPath("//span[@id='deposit']");
+			string Text1=string.Empty;
+			foreach(var Balanceelement in BalanceElements1 )
+			{
+				Text1+=Balanceelement.Text.Trim ( );
+			}
+			if ( !string.IsNullOrEmpty ( Text1 ) )
+			{
+				Log("Current Mining Power: " + Text1 + " Satoshi");
+			}
 					
-					var BalanceElements2=ElementsByXPath("//span[@id='walletBalance']");
-					string Text2=string.Empty;
-					foreach(var Balanceelement in BalanceElements2 )
-					{
-						Text2+=Balanceelement.Text.Trim ( );
-					}
-					if ( !string.IsNullOrEmpty ( Text2 ) )
-					{
-						Log("Your Wallet contains: " + Text2 + " Satoshi");
-					}
-				}
-            }
-            else
-            {
-				Log("Checking for Pop-Ups");
+			var BalanceElements2=ElementsByXPath("//span[@id='walletBalance']");
+			string Text2=string.Empty;
+			foreach(var Balanceelement in BalanceElements2 )
+			{
+				Text2+=Balanceelement.Text.Trim ( );
+			}
+			if ( !string.IsNullOrEmpty ( Text2 ) )
+			{
+				Log("Your Wallet contains: " + Text2 + " Satoshi");
+			}
+		}
+	}
+	else
+        {
+		Log("Checking for Pop-Ups");
                 CheckForPopupsEnabled=true;
                 Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
                 CheckForPopups( );
-            }
+        }
+		
+	if ( NClaims==TMClaims )
+        {
+        	IsSuccess=true;
+		ClaimSuccess( );
+		Log(NClaims.ToString()+" Claims made.");
+		break;
+        }
 			
-			if ( NClaims==TMClaims )
-            {
-                IsSuccess=true;
-				ClaimSuccess( );
-				Log(NClaims.ToString()+" Claims made.");
-				break;
-            }
+	else if ( NClaims < TMClaims )
+	{
+		Log("Waiting between 60 and 100 seconds before next claim");
+		Wait(60, 100);
+	}
 			
-			else if ( NClaims < TMClaims )
-			{
-				Log("Waiting between 60 and 100 seconds before next claim");
-				Wait(60, 100);
-			}
-			
-			else if ( NClaims==0 )
-			{
-				IsSuccess=false;
-				ClaimFailed( );
-				Log("0 Claims made. Max amount of claims per day probably reached.");
-				break;
-			}
+	else if ( NClaims==0 )
+	{
+		IsSuccess=false;
+		ClaimFailed( );
+		Log("0 Claims made. Max amount of claims per day probably reached.");
+		break;
+	}
         }
 
         return GetWaitSetting( );
