@@ -1,9 +1,8 @@
 
-
-//==================//
+//========================================//
 //script Written by: ••AviramDayan•• 01/01/2020 20:30PM - Version 1
-//Last Update: 08/01/2020 12:00AM - Version 4
-//==================//
+//Last Update: 01/01/2020 19:20AM - Version 8
+//=======================================//
 
 /*
 =========
@@ -82,11 +81,12 @@ using System;
 using System.IO;
 using FaucetCollector.Script;
 using OpenQA.Selenium;
+using System.Globalization;
 //css_inc ShortLinkUtilities
 //css_inc RecaptchaUtilities
 
 
-public class btcsamsity : FaucetScript
+public class CoinPot : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
@@ -142,7 +142,9 @@ public class btcsamsity : FaucetScript
                 new FaucetSetting(){Name="Roll_Alternative_Random_HighLow",Display="Roll Alternative - Random HighLow - ON/OFF",Type=EditorType.CheckBox,Default=false},
 
                 new FaucetSetting(){Name="LotteryGame",Display="Lottery Game - ON/OFF",Type=EditorType.CheckBox,Default=false},
-                new FaucetSetting(){Name="Menu_Amount_Tokens_Lottery",Display="Lottery Game - Menu Amount Tokens",Type=EditorType.ComboBox,Default="100 tickets",Items=new System.Collections.Generic.List<string>{"1 ticket","10 tickets","100 tickets","1k tickets","10k tickets","100k tickets","1m tickets"}},
+                new FaucetSetting(){Name="Menu_Amount_Tokens_Buy_Lottery",Display="Lottery Game - Menu Amount Buy Tokens",Type=EditorType.ComboBox,Default="none",Items=new System.Collections.Generic.List<string>{"none","1 ticket","10 tickets","100 tickets","1k tickets","10k tickets","100k tickets","1m tickets","All"}},
+                new FaucetSetting(){Name="Menu_Amount_Tokens_Free_Lottery",Display="Lottery Game - Menu Amount Free Tokens",Type=EditorType.ComboBox,Default="All",Items=new System.Collections.Generic.List<string>{"none","1 ticket","10 tickets","100 tickets","1k tickets","10k tickets","100k tickets","1m tickets","All"}},
+
 				
                 //insert user settings here
                 //new FaucetSetting { 
@@ -349,7 +351,7 @@ public class btcsamsity : FaucetScript
     if(ad)
 	{
         ad=false; //solve the problem in start - after he return to script again
-        return GetWaitSetting();  	
+        //return GetWaitSetting();  	
     }	//end ad
 		
 		
@@ -413,61 +415,194 @@ public class btcsamsity : FaucetScript
         Wait();		
         Wait(2);
         Log("go to LotteryGame");
-		  
-        var Menu_Amount_Tokens_Lottery_Var = GetSetting("Menu_Amount_Tokens_Lottery");
+		
+		//===//
+		//BUY
+		//===//
+        var Menu_Amount_Tokens_Buy_Lottery_Var = GetSetting("Menu_Amount_Tokens_Buy_Lottery");
 
-        if(Menu_Amount_Tokens_Lottery_Var=="1 ticket")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="none")  
         {
-         var Lottery_Token1 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(text(),'1 ticket')]");
+         Log("Buy_Lottery - none"); 
+		}
+
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="1 ticket")  
+        {
+         var Lottery_Token1 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'1,')]"); //1
+         if (IsVisible(Lottery_Token1))
+		 {
 		 Click(Lottery_Token1);
          Log("click - 1 ticket");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="10 tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="10 tickets")  
         {
-         var Lottery_Token10 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(text(),'10 tickets')]");
+         var Lottery_Token10 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'10,')]"); //10
+         if (IsVisible(Lottery_Token10))
+		 {
 		 Click(Lottery_Token10);
          Log("click - 10 tickets");
+		 }
 		}	
 		
-        if(Menu_Amount_Tokens_Lottery_Var=="100 tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="100 tickets")  
         {
-         var Lottery_Token100 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(text(),'100 tickets')]");
+         var Lottery_Token100 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'100,')]"); //100
+         if (IsVisible(Lottery_Token100))
+		 {
 		 Click(Lottery_Token100);
          Log("click - 100 tickets");
+		 }
 		}	
 		
-        if(Menu_Amount_Tokens_Lottery_Var=="1k tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="1k tickets")  
         {
-         var Lottery_Token1000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(text(),'1,000 tickets')]");
+         var Lottery_Token1000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'1000,')]"); //1000
+         if (IsVisible(Lottery_Token1000))
+		 {
 		 Click(Lottery_Token1000);
          Log("click - 1k tickets");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="10k tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="10k tickets")  
         {
-         var Lottery_Token10000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(text(),'10,000 tickets')]");
+         var Lottery_Token10000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'10000,')]"); //10000
+         if (IsVisible(Lottery_Token10000))
+		 {
 		 Click(Lottery_Token10000);
          Log("click - 10k tickets");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="100k tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="100k tickets")  
         {
-         var Lottery_Token100000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(text(),'100,000 tickets')]");
+         var Lottery_Token100000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'100000,')]"); //100000
+         if (IsVisible(Lottery_Token100000))
+		 {
 		 Click(Lottery_Token100000);
          Log("click - 100k tickets");
+		 }
 		}
 
-        if(Menu_Amount_Tokens_Lottery_Var=="1m tickets")  
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="1m tickets")  
         {
-         var Lottery_Token1000000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(text(),'1,000,000 tickets')]");
+         var Lottery_Token1000000 = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'buyTickets(1000000')]"); //1000000
+         if (IsVisible(Lottery_Token1000000))
+		 {
 		 Click(Lottery_Token1000000);
          Log("click - 1m tickets");
+		 }
 		}
+
+        if(Menu_Amount_Tokens_Buy_Lottery_Var=="All")  
+        {
+         var Lottery_Token_All = ElementByXPath("//div[@id='BuyTicketsButtons']/a[contains(@data-bind,'1 &&')]"); //All
+         if (IsVisible(Lottery_Token_All))
+		 {
+		 Click(Lottery_Token_All);
+         Log("click - ALL tickets");
+		 }
+		}
+		//===//
+		
+
+		//===//
+		//FREE
+		//===//
+        var Menu_Amount_Tokens_Free_Lottery_Var = GetSetting("Menu_Amount_Tokens_Free_Lottery");
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="none")  
+        {
+         Log("Free_Lottery - none"); 
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="1 ticket")  
+        {
+         var Lottery_Token1 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'1,')]"); //1
+         if (IsVisible(Lottery_Token1))
+		 {		 
+		 Click(Lottery_Token1);
+         Log("click - 1 ticket");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="10 tickets")  
+        {
+         var Lottery_Token10 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'10,')]"); //10
+         if (IsVisible(Lottery_Token10))
+		 {		 
+		 Click(Lottery_Token10);
+         Log("click - 10 tickets");
+		 }
+		}	
+		
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="100 tickets")  
+        {
+         var Lottery_Token100 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'100,')]"); //100
+         if (IsVisible(Lottery_Token100))
+		 {		 
+		 Click(Lottery_Token100);
+         Log("click - 100 tickets");
+		 }
+		}	
+		
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="1k tickets")  
+        {
+         var Lottery_Token1000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'1000,')]"); //1000
+         if (IsVisible(Lottery_Token1000))
+		 {		 
+		 Click(Lottery_Token1000);
+         Log("click - 1k tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="10k tickets")  
+        {
+         var Lottery_Token10000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'10000,')]"); //10000
+         if (IsVisible(Lottery_Token10000))
+		 {		 
+		 Click(Lottery_Token10000);
+         Log("click - 10k tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="100k tickets")  
+        {
+         var Lottery_Token100000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'100000,')]"); //100000
+         if (IsVisible(Lottery_Token100000))
+		 {		 
+		 Click(Lottery_Token100000);
+         Log("click - 100k tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="1m tickets")  
+        {
+         var Lottery_Token1000000 = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'buyTickets(1000000')]"); //1000000
+         if (IsVisible(Lottery_Token1000000))
+		 {		 
+		 Click(Lottery_Token1000000);
+         Log("click - 1m tickets");
+		 }
+		}
+
+        if(Menu_Amount_Tokens_Free_Lottery_Var=="All")  
+        {
+         var Lottery_Token_All = ElementByXPath("//div[@id='FreeTicketsButtons']//a[contains(@data-bind,'1 &&')]"); //All
+         if (IsVisible(Lottery_Token_All))
+		 {		 
+		 Click(Lottery_Token_All);
+         Log("click - ALL tickets");
+		 }
+		}
+		//===//
+		
 		
       } // LotteryGame
-
-
+      //=============//
+	  
 	
       //=============//
       //MultiplierGame
@@ -546,8 +681,7 @@ public class btcsamsity : FaucetScript
 		
       } //end MultiplierGame
 
-  
-	  ad = true; //call to timer / and do success	 
+	 return Time_Function();
 		
  //This faucet has nothing to do here. We will let Faucet Collector handle it.
  return base.DoSolveFaucet();
@@ -579,6 +713,46 @@ public class btcsamsity : FaucetScript
         return base.CheckFaucetResult();
     }
 	
+
+
+        //=================//
+       //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+           //site time with date - example 10:00 PM | 10:00 AM
+           var XpathTimeVAR = ElementByXPath("//div[contains(@class,'ModalFormWrap')]/p[1]/span/span");
+           if (IsVisible(XpathTimeVAR))
+           {
+	         Log("DateTime.ParseExact - here"); 
+		     var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+             return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+		   }
+		   		   
+		   //site time with normal counter
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("Time_Function - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+           return 0;		
+        }//end Time_Function
+        //=================//	
+
 
 
       //===============================================================//
@@ -1030,12 +1204,14 @@ public class btcsamsity : FaucetScript
 		  //=====//
 		  var Number_1_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit1')] ");		
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
-		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
+		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");	
+
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
 
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  Log("The Number Now is - " + BalanceINT);  
 		  
-          if (BalanceINT > 894) 
+          if (ErrorVAR ==null && BalanceINT > 894) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1046,7 +1222,7 @@ public class btcsamsity : FaucetScript
             }
 		  }
 
-          if (BalanceINT < 106) 
+          if (ErrorVAR ==null && BalanceINT < 106) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1116,10 +1292,12 @@ public class btcsamsity : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  Log("The Number Now is - " + BalanceINT);  
 		  
-          if (BalanceINT > 944) 
+          if (ErrorVAR ==null && BalanceINT > 944) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1130,7 +1308,7 @@ public class btcsamsity : FaucetScript
             }
 		  }
 
-          if (BalanceINT < 55) 
+          if (ErrorVAR ==null && BalanceINT < 55) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1200,10 +1378,12 @@ public class btcsamsity : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  Log("The Number Now is - " + BalanceINT);  
 		  
-          if (BalanceINT > 984) 
+          if (ErrorVAR ==null && BalanceINT > 984) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1214,7 +1394,7 @@ public class btcsamsity : FaucetScript
             }
 		  }
 
-          if (BalanceINT < 15) 
+          if (ErrorVAR ==null && BalanceINT < 15) 
           {
             if (GetBoolSetting("When_To_Change_to_HighLow_CalculatedNumbers_from_Menu_Methods_on_off"))
             {
@@ -1539,9 +1719,11 @@ public class btcsamsity : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
 		  
-          if (GetBoolSetting("Approve_900_100_on_off") && BalanceINT > 900 || BalanceINT < 100 )
+          if ( ( GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900) || (ErrorVAR ==null && BalanceINT < 100 ) )
 		  {
 		   Log("Approve_900_100_on_off - ON - do random token when 900 100 - active");   
            var Multiplier_1_Token = ElementByXPath("//div[@id='StakeButtons']//button[contains(text(),'1 token')]");
@@ -1613,9 +1795,10 @@ public class btcsamsity : FaucetScript
 		  var Number_2_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit2')] ");		
 		  var Number_3_Digit = ElementByXPath("//div[contains(@class,'display')]/div[contains(@data-bind,'digit3')] ");		
 
+		  var ErrorVAR = ElementByXPath("//div[contains(@class,'toast toast-error')]");	
+
           int BalanceINT = Convert.ToInt32(Number_1_Digit.Text + Number_2_Digit.Text + Number_3_Digit.Text); 
-		  
-          if (GetBoolSetting("Approve_900_100_on_off") && BalanceINT > 900 || BalanceINT < 100 )
+          if ( ( GetBoolSetting("Approve_900_100_on_off") && ErrorVAR ==null && BalanceINT > 900) || (ErrorVAR ==null && BalanceINT < 100 ) )		  
           { 	
 		   Log("Approve_900_100_on_off - ON - do random token when 900 100 - active");
            var Multiplier_1_Token = ElementByXPath("//div[@id='StakeButtons']//button[contains(text(),'1 token')]");
@@ -1658,4 +1841,4 @@ public class btcsamsity : FaucetScript
 
 
 
-} //public class dogeto
+} //public class

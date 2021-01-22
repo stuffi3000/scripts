@@ -1,0 +1,223 @@
+﻿using FaucetCollector.Script;
+using System;
+using System.Globalization;
+using System.Linq;
+
+public class BetFuryScript : FaucetScript
+{
+
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("https://betfury.io/")
+            {
+                new FaucetSetting(){
+                    Name="User",
+                    Type=EditorType.TextBox,
+                    Required=true,
+                    Display="Email"
+                } ,
+                new FaucetSetting()
+                {
+                        Name="Pass",
+                        Type=EditorType.Password,
+                        Required=true,
+                        Display="Password"
+                }
+            };
+        }
+    }
+    public override void Start( )
+    {
+        SuccessXPath="//div[@class='success-notification-content']";
+        FailXPath="//div[@class='notification-content']";
+
+        Title="Betfury";
+        base.Start( );
+    }
+    public override int BeforeLogin( )
+    {
+
+        var loginModalBtn=ElementByXPath("//button[contains(text(),'Log in')]");
+        if ( !IsVisible(loginModalBtn) )
+        {
+            return Fail("Login modal btn not visible or not found");
+        }
+
+        Click(loginModalBtn);
+        Wait(1);
+
+        return base.BeforeLogin( );
+    }
+
+    public override int DoLogin( )
+    {
+        var emailBox=ElementByXPath("//input[@type='email']");
+        if ( !IsVisible(emailBox) )
+        {
+            return Fail("Email box not found or not visible");
+        }
+        SetText(
+            emailBox , GetSetting("User"));
+
+        var passwordBox=ElementByXPath("//input[@type='password']");
+        if ( !IsVisible(passwordBox) )
+        {
+            return Fail("password box not visible or not found");
+        }
+
+        SetText(passwordBox , GetPassword("Pass"));
+
+        var loginBtn=ElementByXPath("//button[contains(text(),'Login')]");
+        if ( !IsVisible(loginBtn) )
+        {
+            return Fail("Login btn not found or not visible");
+        }
+        Click(loginBtn);
+        Wait(2);
+        return base.DoLogin( );
+    }
+
+    public override bool IsLoggedIn( )
+    {
+        return ElementByXPath("//button[contains(text(),'out')]")!=null;
+    }
+
+    public override int DoSolveFaucet( )
+    {
+
+        GoToUrl("https://betfury.io/boxes/all");
+        Wait(3 , 4);
+
+        var claimModalBtn=ElementsByXPath("//button[contains(@class,'redbox__btn')]")
+            .FirstOrDefault( x=> IsVisible(x) &&  x.Enabled);
+
+        if ( claimModalBtn==null )
+        {
+            return Fail("claim modal btn not visible or not found");
+        }
+
+        Click(claimModalBtn);
+        Wait(1);
+
+        var result=DoHCaptcha();
+        if ( result>0 )
+        {
+            return result;
+        }
+
+        var confirmClaimBtn=ElementByXPath("//button[@class='captcha-block__submit btn_red']");
+        if ( !IsVisible(confirmClaimBtn) )
+        {
+            return Fail("Confirm claim btn not visible or not found");
+        }
+
+        Click(confirmClaimBtn);
+
+        return base.DoSolveFaucet( );
+    }
+    public override string GetHCaptchaSiteKey( )
+    {
+        var hcaptchaIframe=ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if ( hcaptchaIframe!=null )
+        {
+            string src= hcaptchaIframe.GetAttribute("src");
+
+            if ( !string.IsNullOrEmpty(src) )
+            {
+                // we find the sitekey 
+                var queryParams = src.Split('&').ToList();
+                // we remove the host part 
+
+                queryParams.RemoveAt(0);
+
+                //we find the sitekey 
+
+                string siteKey= queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+
+
+                return siteKey;
+
+            }
+        }
+
+
+        return base.GetHCaptchaSiteKey( );
+    }
+
+    public override bool SetHCaptchaResponse(string response)
+    {
+        try
+        {
+            var hcaptchaIframe=ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+            if ( hcaptchaIframe!=null )
+            {
+                ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','"+response+"');" , hcaptchaIframe);
+
+                ExecuteScript("window.onVerify();");
+            }
+
+        }
+        catch ( Exception )
+        {
+
+        }
+
+        return base.SetHCaptchaResponse(response);
+    }
+
+
+    public override int GetFaucetWaitTime( )
+    {
+        var satCounter= ElementByXPath("//div[@class='freebox__bc-value']//span");
+
+        if ( IsVisible(satCounter) )
+        {
+            double currentSats;
+            var formatInfo=new NumberFormatInfo( ) { CurrencyDecimalSeparator="." };
+
+            if ( double.TryParse(satCounter.Text , NumberStyles.Any ,formatInfo  , out currentSats) )
+            {
+                double totalSats= 25;
+                var capacityElement=ElementByXPath("//span[@class='freebox__capacity-value']");
+                if ( IsVisible(capacityElement) )
+                {
+                    string text = ExecuteScript("arguments[0].textContent;",capacityElement) as string;
+                    if ( !string.IsNullOrEmpty(text) )
+                    {
+                        string capacity= text.Trim().Split('/').LastOrDefault().Split(' ').FirstOrDefault();
+
+                        if(!double.TryParse(capacity,NumberStyles.Any,formatInfo,out totalSats) )
+                        {
+                            Log("Something is wrong getting the total reward , will use the default "+totalSats,Level.Warning);
+                        }
+
+                    }
+                }
+              
+                if ( currentSats>=totalSats )
+                {
+                    return 0;
+                }
+
+                double totalTimer=TimeSpan.FromMinutes(20).TotalSeconds;
+
+                double percent= currentSats/totalSats;
+
+
+                return ( int )( totalTimer*percent );
+
+
+
+            }
+
+        }
+
+
+        return base.GetFaucetWaitTime( );
+    }
+}

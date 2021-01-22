@@ -1,12 +1,9 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-using FaucetCollector.Script;
+﻿using FaucetCollector.Script;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Remote;
-using Base.Captcha;
+using System;
+using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 
 public class GoldenPTCScript : FaucetScript
 {
@@ -41,28 +38,28 @@ public class GoldenPTCScript : FaucetScript
     /// <summary>
     /// This method gets called when the faucet is enabled and the GO button is clicked
     /// </summary>
-    public override void Start()
+    public override void Start( )
     {
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "goldenfaucet.io";
+        Title="goldenfaucet.io";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
-        SuccessXPath = "//a[@class='btn btn-danger']";
-        FailXPath = "//div[@class='Dsa']";
+        SuccessXPath="//a[@class='btn btn-danger']";
+        FailXPath="//div[@class='Dsa']";
 
         //Let Faucet Collector start up everything
-        base.Start();
+        base.Start( );
     }
 
     /// <summary>
     /// This is the first method to run after the browser is opened and the first page is loaded.
     /// </summary>
-    public override int DoInit()
+    public override int DoInit( )
     {
 
         GoToUrl("https://www.goldenfaucet.io/index.php?view=login");
         //Let Faucet Collector continue.
-        return base.DoInit();
+        return base.DoInit( );
     }
 
     /// <summary>
@@ -71,20 +68,20 @@ public class GoldenPTCScript : FaucetScript
     /// After those Login methods are called it will call this IsLoggedIn method again to see if the login did succeed.
     /// If you return true Faucet Collector will store all cookies so it will probably be already logged in on the next attempt.
     /// </summary>
-    public override bool IsLoggedIn()
+    public override bool IsLoggedIn( )
     {
         //In here we can check for the presence of an element that is only present when you are logged in.
         //In this case we check for en element with the class "loggedIn"
-        return ElementByXPath("//a[@href='index.php?view=logout']") != null;
+        return ElementByXPath("//a[@href='index.php?view=logout']")!=null;
     }
 
     /// <summary>
     /// This method gets called if IsLoggedIn returned false, right before the DoLogin method is called.
     /// </summary>
-    public override int BeforeLogin()
+    public override int BeforeLogin( )
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeLogin();
+        return base.BeforeLogin( );
     }
 
     /// <summary>
@@ -92,62 +89,62 @@ public class GoldenPTCScript : FaucetScript
     /// It can be used to actually login the user/enter wallet details in the faucet
     /// </summary>
     /// <returns></returns>
-    public override int DoLogin()
+    public override int DoLogin( )
     {
         GoToUrl("https://www.goldenfaucet.io/index.php?view=login");
         var LoginBox = ElementByXPath("//input[@name='username']");
-        if (!IsVisible(LoginBox))
+        if ( !IsVisible(LoginBox) )
         {
             return Fail("Login box not visible");
         }
-        SetText(LoginBox, GetSetting("User"));
+        SetText(LoginBox , GetSetting("User"));
         var PassBox = ElementByXPath("//input[@name='password']");
-        if (!IsVisible(PassBox))
+        if ( !IsVisible(PassBox) )
         {
             return Fail("Password box not visible");
         }
-        SetText(PassBox, GetPassword("Pass"));
-        Wait(2, 3);
+        SetText(PassBox , GetPassword("Pass"));
+        Wait(2 , 3);
         string SecondPassword = GetSetting("ExtraPass");
-        if (SecondPassword != "none")
+        if ( SecondPassword!="none" )
         {
             var SencondPasswordBox = ElementByXPath("//input[@placeholder='Only when you did set']");
-            if (IsVisible(SencondPasswordBox))
+            if ( IsVisible(SencondPasswordBox) )
             {
-                SetText(SencondPasswordBox, SecondPassword);
+                SetText(SencondPasswordBox , SecondPassword);
             }
         }
         var result = DoSolveImageCaptcha(ElementByXPath("//img[@id='captchaimglogin']"), ElementByXPath("//input[@id='captcha_login']"));
-        if (result > 0)
+        if ( result>0 )
         {
             return Fail("Problem with captcha");
         }
         var agree = ElementByXPath("//input[@value='Login']");
-        if (agree == null)
+        if ( agree==null )
         {
             //We couldn't find it. Register it as a fail so it can reload the page and try again in 10-15 seconds.
             return Fail("Login button not found.");
         }
         Click(agree);
-        Wait(5, 6);
+        Wait(5 , 6);
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoLogin();
+        return base.DoLogin( );
     }
 
     /// <summary>
     /// This method gets called after the DoLogin method.
     /// </summary>
-    public override int AfterLogin()
+    public override int AfterLogin( )
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         var security = ElementByXPath("//input[@id='security_answer']");
-        if (IsVisible(security))
+        if ( IsVisible(security) )
         {
-            SetText(security, GetSetting("Security"));
+            SetText(security , GetSetting("Security"));
             Click(ElementByXPath("//input[@value='Send']"));
         }
 
-        return base.AfterLogin();
+        return base.AfterLogin( );
     }
 
     /// <summary>
@@ -156,32 +153,32 @@ public class GoldenPTCScript : FaucetScript
     /// This is used to pause the script while the faucet its timer runs out.
     /// Return the number of seconds the bot should wait.
     /// </summary>
-    public override int GetFaucetWaitTime()
+    public override int GetFaucetWaitTime( )
     {
         GoToUrl("https://www.goldenfaucet.io//index.php?view=ads");
-        Wait();
+        Wait( );
         var access = ElementByXPath("//input[@value='Give me access']");
         int cont = 0;
         do
         {
 
-            if (IsVisible(access))
+            if ( IsVisible(access) )
             {
                 var result = DoSolveImageCaptcha(ElementByXPath("//img[@id='captchaimg']"), ElementByXPath("//input[@id='captcha']"));
-                if (result > 0)
+                if ( result>0 )
                 {
                     return Fail("Problem with captcha");
                 }
                 Click(access);
             }
-            Wait(2, 3);
-            access = ElementByXPath("//input[@value='Give me access']");
-            if (cont >= 3)
+            Wait(2 , 3);
+            access=ElementByXPath("//input[@value='Give me access']");
+            if ( cont>=3 )
             {
                 break;
             }
             cont++;
-        } while (IsVisible(access));
+        } while ( IsVisible(access) );
 
 
         Wait(3);
@@ -189,16 +186,16 @@ public class GoldenPTCScript : FaucetScript
 
         int count_ads = Ads.Count;
 
-        foreach (IWebElement ad in Ads)
+        foreach ( IWebElement ad in Ads )
         {
-            if (ad.Text.Contains("DO NOT CLICK") || ad.Text.Contains("BOT CHECK") || !IsVisible(ad))
+            if ( ad.Text.Contains("DO NOT CLICK")||ad.Text.Contains("BOT CHECK")||!IsVisible(ad) )
             {
                 count_ads--;
             }
 
 
         }
-        if (count_ads > 0)
+        if ( count_ads>0 )
         {
             return 0;
         }
@@ -207,64 +204,17 @@ public class GoldenPTCScript : FaucetScript
 
     }
 
-    /// <summary>
-    /// This method is called right before a captcha will be solved. 
-    /// If you call SolveCaptcha() in other methods it will start this flow and tries to solve the captcha on the page.
-    /// </summary>
-    public override int BeforeSolveCaptcha()
-    {
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeSolveCaptcha();
-    }
-
-    /// <summary>
-    /// This method gets called after BeforeSolveCaptcha and it does the actual captcha solving
-    /// It will automatically try to see if there is a SolveMedia captcha active or a reCAPTCHA active. 
-    /// If it finds either one it will then use the selected method on the Captcha tab of FaucetCollector to solve the Captcha.
-    /// </summary>
-    public override int DoSolveCaptcha()
+   
+    public override int DoSolveFaucet( )
     {
 
-
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoSolveCaptcha();
-    }
-
-    /// <summary>
-    /// This method will get called after DoSolveCaptcha returned it was a success.
-    /// </summary>
-    /// <returns></returns>
-    public override int AfterSolveCaptcha()
-    {
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterSolveCaptcha();
-    }
-
-    /// <summary>
-    /// This method is called right before we attempt to claim on the faucet. So we are logged in and good to go.
-    /// Next methods that will be called are DoSolveFaucet, AfterSolveFaucet and CheckFaucetResult.
-    /// </summary>
-    public override int BeforeSolveFaucet()
-    {
-        //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeSolveFaucet();
-    }
-
-    /// <summary>
-    /// This method gets called after the BeforeSolveFaucet. You can do the actual claiming of the faucet in here.
-    /// </summary>
-    /// <returns></returns>
-	private static bool cs;
-    public override int DoSolveFaucet()
-    {
-        cs = false;
         GoToUrl("https://www.goldenfaucet.io//index.php?view=ads");
-        Wait();
+        Wait( );
         var access = ElementByXPath("//input[@value='Give me access']");
-        if (IsVisible(access))
+        if ( IsVisible(access) )
         {
             var result = DoSolveCaptcha();
-            if (result > 0)
+            if ( result>0 )
             {
                 return Fail("Problem with captcha");
             }
@@ -273,241 +223,249 @@ public class GoldenPTCScript : FaucetScript
         Wait(3);
         var Ads = ElementsByXPath("//div[@class='ad-block' or @class='ad-block ' or @class='ad-block  ']//div[@class='ad-title']//span[@class='pointer']");
 
-        Log(Ads.Count + " Standard ads detected");
+        Log(Ads.Count+" Standard ads detected");
         try
         {
             var n = 0;
-            CheckForPopupsEnabled = false;
-            while (Ads.Count > n)
+            CheckForPopupsEnabled=false;
+            while ( Ads.Count>n )
             {
                 try
                 {
-                    if (Ads[n].Text.Contains("DO NOT CLICK") || Ads[n].Text.Contains("BOT CHECK") || !IsVisible(Ads[n]))
+                    if ( Ads[n].Text.Contains("DO NOT CLICK")||Ads[n].Text.Contains("BOT CHECK")||!IsVisible(Ads[n]) )
                     {
                         n++;
                     }
                     else
                     {
-                        CheckForPopupsEnabled = false;
-                        Click(Ads[n], false);
-                        Wait();
+                        CheckForPopupsEnabled=false;
+                        Click(Ads[n] , false);
+                        Wait(2,3 );
 
-                        Driver.SwitchTo().Window(Driver.WindowHandles[1]);
+                        var continueButton=ElementByXPath("//input[@name='Continue']");
+                        if ( IsVisible(continueButton) )
+                        {
+                            Click(continueButton);
+                            Wait(1);
+                        }
+
+
+                        Driver.SwitchTo( ).Window(Driver.WindowHandles[1]);
                         Wait(5);
- var verify = ElementByXPath("//input[@value='Continue']");
+                        var verify = ElementByXPath("//input[@value='Continue']");
                         var countdown = ElementByXPath("//div[@id='progress']");
                         var tozero = ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
-                        if (IsVisible(verify))
+                        if ( IsVisible(verify) )
                         {
 
                             var result = DoSolveImageCaptcha(ElementByXPath("//img[@id='captchaimglogin']"), ElementByXPath("//input[@id='captcha_login']"));
-                            if (result > 0)
+                            if ( result>0 )
                             {
                                 return Fail("Problem with captcha");
                             }
                             Click(verify);
                         }
-                     
-						Wait(3);
+
+                        Wait(3);
                         DateTime t2 = DateTime.Now.AddSeconds(20);
-                        while (IsVisible(ElementByXPath("//div[@class='adwait']")))
+                        while ( IsVisible(ElementByXPath("//div[@class='adwait']")) )
                         {
-                            
-                            Wait();
-                            if (DateTime.Now > t2)
+
+                            Wait( );
+                            if ( DateTime.Now>t2 )
                             {
                                 break;
                             }
-                        }
-                   
-                        Wait();
-                        countdown = ElementByXPath("//div[@id='progress']");
-                        tozero = ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
-                        DateTime t1 = DateTime.Now.AddSeconds(100);
-						var errorbox = ElementByXPath("//div[@class='errorbox']");
-						Wait(5);
-                        if (IsVisible(errorbox))
-                        {
-                        
-                            Driver.SwitchTo().Window(Driver.WindowHandles[0]);
-                            CheckForPopupsEnabled = true;
-                            CheckForPopups();
-                            CheckForPopupsEnabled = false;
-                            Driver.Navigate().Refresh();
-                        }
-                        while (IsVisible(countdown) && !IsVisible(tozero))
-                        {
-                          
-                            Wait();
-                            countdown = ElementByXPath("//div[@id='progress']");
-                            tozero = ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
-                            if (DateTime.Now > t1)
-                            {
-                                break;
-                            }
-                        }
-              
-                        Wait();
-                        tozero = ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
-                        if (IsVisible(tozero))
-                        {
-                            
-                    
-                            solve_image_catpcha();
-                            Wait();
                         }
 
-                        Wait();
+                        Wait( );
+                        countdown=ElementByXPath("//div[@id='progress']");
+                        tozero=ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
+                        DateTime t1 = DateTime.Now.AddSeconds(100);
+                        var errorbox = ElementByXPath("//div[@class='errorbox']");
+                        Wait(5);
+                        if ( IsVisible(errorbox) )
+                        {
+
+                            Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
+                            CheckForPopupsEnabled=true;
+                            CheckForPopups( );
+                            CheckForPopupsEnabled=false;
+                            Driver.Navigate( ).Refresh( );
+                        }
+                        while ( IsVisible(countdown)&&!IsVisible(tozero) )
+                        {
+
+                            Wait( );
+                            countdown=ElementByXPath("//div[@id='progress']");
+                            tozero=ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
+                            if ( DateTime.Now>t1 )
+                            {
+                                break;
+                            }
+                        }
+
+                        Wait( );
+                        tozero=ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
+                        if ( IsVisible(tozero) )
+                        {
+
+
+                            solve_image_catpcha( );
+                            Wait( );
+                        }
+
+                        Wait( );
 
                     }
-                    CheckForPopupsEnabled = true;
-                    CheckForPopups();
-                    Driver.SwitchTo().Window(Driver.WindowHandles[0]);
-                    Wait();
-                    if (!Driver.Url.Contains("https://www.goldenfaucet.io//index.php?view=ads"))
+                    CheckForPopupsEnabled=true;
+                    CheckForPopups( );
+                    Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
+                    Wait( );
+                    if ( !Driver.Url.Contains("https://www.goldenfaucet.io//index.php?view=ads") )
                     {
-                        Driver.Navigate().GoToUrl("https://www.goldenfaucet.io//index.php?view=ads");
+                        Driver.Navigate( ).GoToUrl("https://www.goldenfaucet.io//index.php?view=ads");
                     }
                     else
                     {
-                        Driver.Navigate().Refresh();
+                        Driver.Navigate( ).Refresh( );
                     }
-                    Wait(2, 3);
+                    Wait(2 , 3);
                     var access_ = ElementByXPath("//input[@value='Give me access']");
-                    if (IsVisible(access))
+                    if ( IsVisible(access) )
                     {
                         var result = DoSolveImageCaptcha(ElementByXPath("//img[@id='captchaimg']"), ElementByXPath("//input[@id='captcha']"));
-                        if (result > 0)
+                        if ( result>0 )
                         {
                             return Fail("Problem with captcha");
                         }
                         Click(access);
-                        Wait(2, 3);
+                        Wait(2 , 3);
                     }
-                    Ads = ElementsByXPath("//div[@class='ad-block' or @class='ad-block ' or @class='ad-block  ']//div[@class='ad-title']//span[@class='pointer']");
+                    Ads=ElementsByXPath("//div[@class='ad-block' or @class='ad-block ' or @class='ad-block  ']//div[@class='ad-title']//span[@class='pointer']");
 
                 }
-                catch (Exception)
+                catch ( Exception )
                 {
-                    CheckForPopupsEnabled = true;
-                    CheckForPopups();
-                    Driver.SwitchTo().Window(Driver.WindowHandles[0]);
-                    Wait();
-                    if (Driver.Url.Contains("https://www.goldenfaucet.io//index.php?view=ads"))
+                    CheckForPopupsEnabled=true;
+                    CheckForPopups( );
+                    Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
+                    Wait( );
+                    if ( Driver.Url.Contains("https://www.goldenfaucet.io//index.php?view=ads") )
                     {
                         GoToUrl("https://www.goldenfaucet.io//index.php?view=ads");
                     }
                     else
                     {
-                        Driver.Navigate().Refresh();
+                        Driver.Navigate( ).Refresh( );
                     }
-                    Wait(2, 3);
+                    Wait(2 , 3);
                     var access_ = ElementByXPath("//input[@value='Give me access']");
-                    if (IsVisible(access))
+                    if ( IsVisible(access) )
                     {
                         var result = DoSolveImageCaptcha(ElementByXPath("//img[@id='captchaimg']"), ElementByXPath("//input[@id='captcha']"));
-                        if (result > 0)
+                        if ( result>0 )
                         {
                             return Fail("Problem with captcha");
                         }
                         Click(access);
-                        Wait(2, 3);
+                        Wait(2 , 3);
                     }
-                    Ads = ElementsByXPath("//div[@class='ad-block' or @class='ad-block ' or @class='ad-block  ']//div[@class='ad-title']//span[@class='pointer']");
+                    Ads=ElementsByXPath("//div[@class='ad-block' or @class='ad-block ' or @class='ad-block  ']//div[@class='ad-title']//span[@class='pointer']");
 
                 }
             }
         }
-        catch (Exception)
+        catch ( Exception )
         {
-            Driver.Navigate().Refresh();
-            Wait();
+            Driver.Navigate( ).Refresh( );
+            Wait( );
         }
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoSolveFaucet();
+        return base.DoSolveFaucet( );
     }
 
     /// <summary>
     /// This method will get called after the DoSolveFaucet is completed and returned it was a success.
     /// For example you can wait for a processing popup to go away until actual faucet claim result is on the page.
     /// </summary>
-    public override int AfterSolveFaucet()
+    public override int AfterSolveFaucet( )
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterSolveFaucet();
+        return base.AfterSolveFaucet( );
     }
-    public bool solve_image_catpcha()
+    public bool solve_image_catpcha( )
     {
         bool IsSolved = false;
         try
         {
             var capt = ElementByXPath("//img[@src='modules.php?m=surfer&show=captcha']");
-            if (!IsVisible(capt))
+            if ( !IsVisible(capt) )
             {
-                capt = ElementByXPath("//img[contains(@src, 'data:image/png;base64')]");
+                capt=ElementByXPath("//img[contains(@src, 'data:image/png;base64')]");
             }
             Bitmap captcha = TakeScreenshot(Base.Captcha.CaptchaService.Manual, capt);
-            if (captcha.Width != 300 || captcha.Height != 50)
+            if ( captcha.Width!=300||captcha.Height!=50 )
             {
-                captcha = ChangeImageSize(captcha, 300, 50);
+                captcha=ChangeImageSize(captcha , 300 , 50);
 
             }
 
             Bitmap[] icons = new Bitmap[6];
-            icons[0] = captcha.Clone(new Rectangle(0, 0, 50, 50), captcha.PixelFormat);
-            icons[1] = captcha.Clone(new Rectangle(50, 0, 50, 50), captcha.PixelFormat);
-            icons[2] = captcha.Clone(new Rectangle(100, 0, 50, 50), captcha.PixelFormat);
-            icons[3] = captcha.Clone(new Rectangle(150, 0, 50, 50), captcha.PixelFormat);
-            icons[4] = captcha.Clone(new Rectangle(200, 0, 50, 50), captcha.PixelFormat);
-            icons[5] = captcha.Clone(new Rectangle(250, 0, 50, 50), captcha.PixelFormat);
+            icons[0]=captcha.Clone(new Rectangle(0 , 0 , 50 , 50) , captcha.PixelFormat);
+            icons[1]=captcha.Clone(new Rectangle(50 , 0 , 50 , 50) , captcha.PixelFormat);
+            icons[2]=captcha.Clone(new Rectangle(100 , 0 , 50 , 50) , captcha.PixelFormat);
+            icons[3]=captcha.Clone(new Rectangle(150 , 0 , 50 , 50) , captcha.PixelFormat);
+            icons[4]=captcha.Clone(new Rectangle(200 , 0 , 50 , 50) , captcha.PixelFormat);
+            icons[5]=captcha.Clone(new Rectangle(250 , 0 , 50 , 50) , captcha.PixelFormat);
 
 
             string asset_d = AssetDir("Other");
             int result_ = -1;
-            asset_d += "\\Images Ptcwall\\";
+            asset_d+="\\Images Ptcwall\\";
             bool enc = false;
 
-            for (int i = 0; i < 6; i++)
+            for ( int i = 0 ; i<6 ; i++ )
             {
-                for (int j = 1; j <= 10; j++)
+                for ( int j = 1 ; j<=10 ; j++ )
                 {
 
                     string dir = asset_d + j.ToString() + ".png";
                     FileStream s = new FileStream(dir, FileMode.Open);
                     Bitmap imgtocomp = new Bitmap(Image.FromStream(s));
-                    s.Close();
+                    s.Close( );
                     bool result = CompareImage(icons[i], imgtocomp);
-                    if (result)
+                    if ( result )
                     {
-                        result_ = i;
-                        enc = true;
+                        result_=i;
+                        enc=true;
                         break;
                     }
                 }
             }
-            if (enc)
+            if ( enc )
             {
                 result_++;
-                ExecuteScript("endprogress(" + result_.ToString() + ");");
-                Wait();
-                IsSolved = true;
+                ExecuteScript("endprogress("+result_.ToString( )+");");
+                Wait( );
+                IsSolved=true;
             }
         }
-        catch (Exception ex)
+        catch ( Exception ex )
         {
-            Log(ex.ToString());
-            IsSolved = false;
+            Log(ex.ToString( ));
+            IsSolved=false;
         }
 
         return IsSolved;
     }
-    private bool CompareImage(Bitmap image1, Bitmap image2)
+    private bool CompareImage(Bitmap image1 , Bitmap image2)
     {
-        for (int i = 0; i < image1.Height; i++)
+        for ( int i = 0 ; i<image1.Height ; i++ )
         {
-            for (int j = 0; j < image1.Width; j++)
+            for ( int j = 0 ; j<image1.Width ; j++ )
             {
-                if (!SameColor(image1.GetPixel(j, i), image2.GetPixel(j, i), 100))
+                if ( !SameColor(image1.GetPixel(j , i) , image2.GetPixel(j , i) , 100) )
                 {
                     return false;
                 }
@@ -515,36 +473,36 @@ public class GoldenPTCScript : FaucetScript
         }
         return true;
     }
-    private bool SameColor(Color c1, Color c2, double thre)
+    private bool SameColor(Color c1 , Color c2 , double thre)
     {
         int r = c1.R - c2.R;
         int g = c1.G - c2.G;
         int b = c1.B - c2.B;
-        if (r * r + g * g + b * b > thre * thre)
+        if ( r*r+g*g+b*b>thre*thre )
         {
             return false;
         }
         return true;
     }
 
-    public Bitmap ChangeImageSize(Bitmap pImg, int pWidth, int pHeigth)
+    public Bitmap ChangeImageSize(Bitmap pImg , int pWidth , int pHeigth)
     {
 
         //Creating new bitmap
 
         Bitmap vBitmap = new Bitmap(pWidth, pHeigth);
 
-        using (Graphics vGraphics = Graphics.FromImage((Image)vBitmap))
+        using ( Graphics vGraphics = Graphics.FromImage(( Image )vBitmap) )
 
         {
 
             //Specifi interpolation
 
-            vGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            vGraphics.InterpolationMode=InterpolationMode.HighQualityBicubic;
 
             //Draw
 
-            vGraphics.DrawImage(pImg, 0, 0, pWidth, pHeigth);
+            vGraphics.DrawImage(pImg , 0 , 0 , pWidth , pHeigth);
 
         }
 
@@ -562,10 +520,10 @@ public class GoldenPTCScript : FaucetScript
     /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
     /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
     /// </summary>
-    public override int CheckFaucetResult()
+    public override int CheckFaucetResult( )
     {
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
 
-        return base.CheckFaucetResult();
+        return base.CheckFaucetResult( );
     }
 }

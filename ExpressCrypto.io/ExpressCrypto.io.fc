@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/01/2020 00:05PM - Version 1
-//Last Update: 23/08/2020 00:35PM - Version 2
+//Last Update: 17/01/2021 23:15PM - Version 3
 //==================//
 
 using System;
@@ -112,9 +112,9 @@ public class ExpressCrypto : FaucetScript
     }
 	
 	
+
 	
-	
-	
+
 
 	
 //=============//
@@ -153,13 +153,7 @@ public class ExpressCrypto : FaucetScript
 		
         Wait(2);
 
-        //solve Captcha X2 XPath (1 = captcha image | 2 = input text )
-        var result = DoSolveImageCaptcha(ElementByXPath("//span[@class='input-group-addon']/img"),ElementByXPath("//input[@name='captcha']")); 
-
-        if (result > 0)
-        {
-           return Fail("fail not solve"); //return to solve again - if something wrong
-        }
+        Recaptcha_Function(); //call
 
         Wait(2);
 				
@@ -357,6 +351,59 @@ public class ExpressCrypto : FaucetScript
     }
 	
 	
+
+	
+       //=================//
+       //Recaptcha_Function
+       //=================//
+
+        public int Recaptcha_Function()
+        {
+
+
+          //solve Captcha X2 XPath (1 = captcha image | 2 = input text )
+          var DiffCap = ElementByXPath("//span[@class='input-group-addon']/img"); 
+          if (IsVisible(DiffCap))
+		  {           	
+		    var result_3 = DoSolveImageCaptcha(ElementByXPath("//span[@class='input-group-addon']/img"),ElementByXPath("//input[@name='captcha']"));     
+            if (result_3 > 0)
+            {
+               return Fail("DiffCap - fail not solve"); //return to solve again - if something wrong
+            }	
+		  }		
+		
+		
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+		  
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+		return 0;
+        }//end Recaptcha_Function
+        //=================//	
 
 	
 	

@@ -1,16 +1,18 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 04/09/2020 07:00AM - Version 12
+//Last Update: 20/12/2020 20:00PM - Version 14
 //==================//
 
 using System;
 using System.Drawing;
+using System.Linq;
 using FaucetCollector.Script;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using System.Globalization;
 
 //css_inc recaptchaUtilities
 //css_inc AntiBotLinksUtility
@@ -18,7 +20,7 @@ using OpenQA.Selenium.Interactions;
 //css_ref ProcessingImagesUsingLockBits
 //css_inc GetestCaptcha
 
-public class primedice : FaucetScript
+public class Primedice : FaucetScript
 {
     /// <summary>
     /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
@@ -29,14 +31,19 @@ public class primedice : FaucetScript
     {
         get
         {
-			
-            return new FaucetSettings("https://primedice.com/")
+		
+            return new FaucetSettings("https://Primedice.com/")
             {
                 new FaucetSetting(){Name="Email",Display="Email OR UserName",Type=EditorType.TextBox,Required=false},
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=false},
+                new FaucetSetting(){Name="CustomWaitForCode",Display="Custom Wait For Code in Login - in sec ",Type=EditorType.Numeric,Default=60},
+
+                new FaucetSetting() { Name = "ExclusiveBonusDrop_Telegram", Display = "Exclusive Bonus Drop - ON/OFF - in Telegram - 'Primedice.com - Play Smarter' - Public Channel", Type = EditorType.CheckBox, Default =true},	
 				
                 new FaucetSetting() { Name = "Reload", Display = "Reload - ON/OFF - claim unlimited time if available", Type = EditorType.CheckBox, Default =true},	
-                new FaucetSetting(){Name="RakeBack",Display="RakeBack - ON/OFF - from Bronze level",Type=EditorType.CheckBox,Default=false},
+                new FaucetSetting() { Name = "Reload_SiteTimeDate", Display = "Reload Time - return to the exact time that found on the site", Type = EditorType.CheckBox, Default =false},	
+                
+				new FaucetSetting(){Name="RakeBack",Display="RakeBack - ON/OFF - from Bronze level",Type=EditorType.CheckBox,Default=false},
 
 				new FaucetSetting(){Name="MenuCoins",Display="MenuCoins - Select Favorite Coins",Type=EditorType.ComboBox,Default="btc",Items=new System.Collections.Generic.List<string>{"btc","eth","ltc","doge","bch","xrp","trx","eos"}},
 
@@ -48,6 +55,28 @@ public class primedice : FaucetScript
                 new FaucetSetting() { Name = "Vault_Amount_Deposit", Display = "Vault_Amount_Deposit", Type = EditorType.TextBox, Default = "0.00050000" }, 
 
                 new FaucetSetting() { Name = "AffWithdraw", Display = "AffWithdraw", Type = EditorType.CheckBox, Default = false},	
+
+				new FaucetSetting(){Name="MenuGames",Display="MenuGames - Select Favorite Games",Type=EditorType.ComboBox,Default="none",Items=new System.Collections.Generic.List<string>{"none","Keno"}},
+                
+				//Keno
+                new FaucetSetting(){Name="InstantBet",Display="InstantBet - ON/OFF - if ON it will play faster",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting() { Name = "Keno_Spin_Number", Display = "Keno_Spin_Number - Choose how much Spin/BET numbers", Type = EditorType.TextBox, Default = 100 },
+				new FaucetSetting() { Name = "Keno_break", Display = "Keno_break - when the BET numbers works - Choose after how much time you want to break inside 'while loop' - the default is 1500sec = 25min", Type = EditorType.TextBox, Default = "1500" },
+				
+				new FaucetSetting(){Name="Menu_Method_Choose_Numbers",Display="Menu_Method_Choose_Numbers - 'Random' OR 'Recent' OR 'MostWinNumbers' OR 'FixedNumbers' ",Type=EditorType.ComboBox,Default="Random",Items=new System.Collections.Generic.List<string>{"Random","Recent","MostWinNumbers","FixedNumbers"}},
+                new FaucetSetting() { Name = "FixedNumbers", Display = "FixedNumbers - option, choose until 10 number | split by 'comma' ", Type = EditorType.TextBox, Default = "1,2,3,4,5,6,7,8,9,10" },
+				new FaucetSetting(){Name="FixedNumbers_ON_OFF",Display="FixedNumbers - ON/OFF - more option to choose your numbers only once - after the CountGeneral end (Spin/Bet Numbers) ",Type=EditorType.CheckBox,Default=false},
+
+				new FaucetSetting(){Name="MenuRiskLevel",Display="MenuRiskLevel - Select Risk Level",Type=EditorType.ComboBox,Default="classic",Items=new System.Collections.Generic.List<string>{"classic","low","medium","high"}},
+                new FaucetSetting(){Name="Keno_Bet_Amount",Display="Keno_Bet_Amount",Type=EditorType.TextBox,Default = "0.00000001"},
+                new FaucetSetting(){Name="CustomWaitTime",Display="CustomWaitTime - in sec, before click on Spin/BET",Type=EditorType.Numeric,Default = 2},
+
+                new FaucetSetting() { Name = "Win_Counter_Auto_Random_Label", Display = "Win Counter - if ON - before each Spin/BET - each time that you 'LOSE' under your 'Counter' - if you not WIN it will auto change the numbers in 'Random' ", Type = EditorType.Label},	
+                new FaucetSetting(){Name="Win_Counter_Auto_Random",Display="Win_Counter_Auto_Random - ON/OFF",Type=EditorType.CheckBox,Default=true},           
+				new FaucetSetting(){Name="Win_Counter_Numbers",Display="Win_Counter_Numbers - note: it will auto change the numbers in 'Random' if you LOSE ",Type=EditorType.TextBox,Default = 2},
+                
+				new FaucetSetting(){Name="increaseWhenYouLose",Display="increaseWhenYouLose - ON/OFF - only if you LOSE, if you WIN he will return to default amount that you set in first settings ",Type=EditorType.CheckBox,Default=false},           
+
 
             };
         }
@@ -62,7 +91,7 @@ public class primedice : FaucetScript
         ad = false;
        
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title = "primedice.com";
+        Title = "Primedice.com";
 
 		SuccessXPath = "//*";  //*[@id='']
         FailXPath = "//*"; //*[@id='']
@@ -103,13 +132,15 @@ public class primedice : FaucetScript
 
 
 
+
+
 //=============//
 //BeforeLogin
 //=============//
     public override int BeforeLogin()
     {
 		
-	
+		
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
         return base.BeforeLogin();
     }
@@ -127,14 +158,19 @@ public class primedice : FaucetScript
     public override int DoLogin()
     {
 
+     Set_English_Language_Function(); //call
 	
-      var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
+     var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
 	
 	 //if i NOT Login - go to Login Page
 	 if (!IsVisible(ExitButton))
 	 {
 
-		//GoToUrl("https://primedice.com/?modal=login");
+        //====================================//
+        // only this section is different vs - | Stake.Com | //
+        //====================================//
+		 
+		//GoToUrl("https://primedice.com/?action=login&modal=auth");
 
         Driver.Navigate().Refresh(); //that not enter multiple content in input
 		Wait();		
@@ -156,9 +192,11 @@ public class primedice : FaucetScript
          Click(LogInButton);
         }
 
-        Wait(3);
-
-        var box_user = ElementByXPath("//input[contains(@name,'email')]");
+        Wait(3);   
+		
+		//====================//
+		
+		var box_user = ElementByXPath("//input[contains(@name,'email')]");
         SetText(box_user, GetSetting("Email"));
 		
 		Wait(2);
@@ -173,7 +211,8 @@ public class primedice : FaucetScript
 		Wait();	
 
 		Wait(3);
-        var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2')]"); 
+		
+        var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]"); 
         if (IsVisible(RecaptchaOpen_Iframe))
         {
           //SolveCaptcha if apper
@@ -188,9 +227,24 @@ public class primedice : FaucetScript
         }
 
         Click(ButtonLog); //click again
+		
+        var EmailCode = ElementByXPath("//span[contains(text(),'Email Code')]"); 
+        if (IsVisible(EmailCode))
+        {		
+		  Log("Login: we waiting " + GetSetting("CustomWaitForCode") + " sec - Please enter the code that sent to your email " + GetSetting("Email") );			  
+          int MyCustomTimeINT;
+          MyCustomTimeINT = GetIntSetting("CustomWaitForCode"); 
+          Wait(MyCustomTimeINT);
+        }
+		
+		Wait();	
+
+        Click(ButtonLog); //click again
+
 		Wait();	
 		
 	 } // end ExitButton
+
         
        return base.DoLogin();
     }
@@ -269,13 +323,16 @@ public class primedice : FaucetScript
     }
   
 	
-	
+
+		 
 //==============//
 //DoSolveFaucet
 //==============//
  public override int DoSolveFaucet()
   {
-	  
+
+     Set_English_Language_Function(); //call
+
      //=======//
      //Vault
      //=======//
@@ -283,7 +340,7 @@ public class primedice : FaucetScript
      if (GetBoolSetting("Vault_Withdraw"))
      {
 		Log("Vault_Withdraw");
-		GoToUrl("https://primedice.com/?currency=eth&modal=vault&operation=withdraw");
+		GoToUrl("https://Primedice.com/?currency=eth&modal=vault&operation=withdraw");
         Wait(2);
 		
         Choose_Coin_Function();	//call
@@ -292,15 +349,14 @@ public class primedice : FaucetScript
 		
         Vault_Function();	//call
 		
-		Wait(2);	
-		
+		Wait(2);		
 	 }//end Vault_Withdraw
 
 
      if (GetBoolSetting("Vault_Deposit"))
      {
 		Log("Vault_Deposit");
-		GoToUrl("https://primedice.com/?currency=eth&modal=vault&operation=deposit");
+		GoToUrl("https://Primedice.com/?currency=eth&modal=vault&operation=deposit");
         Wait(2);
 		
         Choose_Coin_Function();	//call
@@ -309,13 +365,13 @@ public class primedice : FaucetScript
 		
         Vault_Function();	//call
 		
-		Wait(2);	
+		Wait(2);
 		
 	 }//end Vault_Deposit
 	 
      //=============//	 
 
-	  
+  
      //=============//
      //AffWithdraw
      //=============// 
@@ -325,28 +381,36 @@ public class primedice : FaucetScript
 		Log("AffWithdraw");
 		GoToUrl("https://Primedice.com/affiliate/funds");
 
-        var WithdrawCommission = ElementByXPath("//button[@class='Button-sc-1n30nq3-0 dyQPHX' and not (@disabled) ]");
-        if (IsVisible(WithdrawCommission))
-        {		
-		Log("WithdrawCommission");		
-        Click(WithdrawCommission);
+        var CheckWithdrawCommission = ElementByXPath("//div[contains(@class,'styles__Buttons')]//button[contains(@class,'Button__StyledButton') and (@disabled) ]"); 
+        if (!IsVisible(CheckWithdrawCommission))
+        {	
+          Log("AffWithdraw - Claim ALL");
+          var WithdrawCommission = ElementByXPath("//div[contains(@class,'styles__Buttons')]//button[contains(@class,'Button__StyledButton')]"); 
+          Click(WithdrawCommission);
         }//end WithdrawCommission
-		
+
 	 }//end AffWithdraw
      //=============//	 
  
+
 		//======//
 		//Rakeback//
 		//======//
         if (GetBoolSetting("Rakeback"))
         {	
-          GoToUrl("https://primedice.com/?currency=btc&modal=vipRakeback");
+          GoToUrl("https://Primedice.com/?modal=vip&tab=rakeback");
 	      Log("Go to try - Rakeback");	
 	      Wait();
 	      Wait(2);	
 
-          var RakebackAvailable = ElementByXPath("//a[contains(@href,'Rakeback')]/span[contains(text(),'Rakeback')]"); 
-          if (IsVisible(RakebackAvailable))
+          var RakebackAvailable = ElementByXPath("//button[contains(@class,'Button__StyledButton')]/span[contains(text(),'Rakeback')]");  
+		  
+          if (!IsVisible(RakebackAvailable))
+          {
+	        Log("Rakeback - NOT here - try next time");
+          }     
+		  
+		  if (IsVisible(RakebackAvailable))
           {
             All_Function(); //call
 	        Log("Rakeback - here");
@@ -361,20 +425,109 @@ public class primedice : FaucetScript
 		//======//
         if (GetBoolSetting("Reload"))
         {	
-          GoToUrl("https://primedice.com/?currency=btc&modal=vipReload");
+          GoToUrl("https://Primedice.com/?currency=btc&modal=vip&tab=reload");
 	      Log("Go to try - Reload");	
 	      Wait();
 	      Wait(2);	
 
-          var ReloadAvailable = ElementByXPath("//a[contains(@href,'Reload')]/span[contains(text(),'Reload')]"); 
+          var ReloadAvailable = ElementByXPath("//button[contains(@class,'Button__StyledButton')]/span[contains(text(),'Reload')]"); 
+		  
+          if (!IsVisible(ReloadAvailable))
+          {
+	        Log("Reload - NOT here - try next time");
+          }     
+		  
           if (IsVisible(ReloadAvailable))
           {
-            All_Function(); //call	
+            All_Function(); //call
 	        Log("Reload - here");
           }
 		
         } //end ReloadAvailable
 		//======//
+
+
+		//======//
+		//ExclusiveBonusDrop_Telegram//
+		//======//
+        if (GetBoolSetting("ExclusiveBonusDrop_Telegram"))
+        {
+	      CheckForPopupsEnabled = false;    //disable
+
+		
+	      //Title="Primedice.com - Play Smarter – Telegram"; //
+		  
+          GoToUrl("https://t.me/s/OfficialPrimedice"); //diffrenf from stake
+	      Log("Go to try - ExclusiveBonusDrop_Telegram");	
+	      Wait();
+	      Wait(5);	
+
+            //Vertical - scrollHeight | scrollTop   //Horizontal - | scrollWidth | scrollLeft
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //if some elements not found in html - just before need to do `scrollTop` to find some elements
+            Wait(3);
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //again
+            Wait(3);
+			
+            var ExclusiveBonusDrop_Telegram_Last = ElementsByXPath("//div[contains(@class,'tgme_widget_message_text js-message_text') and contains(., 'Drop') ]//a[position() = last() ]");
+            var ElementsToCheck = ExclusiveBonusDrop_Telegram_Last.LastOrDefault();
+
+            if (ElementsToCheck ==null) // Not Visible
+            {
+	           Log("ElementsToCheck - NOT found");
+			}
+			
+            if (ElementsToCheck !=null) //Visible  
+            {
+			   Click(ElementsToCheck);
+	           Log("ElementsToCheck - here");
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[1]); 
+			   
+			   Wait(5);
+			   
+			   Choose_Coin_Function();
+			   
+			   Wait(5);
+			   
+               var Redeem_VAR = ElementByXPath("//span/span[contains(text(),'Redeem')]"); 
+		       if (IsVisible(Redeem_VAR))
+               {				
+	             Log("ExclusiveBonusDrop_Telegram_Last - here");			
+			     Click(Redeem_VAR);
+			     Wait(7);			  
+			   }
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[0]); 
+			   
+               CheckForPopupsEnabled = true;     //enable
+               CheckForPopups();    //call		
+			   
+	           Title="Primedice.com";		  
+               GoToUrl("https://Primedice.com");	  
+            }
+	
+        } //end ExclusiveBonusDrop_Telegram
+		//======//
+
+		  
+
+        //=========//
+        //MenuGames
+		//=========//
+        var MenuGamesVAR = GetSetting("MenuGames"); 
+
+        if(MenuGamesVAR=="none")
+        {
+  		  Log("Games - none - no game chosen");
+	    }// end none
+	    
+        if(MenuGamesVAR=="Keno")
+        {
+  		  Log("Keno Game - go to keno");
+          Keno_Game_Function(); //call
+	    }// end Keno
+		//=========//
+
 
 		return Time_Function(); //call to function time
 	
@@ -386,7 +539,7 @@ public class primedice : FaucetScript
 //==============///
 	
 	
-
+	
 	
 	
 //==============//
@@ -419,19 +572,47 @@ public class primedice : FaucetScript
         return base.CheckFaucetResult();
     }
 
-	
+
+
         //=================//
        //Time_Function
         //=================//
         public int Time_Function()
         {
-			
+
+           if (GetBoolSetting("Reload_SiteTimeDate"))
+           {
+             Title = "Primedice.com";
+             GoToUrl("https://Primedice.com/?currency=btc&modal=vip&tab=reload");
+	         Log("Go to try - Reload to return to time");	
+	         Wait();
+	         Wait(15);	
+			   
+             //site time with date - example 10:00 PM | 10:00 AM
+             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+             if (IsVisible(CheckAvailableGeneral))
+             {
+	           Log("DateTime.ParseExact - here"); 
+               
+			   var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+			   //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+
+			   var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+			   
+		     } //end CheckAvailableGeneral
+			 
+		   } // end Reload_SiteTimeDate
+
+		   		   
+		   //site time with normal counter
            var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
 		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
 
            if (IsVisible(MinVar))
            {
-	         Log("WaitTimerText apper - return to site time"); 
+	         Log("Time_Function - WaitTimerText apper - return to site time"); 
              int min,sec;
              min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
              sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
@@ -440,7 +621,7 @@ public class primedice : FaucetScript
 
            if (!IsVisible(MinVar))
            {
-	            Log("return to your time"); 
+	            Log("Time_Function - return to your time"); 
 		        return GetWaitSetting();
            }
 
@@ -449,34 +630,90 @@ public class primedice : FaucetScript
         //=================//	
 
 
+
+      //============================//
+      //Set_English_Language_Function
+      //============================//
+      public int Set_English_Language_Function()
+      {	
+	  
+          var CheckLanguage = ElementByXPath("//button[contains(@class,'JGufU')]//img[contains(@src,'gb.svg')] | //button[contains(@class,'fNCTAa')]//img[contains(@src,'gb.svg')]"); 
+                
+	      if (IsVisible(CheckLanguage)) 
+          {
+	       Log("Already English Language");
+          }	
+	      
+          if (!IsVisible(CheckLanguage)) 
+          {
+           var OpenMenuLeftSide = ElementByXPath("//button[contains(@class,'JGufU')]/span[contains(@class,'iHjwOk')]/span[contains(@class,'iHjwOk')]"); 
+           Click(OpenMenuLeftSide);
+	       Log("OpenMenuLeftSide");
+	       
+	       Wait(3);
+	       
+           var ChooseEnglish = ElementByXPath("//ul[contains(@class,'hPNxpF')]//img[contains(@src,'gb.svg')]"); 
+           Click(ChooseEnglish);
+	       Log("ChooseEnglish");
+	       
+	       Wait();
+	       
+	      }
+	  
+		  return 0;
+		  		  
+      } // end Set_English_Language_Function
+		//=========//	
+		
+
+
         //=========//
         //All_Function
 		//=========//
-        public void All_Function()
+        public int All_Function()
         {	
-		
+
           Choose_Coin_Function(); //call
 		  
           var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+
+          if (IsVisible(CheckAvailableGeneral)) 
+          {	
+	        var NextAvailable = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span"); 
+		    if (IsVisible(NextAvailable)) 
+		    {		
+			Log("Next claim available at " + NextAvailable.Text );
+		    }	
+			
+		    if (!IsVisible(NextAvailable)) 
+		    {		
+			Log("try next time");
+		    }	
+
+		  } //end CheckAvailableGeneral - Visible 
+
+
           if (!IsVisible(CheckAvailableGeneral)) 
           {	
 		    Log("faucet visible - do stuff");
 
-            var CheckClaim = ElementByXPath("//div[contains(@class,'styles__Buttons')]//button[contains(@class,'Button__StyledButton') and (@disabled) ]"); 
+            var CheckClaim = ElementByXPath("//button[@type='submit' and (@disabled) ]"); 
             if (!IsVisible(CheckClaim))
             {	
 
-              var Claim1VAR = ElementByXPath("//div[contains(@class,'styles__ButtonsWrap')]//span[contains(text(),'Claim')] "); //click on the claim 1
+              Log("CheckClaim - here");
+
+              var Claim1VAR = ElementByXPath("//button[@type='submit']"); //click on the claim 1
               Click(Claim1VAR);
               Log("claim 1 - try");
 			  
-              var ReCaptchaIframe = ElementByXPath("//iframe[contains(@src,'recaptcha/api2')]"); 
+              var ReCaptchaIframe = ElementByXPath("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]"); 
               if (IsVisible(ReCaptchaIframe))
               {	
 		        Log("Reload - call to solve captch");
                 var result = DoSolveCaptcha(); //call to solve captch		 
 				
-                var Claim2VAR = ElementByXPath("//div[contains(@class,'styles__ButtonsWrap')]//span[contains(text(),'Claim')] "); //click on the claim 2
+                var Claim2VAR = ElementByXPath("//button[@type='submit']"); //click on the claim 2
                 Click(Claim2VAR);
                 Log("claim 2 - Success"); // click again  
 				
@@ -493,7 +730,9 @@ public class primedice : FaucetScript
 
             } //CheckClaim
 		  
-		  }//end CheckAvailableGeneral
+		  }//end CheckAvailableGeneral - NOT Visible
+
+		  return 0;
 
 		}//end All_Function
 		//=========//
@@ -506,18 +745,21 @@ public class primedice : FaucetScript
         {	
 		
           //Check balance
-          var balance = ElementByXPath("//span[contains(@class,'NumberAnimation')]//span[contains(@class,'styles__Content')]");
-          string BalanceSTRING = balance.Text.Trim().Split('.')[1];
+          var BalanceVAR = ElementByXPath("//span[contains(@class,'NumberAnimation')]//span[contains(@class,'styles__Content')]");
+          string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[1];
           int BalanceINT = Convert.ToInt32(BalanceSTRING);
-		  
-          if (BalanceINT < 1) // if under 1
+
+          int MyAmount;
+          Int32.TryParse(GetSetting("LimitDeposit"), out MyAmount);
+
+          if (IsVisible(BalanceVAR) && BalanceINT < MyAmount) // if under 1
           {
-	         Log("LimitFaucet - the balance under 0 < not good");
+	         Log("LimitFaucet - the balance under " + MyAmount + " < not good");
           }
 		  
-          if (BalanceINT > 1 ) // if above "1"
+          if (IsVisible(BalanceVAR) && BalanceINT > MyAmount) // if above 1
           {
-		     Log("LimitFaucet - the balance above 0 > good");	
+	         Log("LimitFaucet - the balance above " + MyAmount + " > good");
 		  	 
 		     var Password_check = ElementByXPath("//input[contains(@name,'password')]"); //the password only apper in "Withdraw" section
              if (IsVisible(Password_check))
@@ -567,13 +809,14 @@ public class primedice : FaucetScript
 		
 	
 
+
       //=========//
       //Choose_Coin_Function
       //=========//
       public int Choose_Coin_Function()
       {	
 
-        var MenuVAR = ElementByXPath("//button[contains(@class,'Button__StyledButton-sc-8bd3dp-0 jXTFLj')]"); 
+        var MenuVAR = ElementByXPath("//div[contains(@class,'styles__StyledStack')]//button[contains(@class,'iWspNF')]"); 
         if (IsVisible(MenuVAR))
         {
           Log("Menu_Function");				  
@@ -582,61 +825,60 @@ public class primedice : FaucetScript
 		  
 	    Wait(2);
 	  
-
         var MenuCoinsVAR = GetSetting("MenuCoins"); 
 	    
         if(MenuCoinsVAR=="btc")
         {
-        var btc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[1]/button[contains(@class,'Button__StyledButton')]");
+        var btc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[1]/button");
         Log("choose - btc");
         Click(btc);
 	    }// end btc
 
         if(MenuCoinsVAR=="eth")
         {
-        var eth = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[2]/button[contains(@class,'Button__StyledButton')]");
+        var eth = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[2]/button");
         Log("choose - eth");
         Click(eth);
 	    }// end eth	  
 
         if(MenuCoinsVAR=="ltc")
         {
-        var ltc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[3]/button[contains(@class,'Button__StyledButton')]");
+        var ltc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[3]/button");
         Log("choose - ltc");
         Click(ltc);
 	    }// end ltc	  
 	    
         if(MenuCoinsVAR=="doge")
         {
-        var doge = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[4]/button[contains(@class,'Button__StyledButton')]");
+        var doge = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[4]/button");
         Log("choose - doge");
         Click(doge);
 	    }// end doge 
 	    
         if(MenuCoinsVAR=="bch")
         {
-        var bch = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[5]/button[contains(@class,'Button__StyledButton')]");
+        var bch = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[5]/button");
         Log("choose - bch");
         Click(bch);
 	    }// end bch
 	    
         if(MenuCoinsVAR=="xrp")
         {
-        var xrp = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[6]/button[contains(@class,'Button__StyledButton')]");
+        var xrp = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[6]/button");
         Log("choose - xrp");
         Click(xrp);
 	    }// end xrp
 	    
         if(MenuCoinsVAR=="trx")
         {
-        var trx = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[7]/button[contains(@class,'Button__StyledButton')]");
+        var trx = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[7]/button");
         Log("choose - trx");
         Click(trx);
 	    }// end trx
 	    
         if(MenuCoinsVAR=="eos")
         {
-        var eos = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[8]/button[contains(@class,'Button__StyledButton')]");
+        var eos = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[8]/button");
         Log("choose - eos");
         Click(eos);
 	    }// end eos
@@ -647,8 +889,404 @@ public class primedice : FaucetScript
 
       } // end Choose_Coin_Function
 		//=========//
+		
+
+		
+	  //AllKenoElementsFunction - store multi elements - last numbers	
+      public List<IWebElement> AllKenoElementsFunction = new List<IWebElement>();
+
+      //MostWinNumbersString - after the CountGeneral end - choose numbers that set in settings
+      public List<string> MostWinNumbersString = new List<string>();
+
+	  //CustomFixedNumbersString - from the general menu - choose FixedNumbers
+      public List<string> CustomFixedNumbersString = new List<string>();
+		  
+        //=========//
+        //Keno_Game_Function
+		//=========//
+        public int Keno_Game_Function()
+        {	
+		
+		  Wait(2);
+		  GoToUrl("https://Primedice.com/casino/games/keno");
+		  Wait(4);
+		  Choose_Coin_Function(); //call
+
+          //InstantBet
+          if (GetBoolSetting("InstantBet")) 
+          {
+  		    Log("Keno Game - InstantBet - play faster");
+            var SettingsKeno = ElementByXPath("//div[contains(@class,'dheDkC')]/span/button"); 
+			Click(SettingsKeno);
+			Wait(3);
+			 
+            var InstantBet_Active = ElementByXPath("//button[contains(@class,'cmvbPZ active')]//span[contains(text(),'Instant') ]"); 
+            if (!IsVisible(InstantBet_Active)) //if NOT Active/visible - then click
+            {
+  		    Log("Keno Game - InstantBet - click ");
+            var InstantBet = ElementByXPath("//span[contains(text(),'Instant Bet')]"); 
+			Click(InstantBet);
+			}
 			
+            if (IsVisible(InstantBet_Active)) //if NOT Active/visible - then click
+            {
+  		    Log("Keno Game - InstantBet - Already Active ");
+			}
+			
+		  }	
+
+          //do MenuRiskLevel
+          var MenuVAR = ElementByXPath("//select[@name='risk']"); 
+          if (IsVisible(MenuVAR))
+          {
+  		    Log("Keno Game - MenuRiskLevel - click");
+		    Click(MenuVAR);			  
+		  }
+
+	      Wait(2);
+
+          var MenuRiskLevel_VAR = GetSetting("MenuRiskLevel"); 
+	      
+          if(MenuRiskLevel_VAR == "classic")
+          {
+          var classic = ElementByXPath("//option[@value='classic']");
+          Log("Keno Game - MenuRiskLevel - choose - classic");
+          Click(classic);
+	      }// end classic
+		  
+          if(MenuRiskLevel_VAR == "low")
+          {
+          var low = ElementByXPath("//option[@value='low']");
+          Log("Keno Game - MenuRiskLevel - choose - low");
+          Click(low);
+	      }// end low
+		  
+          if(MenuRiskLevel_VAR == "medium")
+          {
+          var medium = ElementByXPath("//option[@value='medium']");
+          Log("Keno Game - MenuRiskLevel - choose - medium");
+          Click(medium);
+	      }// end medium
+		  
+          if(MenuRiskLevel_VAR == "high")
+          {
+          var high = ElementByXPath("//option[@value='high']");
+          Log("Keno Game - MenuRiskLevel - choose - high");
+          Click(high);
+	      }// end high
+
+	      Wait(2);
+
+          Bet_Amount_Function(); //call to set Bet_Amount
+		
+          Wait(2);	
+		  
+          //1TIME - Click Only one Time - to store before loop entered
+          Keno_Random_AND_Bet_Click_Function(); //call
+  		  Log("Keno Game - 1TIME - Click Only one Time - to store before loop entered");
+          //====//
+
+	  
+          //====//
+          //Loop
+		  //====//		  
+		  Log("Starting Loop - Keno - total spin to do is: " + GetSetting("Keno_Spin_Number"));
+		  
+          int CustomNumber;
+          CustomNumber = Convert.ToInt32(GetSetting("Keno_Spin_Number"));
+		  
+          int CountGeneral = 1; //if for example i want 10 - and set from 1 - it will be 1-10 - if i set from 0 - it will be 0-10 (11)
+          var TimeToWaitForBreak = DateTime.Now.AddSeconds(GetIntSetting("Keno_break")); //1500sec = 25min //GetIntSetting("Keno_break")
+          while (CountGeneral <= CustomNumber)
+          {
+             		  
+            //START
+            Log("spin number now is: " + CountGeneral);
+
+            //Menu_Method_Choose_Numbers//
+            var Menu_Method_Choose_Numbers_VAR = GetSetting("Menu_Method_Choose_Numbers"); 
+	        
+            if(Menu_Method_Choose_Numbers_VAR == "Random")
+            {
+  		      Log("Keno Game - Choose 'Random' Numbers");
+              var RandomChooseNumbers = ElementByXPath("//button//span[contains(text(),'Auto Pick')] "); //RandomChooseNumbers
+              Click(RandomChooseNumbers);			  
+			}
+			//=========================//
+			
+            if(Menu_Method_Choose_Numbers_VAR == "Recent")
+            {
+                Recent_Function(); //call
+			}	
+			//=========================//
+
+            if(Menu_Method_Choose_Numbers_VAR == "MostWinNumbers")
+            {
+				MostWinNumbers_Function(); //call
+			}	
+			//=========================//	
+
+            if(Menu_Method_Choose_Numbers_VAR == "FixedNumbers")
+            {
+				FixedNumbers_Function(); //call
+			}	
+			//=========================//	
+
+		
+			Wait(4);
+            var CustomWaitTimeVAR = GetIntSetting("CustomWaitTime"); 
+            Wait(CustomWaitTimeVAR); //default 2sec 
+			
+            //bet button
+            Click_Bet_Button_Function(); //call
+
+            //WinCounter
+	        int Count;	
+            var Win_VAR = ElementsByXPath("//button[contains(@class,'kyItwI')]"); //Elements
+            var MyWinCounter = GetIntSetting("Win_Counter_Numbers"); 
+            
+            if (Win_VAR.Count < MyWinCounter || Win_VAR.Count == MyWinCounter)
+            {
+	           Log("Keno Game - under < You LOSE - Your total result is: " + Win_VAR.Count);
+		       Wait(3); 
+			   
+               if (GetBoolSetting("increaseWhenYouLose")) 
+               {
+	             Log("Keno Game - do Double - amount");
+			  	 var Double_var = ElementByXPath("//button//span[contains(text(),'2×')] "); //2x - Double
+                 Click(Double_var);
+		         Wait(2);
+		       }
+
+               if (GetBoolSetting("Win_Counter_Auto_Random")) 
+               {
+                Keno_Random_AND_Bet_Click_Function(); //call
+		        Wait(4); //until the system choose the numbers
+		       }	
+
+            }
+		    
+            if (Win_VAR.Count > MyWinCounter)
+            {
+	           Log("Keno Game - above > You WIN - Your total result is: " + Win_VAR.Count);
+		       Wait(3);
+               //var Divide_var = ElementByXPath("//button//span[contains(text(),'½')] "); //½ - Divide
+               Bet_Amount_Function(); //call to set Bet_Amount
+		       Wait(2);
+		    }
+            //====//
+  
+            Keno_Results_Info_Function(); //call - Keno_Results_Info_Function
+			
+            CountGeneral++; //increment - call again
+            
+			//FixedNumbers_ON_OFF - more option to choose your numbers only once - after the CountGeneral end (Spin/Bet Numbers) 
+            if (CountGeneral > CustomNumber)
+            {  	
+               if (GetBoolSetting("FixedNumbers_ON_OFF")) 
+               {
+			   Log("FixedNumbers_ON_OFF - more option to choose your numbers only once - after the CountGeneral end (Spin/Bet Numbers) ");
+               FixedNumbers_Function(); //call - to FixedNumbers_Function
+			   }//end FixedNumbers_ON_OFF
+            }
+ 
+            if (DateTime.Now > TimeToWaitForBreak) //if the time above 150 sec 
+            {
+            Log("FaucetClaim - break - TimeToWaitForBreak");
+            break; //break the wait loop
+            }
+          
+          } //end while
+          
+          //=========================//      
+		  
+         return 0;
+		}//end Keno_Game_Function
+		//=========//
 
 	
-} //end public class
 
+      //=========//
+      //Recent_Function
+      //=========//
+      public int Recent_Function()
+      {
+		  //choose also the Green & Red
+  		  Log("Keno Game - Choose 'Recent' Numbers");
+          Wait(2);
+
+          var All_Green_Results_2_win_var = ElementsByXPath("//button[contains(@class,'kyItwI')]"); //'Elements' ByXPath - that need to store 
+          var All_Reds_Results_2_var = ElementsByXPath("//button[contains(@class,'eMbhUq')]"); //'Elements' ByXPath - that need to store 
+		  AllKenoElementsFunction.AddRange(All_Green_Results_2_win_var); //add the all elements list
+		  AllKenoElementsFunction.AddRange(All_Reds_Results_2_var); //add the all elements list
+			  
+		  var ClearNumbers_Button = ElementByXPath("//button//span[contains(text(),'Clear Table')] "); //Clear Numbers Button
+          Click(ClearNumbers_Button);
+  		  Log("Keno Game - Clear Numbers");
+			  
+          foreach(var ElementsForEach in AllKenoElementsFunction) //multiple clicks
+          {
+            Click(ElementsForEach,false); //if false  - is without "Wait"
+		   //Log(ElementsForEach.Text);
+          }
+			  
+		  AllKenoElementsFunction.Clear(); //clear the last store (before)	  
+
+		  return 0;
+      } // end Recent_Function
+		//=========//
+
+	  
+      //=========//
+      //MostWinNumbers_Function
+      //=========//
+      public int MostWinNumbers_Function()
+      {	
+		  //choose ONLY the Green - Wins
+  		  Log("Keno Game - Choose 'MostWinNumbers' ");
+          Wait(2);
+
+          var All_Green_Results_2_win_var = ElementsByXPath("//button[contains(@class,'kyItwI')]"); //'Elements' ByXPath - that need to store 
+	      AllKenoElementsFunction.AddRange(All_Green_Results_2_win_var); //add the all elements list
+			
+	      var ClearNumbers_Button = ElementByXPath("//button//span[contains(text(),'Clear Table')] "); //Clear Numbers Button
+          Click(ClearNumbers_Button);
+  		  Log("Keno Game - Clear Numbers");
+			
+          foreach(var ElementsForEach in AllKenoElementsFunction) //multiple clicks
+          {
+            Click(ElementsForEach,false); //if false  - is without "Wait"
+		    //Log(ElementsForEach.Text);
+          }
+			
+		  //AllKenoElementsFunction.Clear(); //clear the last store (before)	  
+
+		  return 0;
+      } // end MostWinNumbers_Function
+		//=========//
+
+
+      //=========//
+      //FixedNumbers_Function
+      //=========//
+      public int FixedNumbers_Function()
+      {	
+          Log("Keno Game - Custom - choose FixedNumbers");
+
+          var ClearNumbers_Button = ElementByXPath("//button//span[contains(text(),'Clear Table')] "); //Clear Numbers Button
+          Click(ClearNumbers_Button);
+          Log("Keno Game - Clear Numbers");    
+            
+          var FixedNumbers_Settings = GetSetting("FixedNumbers").Split(',');
+          CustomFixedNumbersString.AddRange(FixedNumbers_Settings );
+		
+          var FixedNumbers = CustomFixedNumbersString.GroupBy(value => value)
+          .OrderByDescending(x => x.Count())
+          .Select(grp => grp.Key)
+          .Take(10)
+          .ToArray();
+                   
+          foreach(var Numbers in FixedNumbers)
+          {
+            var FixedNumbersElement = ElementByXPath("//button[contains(@class,'gaCGxm')]/span[contains(@class,'hIkLvN') and text()='"+Numbers+"']");
+            Click(FixedNumbersElement,false); //if false  - is without "Wait"
+            Log("Keno Game - FixedNumbers - Click " + Numbers); 
+          } 
+		
+		  Click_Bet_Button_Function(); //call			  
+ 		  Wait(2); 
+          Keno_Results_Info_Function(); //call - Keno_Results_Info_Function
+		  Wait(5);
+
+		  return 0;
+      } // end FixedNumbers_Function
+		//=========//
+	
+	
+      //=========//
+      //Keno_Results_Info_Function
+      //=========//
+      public int Keno_Results_Info_Function()
+      {	
+          var MostWinNumbers_Menu_VAR = GetSetting("Menu_Method_Choose_Numbers") == "MostWinNumbers"; 
+          if(!MostWinNumbers_Menu_VAR) // if MostWinNumbers not chosen, only then do clear
+          {	  
+            int CountGeneral = 1; //need to declare again 
+			  
+            //END - results for spin number
+		    Wait(2);
+            var All_Green_Results_win_var = ElementsByXPath("//button[contains(@class,'kyItwI')]"); //'Elements' ByXPath - that need to store 
+            var All_Reds_Results_var = ElementsByXPath("//button[contains(@class,'eMbhUq')]"); //'Elements' ByXPath - that need to store 
+		    
+	        AllKenoElementsFunction.AddRange(All_Green_Results_win_var); //add the all elements list
+	        AllKenoElementsFunction.AddRange(All_Reds_Results_var); //add the all elements list
+			  
+		    //Log("results for spin number " + CountGeneral + " is:" );
+		    Log("results for this spin is:");
+
+            foreach(var ElementsForEach in AllKenoElementsFunction) //log ElementsForEach
+            {
+		    Log(ElementsForEach.Text);
+            }
+
+		    AllKenoElementsFunction.Clear(); //clear the last store (before)
+			
+		  }//end MostWinNumbers not chosen
+			
+		  return 0;
+		  
+      } // end Keno_Results_Info_Function
+		//=========//	
+	
+	
+      //=========//
+      //Keno_Random_AND_Bet_Click_Function
+      //=========//
+      public int Keno_Random_AND_Bet_Click_Function()
+      {	
+          var RandomChoose_Numbers = ElementByXPath("//button//span[contains(text(),'Auto Pick')] "); //RandomChooseNumbers
+          Click(RandomChoose_Numbers);
+          var Bet_VAR = ElementByXPath("//button[@data-test='bet-button']//span[contains(text(),'Bet')] "); //bet button
+          Click(Bet_VAR);  
+		  
+		  return 0;
+		  
+      } // end Keno_Random_AND_Bet_Click_Function
+		//=========//
+
+		
+      //=========//
+      //Click_Bet_Button_Function
+      //=========//
+      public int Click_Bet_Button_Function()
+      {	
+          var Bet_Available = ElementByXPath("//button[@data-test='bet-button' and @disabled] "); 
+          if (!IsVisible(Bet_Available)) //if the button NOT disabled - click
+          {
+  		   Log("Keno Game - click on bet");
+           var Bet_VAR = ElementByXPath("//button[@data-test='bet-button']//span[contains(text(),'Bet')] "); 
+           Click(Bet_VAR);
+          }   
+			
+		  return 0;
+		  
+      } // end Click_Bet_Button_Function
+		//=========//	
+
+
+      //=========//
+      //Bet_Amount_Function
+      //=========//
+      public int Bet_Amount_Function()
+      {	
+          var Bet_Amount = ElementByXPath("//input[contains(@id,'betAmount')]"); 
+  		  Log("Keno Game - set bet amount");
+          SetText(Bet_Amount, GetSetting("Keno_Bet_Amount"));
+		  
+		  return 0;
+		  		  
+      } // end Bet_Amount_Function
+		//=========//	
+	
+	
+} //end public class

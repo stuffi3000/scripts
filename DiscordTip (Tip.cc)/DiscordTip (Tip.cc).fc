@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 01/11/2020 01:40AM - Version 73
+//Last Update: 11/01/2021 09:00AM - Version 78
 //==================//
 
 using System;
@@ -70,9 +70,9 @@ public class DiscordScript: FaucetScript
 				//new FaucetSetting(){Name="AutoWithdraw_GridCoin",Display="AutoWithdraw GridCoin - On/off",Type=EditorType.CheckBox,Default=false},	
 				
 				new FaucetSetting(){Name="WalletAddress_BTC",Display="WalletAddress BTC",Type=EditorType.TextBox,Required=false},
-				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_BTC",Display="AutoDisableWithdrawAfterSuccessful_BTC",Type=EditorType.TextBox,Required=false},
+				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_BTC",Display="AutoDisableWithdrawAfterSuccessful_BTC",Type=EditorType.CheckBox,Required=false},
 				new FaucetSetting(){Name="WalletAddress_DOGE",Display="WalletAddress DOGE",Type=EditorType.TextBox,Required=false},			
-				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_DOGE",Display="AutoDisableWithdrawAfterSuccessful_DOGE",Type=EditorType.TextBox,Required=false},
+				new FaucetSetting(){Name="AutoDisableWithdrawAfterSuccessful_DOGE",Display="AutoDisableWithdrawAfterSuccessful_DOGE",Type=EditorType.CheckBox,Required=false},
 					
 				//new FaucetSetting(){Name="WalletAddress_GridCoin",Display="WalletAddress GridCoin",Type=EditorType.TextBox,Required=false},
 
@@ -225,10 +225,10 @@ public class DiscordScript: FaucetScript
             //go to normal login
             GoToUrl("https://discordapp.com/login");
 
-            var box_user = ElementByXPath("//input[@type='email']");
+            var box_user = ElementByXPath("//input[@name='email']");
             SetText(box_user, GetSetting("Email"));
 
-            var box_pass = ElementByXPath("//input[@type='password']");
+            var box_pass = ElementByXPath("//input[@name='password']");
             SetText(box_pass, GetPassword("Pass"));
 
             Wait(1);
@@ -328,7 +328,9 @@ public class DiscordScript: FaucetScript
 //=============//
     public override int DoSolveFaucet()
     {
-	
+
+        Discord_PopUp_General_Function(); //call to Check
+		
         //================//
         //ProtectionSetEnglishLanguage//
         //================//
@@ -412,7 +414,7 @@ public class DiscordScript: FaucetScript
 		   
             Wait(2);
 
-   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any')]");      
+   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any') or contains(., 'syntax is invalid') or contains(., 'not supported') ] ");      
 	        if (IsVisible(Error_No_Balance_Check))
             {
                 Log("You don't have any - BTC");				
@@ -443,14 +445,16 @@ public class DiscordScript: FaucetScript
                 Enter_SendKeys_General_Discord_Input_Function();
 			    
                 Wait(6);
-			     
-                var FeeVAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
-                if (IsVisible(FeeVAR) )
+
+			    var Minimom_Error_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1 and contains(., 'minimum for')]");
+                var Fee_Low_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
+                
+				if (!IsVisible(Fee_Low_VAR) || IsVisible(Minimom_Error_VAR) )
                 {
                    Log("BTC - LimitFee -> NOT good - the 'fee' is 'HIGH' and above > 0.0$ or $0.00 or $0.000 ");
                 }
 			     		    
-                if (IsVisible(FeeVAR)) 
+                if (IsVisible(Fee_Low_VAR) || !IsVisible(Minimom_Error_VAR) ) 
                 {
                    Log("BTC - LimitFee <- good - the 'fee' is 'LOW' and under < 0.0$ or $0.00 or $0.000 ");	   
                    Wait(3);
@@ -502,7 +506,7 @@ public class DiscordScript: FaucetScript
 		  
             Wait(2);
 
-   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any')]");      
+   			var Error_No_Balance_Check = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'markup-2BOw-j') and contains(@style,'190')]//div[contains(@class,'grid-1nZz7S') and contains(., 'have any') or contains(., 'syntax is invalid') or contains(., 'not supported') ] ");      
 	        if (IsVisible(Error_No_Balance_Check))
             {
                 Log("You don't have any - DOGE");				
@@ -534,13 +538,15 @@ public class DiscordScript: FaucetScript
 			    
                 Wait(6);
 			     
-                var FeeVAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
-                if (IsVisible(FeeVAR) )
+			    var Minimom_Error_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1 and contains(., 'minimum for')]");
+                var Fee_Low_VAR = ElementByXPath("//div[contains(@id,'chat-messages-') and position()=last()-1]//div[contains(@class,'embedFields-2IPs5Z') and position()=last()-1 ]/div[3]/div[2 and contains(., '$0.0') or contains(., '$0.00')  or contains(., '$0.000') ]");
+                
+				if (!IsVisible(Fee_Low_VAR) || IsVisible(Minimom_Error_VAR) )
                 {
                    Log("DOGE - LimitFee -> NOT good - the 'fee' is 'HIGH' and above > 0.0$ or $0.00 or $0.000 ");
                 }
 			     		    
-                if (IsVisible(FeeVAR)) 
+                if (IsVisible(Fee_Low_VAR) || !IsVisible(Minimom_Error_VAR) ) 
                 {
                    Log("DOGE - LimitFee <- good - the 'fee' is 'LOW' and under < 0.0$ or $0.00 or $0.000 ");		   
                    Wait(3);
@@ -603,6 +609,26 @@ public class DiscordScript: FaucetScript
         //================//
         if (GetBoolSetting("Discordtip_Tippi_vote_OnOff"))
         {
+			
+           TopSite_Function(); //call
+		   
+		   //first go to server
+	       Title = "Discord";	
+		   GoToUrl("https://discord.gg/kJJYWxQChK");
+		   Wait();	
+		   Wait(5);		
+		   
+           Driver.Navigate().Refresh();
+		   Wait();	
+		   
+           Discord_PopUp_General_Function(); //call
+		   
+		   Wait(2);	
+		   
+           inviteServer_Elements_Function(); //call
+		   
+           Wait(3);		
+			
            Title = "Discordtip";
            ADFunction_String_URL_Discordtip_Tippi(); //call to Discordtip_Tippi
            Wait();
@@ -630,7 +656,7 @@ public class DiscordScript: FaucetScript
         Driver.Navigate().Refresh();
 		Wait();	
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -667,7 +693,7 @@ public class DiscordScript: FaucetScript
         Driver.Navigate().Refresh();
 		Wait();	
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -706,7 +732,7 @@ public class DiscordScript: FaucetScript
 		Wait();	
         */
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -745,7 +771,7 @@ public class DiscordScript: FaucetScript
 		Wait();	
         */	
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -782,7 +808,7 @@ public class DiscordScript: FaucetScript
         Driver.Navigate().Refresh();
 		Wait();	
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -820,7 +846,7 @@ public class DiscordScript: FaucetScript
         Driver.Navigate().Refresh();
 		Wait();	
 */		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -860,7 +886,7 @@ public class DiscordScript: FaucetScript
 		Wait();	
         */	
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -900,7 +926,7 @@ public class DiscordScript: FaucetScript
 		Wait();	
         */		
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -1020,7 +1046,7 @@ public class DiscordScript: FaucetScript
         Driver.Navigate().Refresh();
 		Wait();	
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 		
@@ -1175,7 +1201,7 @@ public class DiscordScript: FaucetScript
         Driver.Navigate().Refresh();
 		Wait();	
 		
-        NitroGames_Function(); //call
+        Discord_PopUp_General_Function(); //call
 		
 		Wait(2);	
 				
@@ -2023,8 +2049,8 @@ public class DiscordScript: FaucetScript
 		   Wait(3);
 		   Click(ReactionButton_Clean);
 		   Wait(2);
-		   Log("Discordtip_FaucetCollector: Click On Reaction - done"); 
-	       Notification("Discordtip_FaucetCollector: Click On Reaction - done");	
+		   Log("Reaction: Click On Reaction - done"); 
+	       Notification("Reaction: Click On Reaction - done");	
 		   ClaimSuccess(); //Marks the claim as a success
 		   Wait();
           } 
@@ -2488,9 +2514,6 @@ public class DiscordScript: FaucetScript
   //====================//
 
 
-
-
-
         //=================//
        //TopSite_Function
         //=================//
@@ -2509,20 +2532,26 @@ public class DiscordScript: FaucetScript
 
 
         //=================//
-       //NitroGames_Function
+       //Discord_PopUp_General_Function
         //=================//
-        public int NitroGames_Function()
+        public int Discord_PopUp_General_Function()
         {
-			
-          var NitroGamesVAR = ElementByXPath("//div[@class='contents-18-Yxp' and contains(text(),'Cancel')]");
-	      if (IsVisible(NitroGamesVAR))
+          var Discord_PopUp_General = ElementByXPath("//button[contains(@type,'button') and contains(@aria-label,'Close') or contains(@aria-label,'close') and contains(@class,'close-') ] ");
+	      if (Discord_PopUp_General !=null) //visible
           {
-		    Log("NitroGamesVAR apper - Cancel this "); 	
-            Click(NitroGamesVAR);
+		    Log("Discord_PopUp_General - apper - we close it"); 	
+            Click(Discord_PopUp_General);
+          }  	
+		  
+          var Nitro_Games_PopUp = ElementByXPath("//div[@class='contents-18-Yxp' and contains(text(),'Cancel')]");
+	      if (IsVisible(Nitro_Games_PopUp))
+          {
+		    Log("Nitro_Games_PopUp - apper - we close it "); 	
+            Click(Nitro_Games_PopUp);
           }
 		  
 		return 0;
-        }//end NitroGames_Function
+        }//end Discord_PopUp_General_Function
         //=================//	
 
 

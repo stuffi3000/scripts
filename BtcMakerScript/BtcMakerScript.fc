@@ -1,0 +1,165 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
+using System.Linq;
+//css_ref FaucetCollector.Utilities
+
+namespace NewScripts.BtcMaker
+{
+    public class BtcMakerScript : FaucetScript
+    {
+        public override FaucetSettings Settings
+        {
+            get
+            {
+
+                return new FaucetSettings("https://btcmaker.io/")
+                {
+                    new FaucetSetting()
+                    {
+                        Display="Username/Email",
+                        Type=EditorType.TextBox,
+                        Required=true,
+                        Name="User"
+                    },
+                    new FaucetSetting()
+                    {
+                        Display="Password",
+                        Type=EditorType.Password,
+                        Required=true,
+                        Name="Pass"
+                    }
+                };
+
+            }
+        }
+
+        public override void Start()
+        {
+            SuccessXPath = "//div[contains(@class,'jq-icon-success')]";
+
+            FailXPath = "//div[contains(@class,'jq-icon-error')]";
+
+            Title = "Btcmaker";
+            base.Start();
+        }
+
+        public override int BeforeLogin()
+        {
+            GoToUrl("https://btcmaker.io/login.php");
+
+            return base.BeforeLogin();
+        }
+        public override int DoLogin()
+        {
+            var emailBox = ElementByXPath("//input[@id='user_email']");
+            if (!IsVisible(emailBox))
+            {
+                return Fail("Email box not visible");
+            }
+            SetText(emailBox, GetSetting("User"));
+
+
+            var passwordBox = ElementByXPath("//input[@id='password']");
+
+
+            if (!IsVisible(passwordBox))
+            {
+                return Fail("Password box is not visible");
+            }
+
+            SetText(passwordBox, GetPassword("Pass"));
+
+
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+
+            var captchaButton = ElementByXPath("//button[@id='process_login']");
+            if (!IsVisible(captchaButton))
+            {
+                return Fail("Captcha button is not visible");
+            }
+
+            Click(captchaButton);
+
+            Wait();
+
+            var error = ElementByXPath("//div[contains(@class,'jq-icon-error')]");
+            if (IsVisible(error))
+            {
+                Log(error.Text);
+
+            }
+
+            return base.DoLogin();
+        }
+
+        public override bool IsLoggedIn()
+        {
+            return ElementByXPath("//a[contains(@onclick,'process_logout()')]") != null && ElementByXPath("//a[contains(@href,'login')]") == null;
+        }
+
+
+        public override int DoSolveCaptcha()
+        {
+
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+
+            return result;
+
+        }
+        public override int DoSolveFaucet()
+        {
+
+
+
+            var captchaSolvedBtn = ElementByXPath("//button[@id='process_claim_hourly_faucet']");
+            if (!IsVisible(captchaSolvedBtn))
+            {
+                return Fail("captcha solved button is not visible");
+            }
+            var result = DoSolveCaptcha();
+            if (result > 0)
+            {
+                return result;
+            }
+
+            Click(captchaSolvedBtn);
+
+
+
+
+            return base.DoSolveFaucet();
+
+        }
+
+        public override int GetFaucetWaitTime()
+        {
+            var timerElements = ElementsByXPath("//li[@class='flip-clock-active']//div[@class='up']//div[@class='inn']").Where(element => IsVisible(element)).ToList();
+            if (timerElements.Count == 4)
+            {
+                string minutesText = timerElements[0].Text + timerElements[1].Text;
+                string secondsText = timerElements[2].Text + timerElements[3].Text;
+
+                int m, s;
+
+                if (int.TryParse(minutesText, out m) && int.TryParse(secondsText, out s))
+                {
+                    return m * 60 + s;
+                }
+            }
+
+            return base.GetFaucetWaitTime();
+        }
+    }
+}

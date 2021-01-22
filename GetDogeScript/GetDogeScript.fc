@@ -179,9 +179,9 @@ public class GetDogeScript : FaucetScript
     /// <returns></returns>
     public override int DoSolveFaucet( )
     {
-        if ( Driver.Url!="https://getdoge.io/" )
+        if ( Driver.Url!= "https://getdoge.io/faucet.html")
         {
-            GoToUrl("https://getdoge.io/");
+            GoToUrl("https://getdoge.io/faucet.html");
             Wait( );
         }
         return manager.DoSolveFaucet( );

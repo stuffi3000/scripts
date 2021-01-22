@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/10/2020 03:00AM - Version 1
-//Last Update: 20/10/2020 17:00PM - Version 4
+//Last Update: 21/01/2021 22:20PM - Version 6
 //==================//
 
 using System;
@@ -30,7 +30,7 @@ public class PipeFlare : FaucetScript
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 //new FaucetSetting(){Name="Address",Display="Address HORIZEN - ZEN ",Type=EditorType.TextBox,Required=true},
 				
-                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - ZEC,PIVX,DASH,FLR - all in one",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - ZEC,PIVX,DASH,FLR,DOGE - all in one",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="Bonus_5_days",Display="Bonus_5_days",Type=EditorType.CheckBox,Default=true},
                 new FaucetSetting(){Name="Bonus_Aff",Display="Bonus_Aff",Type=EditorType.CheckBox,Default=false},
 				
@@ -165,7 +165,11 @@ public class PipeFlare : FaucetScript
 	    }
 		
         Wait(2);
-		
+
+        Recaptcha_Function(); //call
+	
+        Wait(2);
+	
         if (IsVisible(ElementByXPath ("//form[@class='login-form']//button[@type='submit']") )) 
 	    {
         var ButtonLog = ElementByXPath("//form[@class='login-form']//button[@type='submit']");
@@ -282,15 +286,25 @@ public class PipeFlare : FaucetScript
 	       Wait();
 	       Wait(2);
 
-           var Bonus_Not_Eligible_Button = ElementByXPath("//li[contains(@class,'bonus-round js-BonusRound') and contains(@style,'none')] | //li[contains(@data-target,'modal-jackpot-not-eligible')]");
-	       if (!IsVisible(Bonus_Not_Eligible_Button))
+           var Bonus_Not_Eligible_Button = ElementByXPath("//li[contains(@class,'bonus-round js-BonusRound') and contains(@style,'none')]");
+
+	       if (Bonus_Not_Eligible_Button !=null ) //visible
+	       {
+		    Log("Bonus_5_days - Bonus not here, try next time. ");
+		   }
+
+	       if (Bonus_Not_Eligible_Button ==null ) //not visible
 	       {
 
             var Bonus_Available = ElementByXPath("//li[contains(@class,'bonus-round js-BonusRound')] | //li[contains(@data-target,'modal-jackpot')]");
 		    Click(Bonus_Available);
 		    Log("Bonus_5_days - Bonus_Available");
-            Wait();
             Wait(2);
+
+            var Play_Button = ElementByXPath("//button[contains(text(),'Play')]");
+		    Click(Play_Button);
+		    Log("Bonus_5_days - Play_Button");
+            Wait(7);
 			
             var MassageError = ElementByXPath("//div[@class='modal-body' and contains(text(),'After using the faucet for five')]");
 	        
@@ -307,6 +321,8 @@ public class PipeFlare : FaucetScript
 	        }
 			
 	       } //end Bonus_Not_Eligible_Button
+
+
 
       } //end Bonus_5_days
       //=============//
@@ -497,6 +513,30 @@ public class PipeFlare : FaucetScript
            {
               Log("FLR - not available");		   
 		   }
+
+		   
+           var Claim_Available_DOGE = ElementByXPath("//a[contains(@href,'DOGE') and @class='nav-link available'] | //a[contains(@href,'DOGE') and @class='nav-link available active'] ");       
+		   if (IsVisible(Claim_Available_DOGE))
+           {
+              Log("Claim_Available_DOGE - do stuff");	
+			  Wait(2);
+              Click(Claim_Available_DOGE);		  
+	          Wait(3);
+              var Claim_Start_DOGE = ElementByXPath("//div[contains(@id,'DOGE')]//button[@type='submit']");       
+              Click(Claim_Start_DOGE);
+	          Wait(2);
+              invisible_Recaptcha_Function(); //call to check
+			  Wait(4);
+              FaucetClaim_END_Function(); //call		   
+			  Wait(2);
+		   } //end DOGE
+		   
+		   if (!IsVisible(Claim_Available_DOGE))
+           {
+              Log("DOGE - not available");		   
+		   }		   
+		   
+		   
 	   } // end Available_Check_General
 
       } //end FaucetClaim
@@ -554,12 +594,14 @@ public class PipeFlare : FaucetScript
 			Log("Bonus_Function - ButtonSpin");
 		   }
 		   
+		   /*
            var TimeToWaitForBreak = DateTime.Now.AddSeconds(65);			 
            while (true)
            {
-			   
-		     Wait(); //wait until
 
+		     Wait(); //wait until
+			 Log("Wait 30 sec for more Bonus");  
+			 
              var TitleVAR = ElementByXPath("//div[@class='sm-result']/div[@class='sm-result-msg']//h4");
              var DescriptionVAR = ElementByXPath("//div[@class='sm-result']/div[@class='sm-result-msg']//p");
 			 
@@ -576,7 +618,8 @@ public class PipeFlare : FaucetScript
              }
 			 
            } //end while (true)		   	   
-	 
+	       */
+	   
 	    return 0;
       }//end Bonus_Function
       //=================//	
@@ -707,8 +750,10 @@ public class PipeFlare : FaucetScript
 		  }
 		  
 	     //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")    // ("//input[contains(@id,'recaptcha-token') ] | //div[contains(@id,'rc-imageselect') ]")
-          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
-          if (IsVisible(RecaptchaOpen_Iframe))
+          
+          var Recaptcha_Login_Iframe = ElementByXPath ("//form[@class='login-form']//iframe[contains(@src,'recaptcha')]"); 	 
+		  //var Recaptcha_Normal_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(Recaptcha_Login_Iframe))
 		  {
             //SolveCaptcha if apper
             Log("DO Recaptcha");	  

@@ -1,13 +1,14 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 23/12/2019 01:30PM - Version 1
-//Last Update: 03/10/2020 03:30AM - Version 13
+//Last Update: 21/01/2021 22:30PM - Version 15
 //==================//
 
 using System;
 using System.IO;
 using FaucetCollector.Script;
 using OpenQA.Selenium;
+using System.Globalization;
 //css_inc ShortLinkUtilities
 //css_inc RecaptchaUtilities
 
@@ -175,7 +176,10 @@ public class GetZen : FaucetScript
 	    }
 		
         Wait(2);
-		
+
+        Recaptcha_Function(); //call
+
+        Wait(2);		
         if (IsVisible(ElementByXPath ("//form[@class='login-form']//button[@type='submit']") )) 
 	    {
         var ButtonLog = ElementByXPath("//form[@class='login-form']//button[@type='submit']");
@@ -540,6 +544,23 @@ public class GetZen : FaucetScript
         //=================//
         public int Time_Function()
         {
+
+
+           //site time with date - example 10:00 PM | 10:00 AM  OR UTC LocalTime
+           var CheckAvailableGeneral = ElementByXPath("//div[contains(@id,'result') and contains(text(),'wait') or contains(text(),'UTC') ]");
+           if (IsVisible(CheckAvailableGeneral))
+           {
+	         Log("DateTime.ParseExact - here");             
+	         var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+	         //var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //AM-PM -- t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  			   
+	         var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US") ).ToLocalTime(); //UTC -- yyyy-MM-dd HH:mm:ss =  LocalTime - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+	         //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+	 
+             var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+             return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+		  
+           } //end CheckAvailableGeneral
+			 
 			
            var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
 		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
@@ -581,8 +602,9 @@ public class GetZen : FaucetScript
 		  }
 		  
 	     //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
-          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
-          if (IsVisible(RecaptchaOpen_Iframe))
+          var Recaptcha_Login_Iframe = ElementByXPath ("//form[@class='login-form']//iframe[contains(@src,'recaptcha')]");
+		  var Recaptcha_Faucet_Iframe = ElementByXPath ("//form[@id='form-claim-zen']//iframe[contains(@src,'recaptcha')]");
+		  if ( IsVisible(Recaptcha_Login_Iframe) || IsVisible(Recaptcha_Faucet_Iframe) )
 		  {
             //SolveCaptcha if apper
             Log("DO Recaptcha");	  

@@ -1,7 +1,8 @@
 ﻿using FaucetCollector.Script;
-using FaucetCollector.Utilities.HumanActions;
+
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+
 using System;
 //css_ref FaucetCollector.Utilities
 
@@ -31,45 +32,45 @@ public class PlayNanoScript : FaucetScript
         }
     }
 
-    public override void Start( )
+    public override void Start()
     {
-        SuccessXPath="//div[@class='noty_body' and not(@style)]";
-        FailXPath="//div[@class='noty_body']";
-        Title="PlayNANO";
-        base.Start( );
+        SuccessXPath = "//div[contains(@id,'noty_bar')]";
+        FailXPath = "//div[@class='noty_body']";
+        Title = "PlayNANO";
+        base.Start();
     }
 
-    public override int DoLogin( )
+    public override int DoLogin()
     {
         GoToUrl("https://playnano.online/login");
 
         Wait(1);
 
-        var userBox=ElementByXPath("//input[@id='user_email']");
-        if ( !IsVisible(userBox) )
+        var userBox = ElementByXPath("//input[@id='user_email']");
+        if (!IsVisible(userBox))
         {
             return Fail("Email box not visible or not found");
         }
-        SetText(userBox , GetSetting("User"));
+        SetText(userBox, GetSetting("User"));
 
-        var passwordBox=ElementByXPath("//input[@id='user_password']");
-        if ( !IsVisible(passwordBox) )
+        var passwordBox = ElementByXPath("//input[@id='user_password']");
+        if (!IsVisible(passwordBox))
         {
             return Fail("Password box not visible or not found");
         }
-        SetText(passwordBox , GetPassword("Pass"));
+        SetText(passwordBox, GetPassword("Pass"));
 
-        if ( IsVisible(ElementByXPath("//label[@for='user_Captcha']")) )
+        if (IsVisible(ElementByXPath("//label[@for='user_Captcha']")))
         {
-            var result=DoSolveCaptcha();
-            if ( result>0 )
+            var result = DoSolveCaptcha();
+            if (result > 0)
             {
                 return result;
             }
         }
 
-        var loginBtn=ElementByXPath("//input[@value='Login']");
-        if ( !IsVisible(loginBtn) )
+        var loginBtn = ElementByXPath("//input[@value='Login']");
+        if (!IsVisible(loginBtn))
         {
             return Fail("login button not found");
         }
@@ -79,28 +80,28 @@ public class PlayNanoScript : FaucetScript
 
         Wait(1);
 
-        var error=ElementByXPath("//div[@class='noty_body']");
-        if ( IsVisible(error) )
+        var error = ElementByXPath("//div[@class='noty_body']");
+        if (IsVisible(error))
         {
             Log(error.Text);
         }
 
-        return base.DoLogin( );
+        return base.DoLogin();
     }
 
-    public override bool IsLoggedIn( )
+    public override bool IsLoggedIn()
     {
-        return ElementByXPath("//a[@href='/logout']")!=null;
+        return ElementByXPath("//a[@href='/logout']") != null;
     }
 
-    public override int DoSolveFaucet( )
+    public override int DoSolveFaucet()
     {
         GoToUrl("https://playnano.online/watch-and-learn");
         Wait(1);
 
-        var watchButton=ElementByXPath("//a[@id='watch-link']");
+        var watchButton = ElementByXPath("//a[@id='watch-link']");
 
-        if ( !IsVisible(watchButton) )
+        if (!IsVisible(watchButton))
         {
             return Fail("watch button not found");
         }
@@ -109,79 +110,83 @@ public class PlayNanoScript : FaucetScript
         Wait(1);
 
 
-        var watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
-        int adsClicked=0;
-        while ( IsVisible(watchNextButton)&&adsClicked<12 )
+        var watchNextButton = ElementByXPath("//button[contains(@class,'watch-next-btn')]");
+        int adsClicked = 0;
+        FaucetCollector.Utilities.Adblock adblock = new FaucetCollector.Utilities.Adblock(this);
+        DateTime Timeout = DateTime.Now.AddMinutes(10);
+        adblock.DestroyAds();
+        while ((IsVisible(watchNextButton) || !IsVisible(ElementById("gu_address"))) && adsClicked < 40 && DateTime.Now < Timeout)
         {
 
-            DateTime timeout= DateTime.Now.AddSeconds(20);
-          
+            DateTime timeout = DateTime.Now.AddSeconds(20);
+
             Wait(2);
 
             //there is not other xpath available
-            var adClose=ElementByName("//div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]");
 
-            if ( IsVisible(adClose) )
-            {
-                ExecuteScript("arguments[0].click()" , adClose);
-            }
-            scrollDown( );
 
-            while ( !watchNextButton.Enabled&&timeout>DateTime.Now )
+            TryBlockPrimaryAd();
+
+
+
+            ScrollDown();
+
+            while (!watchNextButton.Enabled && timeout > DateTime.Now)
             {
-                Wait( );
+                Wait();
             }
-            if ( !IsVisible(watchNextButton) )
+            if (!IsVisible(watchNextButton))
             {
                 adsClicked++;
                 continue;
             }
 
-        
+            TryBlockPrimaryAd();
+
+
             Wait(2);
 
-            Actions holdElement= new Actions(Driver).MoveToElement(watchNextButton,watchNextButton.Size.Width/2,watchNextButton.Size.Height/2);
+            Actions holdElement = new Actions(Driver).MoveToElement(watchNextButton, watchNextButton.Size.Width / 2, watchNextButton.Size.Height / 2);
 
-            holdElement.Build( ).Perform( );
+            holdElement.Build().Perform();
 
-            Wait(1 , 2);
+            Wait(1, 2);
 
             Click(watchNextButton);
 
             Wait(1);
             adsClicked++;
 
-            watchNextButton=ElementByXPath("//button[contains(@class,'watch-next-btn')]");
+            watchNextButton = ElementByXPath("//button[contains(@class,'watch-next-btn')]");
         }
 
         Wait(1);
 
-        var stopButton=ElementByXPath("//button[@value='stop']");
-        if ( !IsVisible(stopButton) )
+        var buttonStopWatch = ElementByXPath("//button[contains(@class,'button cancel') and @value='stop']");
+        if (!IsVisible(buttonStopWatch))
         {
-            return Fail("Finish button not found");
+            return Fail("Button stop watch and get reward is not found");
         }
-        var result=DoSolveCaptcha();
-        if ( result>0 )
+        // solve hcaptcha
+        var result = DoSolveCaptcha();
+        if (result>0)
         {
             return result;
         }
 
-        Click(stopButton);
+        Click(buttonStopWatch);
 
-        Wait(1);
+        Wait(1, 2);
 
-        CheckFaucetResult( );
-        Log("you sucessfully viewed the ads" , Level.Payout);
-        ClaimSuccess( );
+        CheckFaucetResult();
 
-        return GetWaitSetting( );
+        return GetWaitSetting();
     }
 
 
-    private  void scrollDown( )
+    private void ScrollDown()
     {
-        var actionKeyDown= new Actions(Driver).SendKeys(Keys.ArrowDown)
+        var actionKeyDown = new Actions(Driver).SendKeys(Keys.ArrowDown)
             .SendKeys(Keys.ArrowDown)
             .SendKeys(Keys.ArrowDown)
             .SendKeys(Keys.ArrowDown)
@@ -191,14 +196,26 @@ public class PlayNanoScript : FaucetScript
             .SendKeys(Keys.ArrowDown);
 
         var action = actionKeyDown.Build();
-        for (int i=0 ;i<7 ;i++ )
+        for (int i = 0; i < 7; i++)
         {
 
 
-            action.Perform( );
+            action.Perform();
         }
 
-     
+    }
+    private void TryBlockPrimaryAd()
+    {
+        try
+        {
+            var primaryAd = ElementByXPath("//*[contains(@style,'display: block !important')]//div[@data-name='stitialer']/..//div[contains(@style,'right: 0px;')]//div|//*[contains(@style,'display: block !important')]//a[@id='close']");
+            if (IsVisible(primaryAd))
+            {
+                Click(primaryAd);
+            }
+        }
+        catch (Exception) { }
+        //*[contains(@style,'display: block !important')]//div[@data-name='stitialer']/..//div[contains(@style,'right: 0px;')]//div
     }
 }
 

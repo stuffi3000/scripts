@@ -1,0 +1,124 @@
+﻿using FaucetCollector.Script;
+
+using System.Collections.Generic;
+using System.Linq;
+
+public class AbitcoinFaucet : FaucetScript
+{
+
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("http://abitfaucet.com/")
+            {
+                new FaucetSetting()
+                {
+                    Name="User",
+                    Type=EditorType.TextBox,
+                    Required=true,
+                    Display="Bitcoin Address"
+                },
+                new FaucetSetting()
+                {
+                    Name="UseSolvemedia",
+                    Type=EditorType.CheckBox,
+                    Default=true,
+                    Display="Use Solvemedia"
+                }
+            };
+
+        }
+    }
+
+    public override void Start()
+    {
+        SuccessXPath = "//div[@class='message message-success']";
+        Title = "abitcoinfaucet.com";
+        FailXPath = "//div[@class='message message-error']";
+        base.Start();
+
+    }
+
+    public override bool IsLoggedIn()
+    {
+        //the site don't need to login so we are always logged in
+        return true;
+    }
+
+    public override int GetFaucetWaitTime()
+    {
+
+        var timer = ElementByXPath("//div[@class='timer']");
+        if (IsVisible(timer))
+        {
+            int m, s;
+            List<string> splitedTimer = timer.Text.Split(':').ToList();
+
+            if (splitedTimer.Count == 2)
+            {
+                if (int.TryParse(splitedTimer[0], out m) && int.TryParse(splitedTimer[1], out s))
+                {
+                    return m * 60 + s;
+                }
+            }
+
+        }
+        return base.GetFaucetWaitTime();
+    }
+
+    public override int DoSolveFaucet()
+    {
+        var addressBox = ElementByXPath("//input[@name='address']");
+        if (!IsVisible(addressBox))
+        {
+            return Fail("Address box is not visible or not found");
+        }
+        SetText(addressBox, GetSetting("User"));
+
+        var claimBtn = ElementByXPath("//input[@name='claim_coins']");
+        if (!IsVisible(claimBtn))
+        {
+            return Fail("Claim btn is not visible or not found");
+        }
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+        Click(claimBtn);
+
+        Wait(1, 2);
+
+        CheckFaucetResult();
+        if (IsSuccess)
+        {
+            return GetWaitSetting();
+        }
+
+        return base.DoSolveFaucet();
+    }
+
+    public override int DoSolveCaptcha()
+    {
+        var captchaSelector = ElementByXPath("//select[@name='t99fc']");
+
+        if (IsVisible(captchaSelector))
+        {
+            string valueToSet = GetBoolSetting("UseSolvemedia") ? "solvemedia" :
+                "recaptcha";
+            SelectOptionByValue(captchaSelector, valueToSet);
+            Wait(1);
+        }
+
+
+        return base.DoSolveCaptcha();
+
+    }
+
+
+
+
+}
+

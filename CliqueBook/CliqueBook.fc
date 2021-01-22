@@ -368,7 +368,14 @@ public class CliqueBook : FaucetScript
     public void DisposeBitmaps(List<Bitmap> bitmaps)
     {
         if ( bitmaps==null ) { return; }
-        bitmaps.ForEach(bitmap => bitmap?.Dispose( ));
+
+        foreach ( var bitmap in bitmaps )
+        {
+            if ( bitmap!=null )
+            {
+                bitmap.Dispose( );
+            }
+        }
     }
     private int Different_pixels(Bitmap image1 , Bitmap image2)
     {

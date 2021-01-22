@@ -1,6 +1,6 @@
 //==================//
 //script Written by: ••AviramDayan•• 05/11/2019 00:00PM - Version 1
-//Last Update: 11/03/2020 07:20AM - Version 2
+//Last Update: 03/12/2020 21:30AM - Version 4
 //==================//
 
 using System;
@@ -26,7 +26,8 @@ public class BloxawardsScript : FaucetScript
                 new FaucetSetting() { Name = "Email", Display = "E-mail", Type = EditorType.TextBox, Required = true },
                 new FaucetSetting() { Name = "Password", Display = "Password", Type = EditorType.Password, Required = true },
                 new FaucetSetting(){Name="AutoExchange",Display="AutoExchange - ON/OFF - Exchange all coins to BRAZ - note - open account in 'southxchange' to exchange BRAZ to any coin",Type=EditorType.CheckBox,Default=true},	
-                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - ON/OFF ",Type=EditorType.CheckBox,Default=true},	
+                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim - ON/OFF ",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting() { Name = "CoinText", Display = "CoinText - Write the full name of the coin including a first capital letter",Default="Bitcoin", Type = EditorType.TextBox, Required = false },			
                 new FaucetSetting() { Name = "AdressBRAZ", Display = "AdressBRAZ", Type = EditorType.TextBox, Required = false },
             };
         }
@@ -211,11 +212,11 @@ public class BloxawardsScript : FaucetScript
 		
 	    //GoToUrl(DomainName_String+"/claim/index.php?coin_name=bitcoin&*"); // it's impossible to do direct to specific url coin
 
-        var BitcoinCardHere = ElementByXPath("//input[@value='Claim Bitcoin']"); 
-        if (IsVisible(BitcoinCardHere))
+        var CoinCardHere = ElementByXPath("//input[@value='Claim "+GetSetting("CoinText")+"']"); 
+        if (CoinCardHere !=null) // Visible
         {
-        Log("BitcoinCardHere - here");
-        Click(BitcoinCardHere);
+        Log("CoinCardHere - here");
+        Click(CoinCardHere);
         }
 
         Wait();		
@@ -223,7 +224,7 @@ public class BloxawardsScript : FaucetScript
 		
         var ZeroNotAvailable = ElementByXPath("//span[@class='alert alert-success' and contains(text(),'LEFT') and contains(text(),'0') ]");
 
-        if (IsVisible(ZeroNotAvailable))
+        if (ZeroNotAvailable !=null) // Visible
         {
             //We couldn't find the button, return we have a failure.
             Log("Claim - not available today");
@@ -232,7 +233,7 @@ public class BloxawardsScript : FaucetScript
 
         Wait(2);
 
-        if (!IsVisible(ZeroNotAvailable))
+        if (ZeroNotAvailable ==null) // not Visible
         {
 
 			Log("claimButton - now");

@@ -1,7 +1,13 @@
-﻿using System;
-using System.Linq;
-using FaucetCollector.Script;
+﻿using FaucetCollector.Script;
+using FaucetCollector.Utilities;
+
 using OpenQA.Selenium;
+
+using System;
+using System.Linq;
+
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
 
 class HitBits : FaucetScript
 {
@@ -9,255 +15,327 @@ class HitBits : FaucetScript
     {
         get
         {
-            return new FaucetSettings ( BaseUrl )
+            return new FaucetSettings(BaseUrl)
             {
                 new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
                 new FaucetSetting(){Name="UseSolvemedia",Type=EditorType.CheckBox,Default=true,Display="UseSolvemedia"},
-                new FaucetSetting(){Name="Fight",Type=EditorType.Numeric,Default=0,Display="Number of raid to fight before claim [0  is disabled]"}
+                new FaucetSetting(){Name="Fight",Type=EditorType.Numeric,Default=0,Display="Number of raid to fight before claim [0  is disabled]"},
+                new FaucetSetting()
+                {
+                    Name="DailyReward",
+                    Type=EditorType.CheckBox,
+                    Default=true,
+                    Display="Try claim daily reward"
+                },
+                new FaucetSetting()
+                {
+                    Name="TryDoShortlink",
+                    Type=EditorType.CheckBox,
+                    Display="Try do a shortlink",
+                    Default=false
+                }
             };
 
         }
     }
-    public const string BaseUrl="https://hitbits.io/";
-    public const string LoginUrl=BaseUrl+"login";
-    public const string FaucetUrl=BaseUrl+"faucet";
-    public const string RaidUrl=BaseUrl+"raids";
-   
-    public override void Start ( )
+    public const string BaseUrl = "https://hitbits.io/";
+    public const string LoginUrl = BaseUrl + "login";
+    public const string FaucetUrl = BaseUrl + "faucet";
+    public const string RaidUrl = BaseUrl + "raids";
+
+    public override void Start()
     {
-        FailXPath="//div[contains(@class,'alert')]";
+        FailXPath = "//div[contains(@class,'alert')]";
 
-        SuccessXPath="//span[@class='tag is-primary is-medium']//span";
+        SuccessXPath = "//span[@class='tag is-primary is-medium']//span";
 
-        Title="HitBits|Hit Bits";
-        base.Start ( );
+        Title = "HitBits|Hit Bits";
+        base.Start();
     }
-    public override int DoLogin ( )
+    public override int DoLogin()
     {
-        GoToUrl ( LoginUrl );
-        
-        Wait ( 1 );
+        GoToUrl(LoginUrl);
 
-        var UserBox=ElementByXPath("//input[@name='username']");
-        if ( !IsVisible ( UserBox ) )
-        {
-            return Fail ( "User box not visible" );
-        }
-        var PasswordBox=ElementByXPath("//input[@name='password']");
-        if ( !IsVisible ( PasswordBox ) )
-        {
-            return Fail ( "Password box not visible" );
-        }
-        var Loginbtn=ElementByXPath("//button[@type='submit']");
-        if ( !IsVisible ( Loginbtn ) )
-        {
-            return Fail ( "Login button not visible or not found" );
-        }
-        SetText ( UserBox , GetSetting ( "User" ) );
-        SetText ( PasswordBox , GetPassword ( "Pass" ) );
+        Wait(1);
 
-        var result=DoSolveCaptcha();
-        if ( result>0 )
+        var UserBox = ElementByXPath("//input[@name='username']");
+        if (!IsVisible(UserBox))
+        {
+            return Fail("User box not visible");
+        }
+        var PasswordBox = ElementByXPath("//input[@name='password']");
+        if (!IsVisible(PasswordBox))
+        {
+            return Fail("Password box not visible");
+        }
+        var Loginbtn = ElementByXPath("//button[@type='submit']");
+        if (!IsVisible(Loginbtn))
+        {
+            return Fail("Login button not visible or not found");
+        }
+        SetText(UserBox, GetSetting("User"));
+        SetText(PasswordBox, GetPassword("Pass"));
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
         {
             return result;
         }
 
-        Click ( Loginbtn );
-        Wait ( 1 );
-        var ErrorLogin=ElementByXPath("//div[@class='notices is-top']//div|//div[@class='notices is-bottom']//div");
-        if ( IsVisible ( ErrorLogin ) )
+        Click(Loginbtn);
+        Wait(1);
+        var ErrorLogin = ElementByXPath("//div[@class='notices is-top']//div|//div[@class='notices is-bottom']//div");
+        if (IsVisible(ErrorLogin))
         {
-            Log ( ErrorLogin.Text );
+            Log(ErrorLogin.Text);
         }
-    
-      
-        return base.DoLogin ( );
+
+
+        return base.DoLogin();
     }
 
-   
-    public override int DoSolveCaptcha ( )
+
+    public override int DoSolveCaptcha()
     {
-        string CaptchaType=GetBoolSetting("UseSolvemedia")?"SolveMedia":"Recaptcha";
+        string CaptchaType = GetBoolSetting("UseSolvemedia") ? "SolveMedia" : "Recaptcha";
         // Check if we are in the correct captcha or not
-        if ( !IsVisible ( ElementByXPath ( "//span[contains(text(),'"+CaptchaType+"')]" ) ) )
+        if (!IsVisible(ElementByXPath("//span[contains(text(),'" + CaptchaType + "')]")))
         {
             //We are not in correct captcha type get button to switch captcha
-            var SwitchButton=ElementByXPath("//div[@class='dropdown-trigger']//button");
-            if ( IsVisible ( SwitchButton ) )
+            var SwitchButton = ElementByXPath("//div[@class='dropdown-trigger']//button");
+            if (IsVisible(SwitchButton))
             {
-                Click ( SwitchButton );
-                Wait ( 1 );
-                var SwitchElement=ElementByXPath("//h3[contains(text(),'"+CaptchaType+"')]");
-                if ( IsVisible ( SwitchElement ) )
+                Click(SwitchButton);
+                Wait(1);
+                var SwitchElement = ElementByXPath("//h3[contains(text(),'" + CaptchaType + "')]");
+                if (IsVisible(SwitchElement))
                 {
-                    Click ( SwitchElement );
-                    Wait ( 2 , 3 );
+                    Click(SwitchElement);
+                    Wait(2, 3);
                 }
             }
-        }       
-    
-        return base.DoSolveCaptcha ( );
+        }
+
+        return base.DoSolveCaptcha();
     }
-    public override bool IsLoggedIn ( )
+    public override bool IsLoggedIn()
     {
 
 
-        return ElementByXPath ( "//i[@class='mdi mdi-logout mdi-24px']|//span[contains(text(),'Logout')]" )!=null;
+        return ElementByXPath("//i[@class='mdi mdi-logout mdi-24px']|//span[contains(text(),'Logout')]") != null;
 
     }
-   
-    private void TryHideChat( )
+
+    private void TryHideChat()
     {
         //sometimes the chat block the captcha
-        var hideChatBtn=ElementByXPath("//button[@title='Hide']");
-        if ( IsVisible(hideChatBtn) )
+        var hideChatBtn = ElementByXPath("//button[@title='Hide']");
+        if (IsVisible(hideChatBtn))
         {
             Click(hideChatBtn);
             Wait(2);
         }
     }
-    public override int DoSolveFaucet ( )
+
+    
+    public override int DoSolveFaucet()
     {
-        if ( Driver.Url!=FaucetUrl )
-        {
-            GoToUrl ( FaucetUrl );
-            Wait ( 2 , 3 );
-        }
-        var GotoFaucetButton=ElementByXPath("//a[@class='button is-success is-medium' and @href='/faucet']");
-        if ( IsVisible ( GotoFaucetButton ) )
-        {
-            Click ( GotoFaucetButton );
-            Wait ( 2 );
-        }
-        TryHideChat( );
-        var NextBtn=ElementByXPath("//div[contains(@class,'level-item')]//div//button[contains(@class,'button is-primary')]");
-        DateTime timeout=DateTime.Now.AddSeconds(10);
-        while((!IsVisible(NextBtn) ||!NextBtn.Enabled) && DateTime.Now<timeout )
-        {
-            Wait ( );
-            NextBtn=ElementByXPath ( "//div[contains(@class,'level-item')]//div//button[contains(@class,'button is-primary')]" );
-        }
-        if ( !IsVisible ( NextBtn ) )
-        {
-            return Fail ( "Next button not found" );
-        }
-        Click ( NextBtn );
-        Wait ( 2 , 3 );
+        GoToUrl("https://hitbits.io/home");
+        Wait(2);
 
-        var ClaimBtn=ElementByXPath("//button[contains(@class,'button is-success') and contains(text(),'Claim')]");
-        if ( !IsVisible ( ClaimBtn ) )
+
+        if (GetBoolSetting("DailyReward"))
         {
-            return Fail ( "Claimbtn is not visible" );
+            Log("Trying claim daily reward");
+            var buttonDailyReward = ElementByXPath("//strong[contains(text(),'Today')]//..//..//button[contains(@class,'success')]");
+            if (IsVisible(buttonDailyReward))
+            {
+                Click(buttonDailyReward);
+                Wait(1);
+                Log("Daily Reward successfully claimed");
+            }
+            else
+            {
+                Log("Button to claim daily reward not found or not visible , seems that daily reward is not available");
+            }
         }
 
-        var result=DoSolveCaptcha();
-        if ( result>0 )
+        var GotoFaucetButton = ElementByXPath("//a[@class='button is-success is-medium' and @href='/faucet']");
+        if (IsVisible(GotoFaucetButton))
+        {
+            Click(GotoFaucetButton);
+            Wait(2);
+        }
+        TryHideChat();
+        var NextBtn = ElementByXPath("//div[contains(@class,'level-item')]//div//button[contains(@class,'button is-primary')]");
+        DateTime timeout = DateTime.Now.AddSeconds(10);
+        while ((!IsVisible(NextBtn) || !NextBtn.Enabled) && DateTime.Now < timeout)
+        {
+            Wait();
+            NextBtn = ElementByXPath("//div[contains(@class,'level-item')]//div//button[contains(@class,'button is-primary')]");
+        }
+        if (!IsVisible(NextBtn))
+        {
+            return Fail("Next button not found");
+        }
+        Click(NextBtn);
+        Wait(2, 3);
+
+        var ClaimBtn = ElementByXPath("//button[contains(@class,'button is-success') and contains(text(),'Claim')]");
+        if (!IsVisible(ClaimBtn))
+        {
+            return Fail("Claimbtn is not visible");
+        }
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
         {
             return result;
         }
-        Wait ( 1 );
+        Wait(1);
 
-        Click ( ClaimBtn );
-
-
+        Click(ClaimBtn);
 
 
 
-        return base.DoSolveFaucet ( );
+
+
+        return base.DoSolveFaucet();
     }
 
-    public override int GetFaucetWaitTime ( )
+    public override int GetFaucetWaitTime()
     {
-        if ( Driver.Url!=FaucetUrl )
-        {
-            GoToUrl ( FaucetUrl );
-            Wait ( 2 , 3 );      
-        }
-        var GotoFaucetButton=ElementByXPath("//a[@class='button is-success is-medium' and @href='/faucet']");
-        if ( IsVisible ( GotoFaucetButton ) )
-        {
-            Click ( GotoFaucetButton );
-            Wait ( 2 );
-        }
 
-        var Timer=ElementByXPath("//span[contains(@class,'tag is-dark is-medium')]//span[contains(text(),':')]");
-
-        if ( IsVisible ( Timer ) )
+        if (!Driver.Url.Contains("faucet"))
         {
-            int M,S;
-            var SplitedTimer=Timer.Text.Split(':');
-            if ( int.TryParse ( SplitedTimer[0] , out M )&&int.TryParse ( SplitedTimer[1] , out S ) )
+            GoToUrl("https://hitbits.io/home");
+
+            var GotoFaucetButton = ElementByXPath("//a[@class='button is-success is-medium' and @href='/faucet']");
+            if (IsVisible(GotoFaucetButton))
             {
-                return M*60+S;
+                Click(GotoFaucetButton);
+                Wait(2);
             }
         }
-      
-        return base.GetFaucetWaitTime ( );
+
+
+        var Timer = ElementByXPath("//span[contains(@class,'tag is-dark is-medium')]//span[contains(text(),':')]");
+
+        if (IsVisible(Timer))
+        {
+            int M, S;
+            var SplitedTimer = Timer.Text.Split(':');
+            if (int.TryParse(SplitedTimer[0], out M) && int.TryParse(SplitedTimer[1], out S))
+            {
+                return M * 60 + S;
+            }
+        }
+
+        return base.GetFaucetWaitTime();
     }
 
     #region RaidRegion
     //Everything code refered to raids
-    public override int BeforeSolveFaucet ( )
+    public override int BeforeSolveFaucet()
     {
-        int RaidFightNumber=GetIntSetting("Fight");
-        if ( RaidFightNumber>0 )
+        if (GetBoolSetting("TryDoShortlink"))
         {
-            GoToUrl ( RaidUrl );
-            Wait (3,4 );
-            int ActualLevel=this.ActualLevel;
+            GoToUrl("https://hitbits.io/offerwalls/shortlinks");
+            Wait(1, 2);
 
-            if ( ( ActualLevel+75 )>=( RaidFightNumber-1 )*50 )
+            var shortlinkButtons = ElementsByXPath("//a[contains(@href,'shortlinks')]").Where(button => IsVisible(button)).ToList();
+            if (shortlinkButtons.Count > 0)
             {
-                var GotoRaidButtons=ElementsByXPath("//button[@class='button is-warning']");
-                var GotoRaidButton=GotoRaidButtons.Count>(RaidFightNumber-1)?GotoRaidButtons[RaidFightNumber-1]:GotoRaidButtons.Last();
-                if ( IsVisible ( GotoRaidButton ) )
+                Click(shortlinkButtons[Random(0, shortlinkButtons.Count - 1)]);
+                Wait(1, 2);
+                var visitLink = ElementByXPath("//span[contains(text(),'Visit Link')]");
+                if (IsVisible(visitLink))
                 {
-                    Click ( GotoRaidButton );
-                    Wait ( 3,4 );
-                    int count=0;
-                    var PlayButton=this.PlayButton;
-                    while ( EnergyLevel>0 && count<10 && PlayButton!=null )
-                    {
-                        Click ( PlayButton );
-                        Wait ( );
+                    ShortLinkBypasser shortLinkBypasser = new ShortLinkBypasser(this);
 
-                        DateTime timeout=DateTime.Now.AddSeconds(15);
-                        while ( !IsVisible ( ElementByXPath ( "//button[contains(@class,'button is-warning is-large')]//span[contains(text(),'0')]" ) )&&DateTime.Now<timeout )
+                    try
+                    {
+                        CheckForPopupsEnabled = false;
+
+                        Click(visitLink,false);
+                        if (Driver.WindowHandles.Count > 1)
                         {
-                            Wait ( );
+                            Driver.SwitchTo().Window(Driver.WindowHandles[1]);
                         }
-                        var Success=ElementsByXPath("//li[contains(text(),'You hit for')]").LastOrDefault();
-                        if ( IsVisible ( Success ) )
+
+                        shortLinkBypasser.DoShortLink();
+                    }
+                    finally
+                    {
+                        CheckForPopupsEnabled = true;
+                        Driver.SwitchTo().Window(Driver.WindowHandles[0]);
+                        CheckForPopups();
+                        
+                        GoToUrl("https://hitbits.io/home");
+                    }
+
+                }
+            }
+        }
+        int RaidFightNumber = GetIntSetting("Fight");
+        if (RaidFightNumber > 0)
+        {
+            GoToUrl(RaidUrl);
+            Wait(3, 4);
+            int ActualLevel = this.ActualLevel;
+
+            if ((ActualLevel + 75) >= (RaidFightNumber - 1) * 50)
+            {
+                var GotoRaidButtons = ElementsByXPath("//button[@class='button is-warning']");
+                var GotoRaidButton = GotoRaidButtons.Count > (RaidFightNumber - 1) ? GotoRaidButtons[RaidFightNumber - 1] : GotoRaidButtons.Last();
+                if (IsVisible(GotoRaidButton))
+                {
+                    Click(GotoRaidButton);
+                    Wait(3, 4);
+                    int count = 0;
+                    var PlayButton = this.PlayButton;
+                    while (EnergyLevel > 0 && count < 10 && PlayButton != null)
+                    {
+                        Click(PlayButton);
+                        Wait();
+
+                        DateTime timeout = DateTime.Now.AddSeconds(15);
+                        while (!IsVisible(ElementByXPath("//button[contains(@class,'button is-warning is-large')]//span[contains(text(),'0')]")) && DateTime.Now < timeout)
                         {
-                            Log ( Success.Text );
+                            Wait();
+                        }
+                        var Success = ElementsByXPath("//li[contains(text(),'You hit for')]").LastOrDefault();
+                        if (IsVisible(Success))
+                        {
+                            Log(Success.Text);
                         }
                         count++;
-                        PlayButton=this.PlayButton;
+                        PlayButton = this.PlayButton;
                     }
 
                 }
             }
             else
             {
-                Log ( "You cannot play this raid you need to be"+( ( RaidFightNumber-1 )*50 ).ToString ( )+" And you are "+ActualLevel.ToString ( ) );
+                Log("You cannot play this raid you need to be" + ((RaidFightNumber - 1) * 50).ToString() + " And you are " + ActualLevel.ToString());
             }
 
 
 
         }
-        return base.BeforeSolveFaucet ( );
+        return base.BeforeSolveFaucet();
     }
 
     private int EnergyLevel
     {
         get
         {
-            var EnergyLevelElem=ElementByXPath("//progress[contains(@class,'progress is-success')]");
-            if ( IsVisible ( EnergyLevelElem ) )
+            var EnergyLevelElem = ElementByXPath("//progress[contains(@class,'progress is-success')]");
+            if (IsVisible(EnergyLevelElem))
             {
                 int Elevel;
-                if ( int.TryParse ( EnergyLevelElem.GetAttribute ( "value" ) , out Elevel ) )
+                if (int.TryParse(EnergyLevelElem.GetAttribute("value"), out Elevel))
                 {
                     return Elevel;
                 }
@@ -269,14 +347,14 @@ class HitBits : FaucetScript
     {
         get
         {
-            return GetActualLevel ( );
+            return GetActualLevel();
         }
     }
-    private int GetActualLevel ( )
+    private int GetActualLevel()
     {
-        var LevelElement=ElementByXPath("//strong[contains(text(),'Lv.')]");
+        var LevelElement = ElementByXPath("//strong[contains(text(),'Lv.')]");
         int Lv;
-        if ( IsVisible ( LevelElement )&&int.TryParse ( LevelElement.Text.Trim ( ).Split ( ' ' )[1] , out Lv ) )
+        if (IsVisible(LevelElement) && int.TryParse(LevelElement.Text.Trim().Split(' ')[1], out Lv))
         {
             return Lv;
         }
@@ -288,12 +366,12 @@ class HitBits : FaucetScript
     {
         get
         {
-            var AvailableButtons= ElementsByXPath ( "//button[@class='button is-success is-large' and not(@disabled='disabled')]" );
-            if ( AvailableButtons.Count==0 )
+            var AvailableButtons = ElementsByXPath("//button[@class='button is-success is-large' and not(@disabled='disabled')]");
+            if (AvailableButtons.Count == 0)
             {
                 return null;
             }
-            return AvailableButtons.Where ( x => x.Enabled && IsVisible ( x ) ).LastOrDefault ( );
+            return AvailableButtons.Where(x => x.Enabled && IsVisible(x)).LastOrDefault();
 
         }
     }

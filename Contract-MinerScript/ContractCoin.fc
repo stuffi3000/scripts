@@ -1,4 +1,5 @@
 ﻿using FaucetCollector.Script;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,17 +16,39 @@ public class ContractMiner : FaucetScript
 
                 new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
-                new FaucetSetting(){Name="LoginW",Display="Login With",Type=EditorType.ComboBox,Items=new System.Collections.Generic.List<string>{"Solvemedia","Recaptcha"},Default="Recaptcha"},            
-                //new FaucetSetting(){Name="ContractN",Display="Contact Nº:",Type=EditorType.Numeric,Default=1},
-                new FaucetSetting(){Name="TimedlyHour",Display="ClaimTimedlyHour",Type=EditorType.CheckBox,Default=true},
-                new FaucetSetting(){Name="MinersTap",Display="MinersTap",Type=EditorType.CheckBox,Default=true},
-                new FaucetSetting(){Name="AutoMiner",Display="AutoMiner_(0 Disabled)",Type=EditorType.Numeric,Default=0},
-                new FaucetSetting(){
-                    Name="Coinflip",
-                    Type=EditorType.ComboBox,
-                    Items=AvailableCoinflipOptions ,
-                    Display="RP Coinflip",
-                    Default=CoinflipOption.Disabled.ToString()
+                new FaucetSetting(){Name="LoginW",Display="Login With",Type=EditorType.ComboBox,Items=new System.Collections.Generic.List<string>{"Solvemedia","Recaptcha"},Default="Recaptcha"},
+                new FaucetSetting(){Name="MinerTap",Display="MinerTap",Type=EditorType.CheckBox,Default=true},
+                new FaucetSetting()
+                {
+                    Name="HourlyPot",Display="Hourly pot",Type=EditorType.CheckBox,Default=true
+                },
+                new FaucetSetting()
+                {
+                    Name="SaveSession",
+                    Type=EditorType.CheckBox,
+                    Default=true,
+                    Display="Click on remember me"
+                },
+                new FaucetSetting()
+                {
+                    Name="DailyClaim",
+                    Type=EditorType.CheckBox,
+                    Default=true,
+                    Display="Daily Claim"
+                },
+                new FaucetSetting()
+                {
+                    Name="LootBox",
+                    Display="Try claim loot box",
+                    Type=EditorType.CheckBox,
+                    Default=false
+                },
+                new FaucetSetting()
+                {
+                    Name="CoinFlip",
+                    Type=EditorType.CheckBox,
+                    Display="Claim Coinflip",
+                    Default=true
                 }
 
 
@@ -36,17 +59,17 @@ public class ContractMiner : FaucetScript
     /// <summary>
     /// This method gets called when the faucet is enabled and the GO button is clicked
     /// </summary>
-    public override void Start( )
+    public override void Start()
     {
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title="Miner";
+        Title = "Miner";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
-        SuccessXPath="//div[@class='alert alert-success']";
-        FailXPath="//div[@class='alert alert-danger']";
+        SuccessXPath = "//div[@class='alert alert-success']";
+        FailXPath = "//div[@class='alert alert-danger']";
 
         //Let Faucet Collector start up everything
-        base.Start( );
+        base.Start();
     }
 
     private enum CoinflipOption
@@ -60,7 +83,7 @@ public class ContractMiner : FaucetScript
     {
         get
         {
-            return Enum.GetNames(typeof(CoinflipOption)).ToList( );
+            return Enum.GetNames(typeof(CoinflipOption)).ToList();
         }
     }
 
@@ -68,60 +91,52 @@ public class ContractMiner : FaucetScript
     {
         get
         {
-            var settingSelected= GetSetting("Coinflip");
+            var settingSelected = GetSetting("Coinflip");
 
-            CoinflipOption selectedOrDefaultOption  = CoinflipOption.Disabled;
+            CoinflipOption selectedOrDefaultOption = CoinflipOption.Disabled;
 
-            if ( !Enum.TryParse(settingSelected , out selectedOrDefaultOption) )
+            if (!Enum.TryParse(settingSelected, out selectedOrDefaultOption))
             {
 
-                Log("We have problems reaching setting that you have selected on coinflip please select it again" , Level.Warning);
+                Log("We have problems reaching setting that you have selected on coinflip please select it again", Level.Warning);
 
             }
             return selectedOrDefaultOption;
         }
 
     }
-    public override bool IsLoggedIn( )
+    public override bool IsLoggedIn()
     {
 
         //In here we can check for the presence of an element that is only present when you are logged in.
         //In this case we check for en element with the class "loggedIn"
-        return ElementByXPath("//a[contains(@href,'target=logout')]")!=null;
+        return ElementByXPath("//a[contains(@href,'logout')]") != null;
     }
 
-    public void CheckDailyAd( )
+    public void CheckDailyAd()
     {
-        if ( IsVisible(ElementByXPath("//h5[contains(text(),'Daily Login Ad')]")) )
+        var btnDailyReward = ElementByXPath("//button[@name='claim_daily_rp']");
+        if (IsVisible(btnDailyReward))
         {
-            var CloseDailyAd = ElementByXPath("//button[@name='close_daily_ad']");
-            DateTime t1 = DateTime.Now.AddSeconds(15);
-            while ( !IsVisible(CloseDailyAd) )
-            {
-                Wait( );
-                CloseDailyAd=ElementByXPath("//button[@name='close_daily_ad']");
-                if ( DateTime.Now>t1 )
-                {
-                    break;
-                }
-            }
-            Click(CloseDailyAd);
+            Log("Claiming daily reward");
+
+            Click(btnDailyReward);
         }
     }
-    public void SelectCorrectCaptcha( )
+    public void SelectCorrectCaptcha()
     {
         var LoginW = GetSetting("LoginW");
-        if ( LoginW=="Recaptcha" )
+        if (LoginW == "Recaptcha")
         {
-            if ( !IsVisible(ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]")) )
+            if (!IsVisible(ElementByXPath("//iframe[contains(@src,'google.com/recaptcha')]")))
             {
                 var SelectCaptchaButton = ElementByXPath("//a[@data-target='#change-captcha-solution']");
-                if ( IsVisible(SelectCaptchaButton) )
+                if (IsVisible(SelectCaptchaButton))
                 {
                     Click(SelectCaptchaButton);
                     Wait(1);
                     var SelectRecaptcha = ElementByXPath("//a[contains(text(),'ReCaptcha')]");
-                    if ( IsVisible(SelectRecaptcha) )
+                    if (IsVisible(SelectRecaptcha))
                     {
                         Click(SelectRecaptcha);
                         Wait(1);
@@ -131,15 +146,15 @@ public class ContractMiner : FaucetScript
         }
         else
         {
-            if ( !IsVisible(ElementByXPath("//img[@id='adcopy-puzzle-image-image']")) )
+            if (!IsVisible(ElementByXPath("//img[@id='adcopy-puzzle-image-image']")))
             {
                 var SelectCaptchaButton = ElementByXPath("//a[@data-target='#change-captcha-solution']");
-                if ( IsVisible(SelectCaptchaButton) )
+                if (IsVisible(SelectCaptchaButton))
                 {
                     Click(SelectCaptchaButton);
                     Wait(1);
                     var SelectSolvemedia = ElementByXPath("//a[contains(text(),'SolveMedia')]");
-                    if ( IsVisible(SelectSolvemedia) )
+                    if (IsVisible(SelectSolvemedia))
                     {
                         Click(SelectSolvemedia);
                         Wait(1);
@@ -148,20 +163,20 @@ public class ContractMiner : FaucetScript
             }
         }
     }
-    public override int BeforeLogin( )
+    public override int BeforeLogin()
     {
         var Login = ElementByXPath("//a[contains(@href,'target=login')]");
-        if ( IsVisible(Login) )
+        if (IsVisible(Login))
         {
             Click(Login);
         }
 
         Wait(2);
-        SelectCorrectCaptcha( );
+        SelectCorrectCaptcha();
 
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.BeforeLogin( );
+        return base.BeforeLogin();
     }
 
     /// <summary>
@@ -169,64 +184,76 @@ public class ContractMiner : FaucetScript
     /// It can be used to actually login the user/enter wallet details in the faucet
     /// </summary>
     /// <returns></returns>
-    public override int DoLogin( )
+    public override int DoLogin()
     {
+        if (!Driver.Url.Contains("https://www.contract-miner.com/?my-account=index&target=login"))
+        {
+            GoToUrl("https://www.contract-miner.com/?my-account=index&target=login");
+        }
+
 
         var UserBox = ElementByXPath("//input[@id='username']");
-        if ( !IsVisible(UserBox) )
+        if (!IsVisible(UserBox))
         {
             return Fail("User Box is not visible");
         }
-        SetText(UserBox , GetSetting("User"));
+        SetText(UserBox, GetSetting("User"));
         Wait(1);
         var PasswordBox = ElementByXPath("//input[@type='password']");
-        if ( !IsVisible(PasswordBox) )
+        if (!IsVisible(PasswordBox))
         {
             return Fail("Password box is not visible");
         }
-        SetText(PasswordBox , GetPassword("Pass"));
+        SetText(PasswordBox, GetPassword("Pass"));
         Wait(1);
         var result = DoSolveCaptcha();
-        if ( result>0 )
+        if (result > 0)
         {
             return Fail("Fail solving captcha");
         }
-        if ( GetSetting("LoginW")=="Recaptcha" )
+        if (GetSetting("LoginW") == "Recaptcha")
         {
             FaucetCollector.Captcha.RecaptchaUtility utility = new FaucetCollector.Captcha.RecaptchaUtility(this);
-            utility.DoSolve( );
+            utility.DoSolve();
         }
-        var KeepSign = ElementByXPath("//input[@name='remember_me_login']");
-        if ( IsVisible(KeepSign) )
+        if (GetBoolSetting("SaveSession"))
         {
-            Click(KeepSign);
+            var KeepSign = ElementByXPath("//input[@id='stay_signed_in']");
+            if (IsVisible(KeepSign))
+            {
+                Click(KeepSign);
+            }
+
         }
-        var LoginBtn = ElementsByXPath("//button[contains(@class,'btn btn-primary')]").FirstOrDefault();
-        if ( !IsVisible(LoginBtn) )
+    
+
+
+        var LoginBtn = ElementsByXPath("//button[@id='submit']").FirstOrDefault();
+        if (!IsVisible(LoginBtn))
         {
             return Fail("Button login is not visible");
         }
         Click(LoginBtn);
 
         var Error = ElementByXPath("//div[@class='toast-message']");
-        if ( IsVisible(Error) )
+        if (IsVisible(Error))
         {
             Log(Error.Text);
         }
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.DoLogin( );
+        return base.DoLogin();
     }
 
     /// <summary>
     /// This method gets called after the DoLogin method.
     /// </summary>
-    public override int AfterLogin( )
+    public override int AfterLogin()
     {
-        CheckDailyAd( );
+        CheckDailyAd();
 
 
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return base.AfterLogin( );
+        return base.AfterLogin();
     }
 
     /// <summary>
@@ -235,15 +262,15 @@ public class ContractMiner : FaucetScript
     /// This is used to pause the script while the faucet its timer runs out.
     /// Return the number of seconds the bot should wait.
     /// </summary>
-    public override int GetFaucetWaitTime( )
+    public override int GetFaucetWaitTime()
     {
 
-        int lowerTimer=GetLowerTimer();
-        if ( lowerTimer>0 )
+        int lowerTimer = GetLowerTimer();
+        if (lowerTimer > 0)
         {
             return lowerTimer;
         }
-        else if ( IsSuccess )
+        else if (IsSuccess)
         {
             //  We return 15 minutes , the minimum wait time if is success and something is wrong getting the settings 
             return 900;
@@ -254,72 +281,72 @@ public class ContractMiner : FaucetScript
 
 
     }
-    public int GetLowerTimer( )
+    public int GetLowerTimer()
     {
         DateTime activedHourTime;
         DateTime actived15Timer;
-        int ActivedHourWaitTime=0;
-        int Actived15WaitTime=0;
-        if ( DateTime.TryParse(GetSetting("ActedHour") , out activedHourTime) )
+        int ActivedHourWaitTime = 0;
+        int Actived15WaitTime = 0;
+        if (DateTime.TryParse(GetSetting("ActedHour"), out activedHourTime))
         {
             // We get the time in that we started the job from the settings
-            ActivedHourWaitTime=( int )( activedHourTime.AddHours(1)-DateTime.Now ).TotalSeconds;
+            ActivedHourWaitTime = (int)(activedHourTime.AddHours(1) - DateTime.Now).TotalSeconds;
         }
-        if ( DateTime.TryParse(GetSetting("Actived15") , out actived15Timer) )
+        if (DateTime.TryParse(GetSetting("Actived15"), out actived15Timer))
         {
             // We get timer from started mine
-            Actived15WaitTime=( int )( actived15Timer.AddMinutes(15)-DateTime.Now ).TotalSeconds;
+            Actived15WaitTime = (int)(actived15Timer.AddMinutes(15) - DateTime.Now).TotalSeconds;
         }
         // If Actived hour timer is biggest than actived 15 and >0  we return it 
-        return ( ActivedHourWaitTime>=Actived15WaitTime&&ActivedHourWaitTime>0 )
+        return (ActivedHourWaitTime >= Actived15WaitTime && ActivedHourWaitTime > 0)
             // We check if Actived 15 is >0 , return it , else we return 0
-            ? ActivedHourWaitTime : Actived15WaitTime>0 ? Actived15WaitTime : 0;
+            ? ActivedHourWaitTime : Actived15WaitTime > 0 ? Actived15WaitTime : 0;
 
 
     }
 
     public int TryUseShortlink(int tries = 0)
     {
-        if ( tries>4 )
+        if (tries > 4)
         {
             return Fail("Fail do shortlink");
         }
-        var GenerateShort = ElementByXPath("//button[@id='generate_end_auth']");
-        if ( !IsVisible(GenerateShort) )
+        var GenerateShort = ElementByXPath("//button[@id='generate_mt_end_shortener_cm']");
+        if (!IsVisible(GenerateShort))
         {
             return Fail("Generate ShortLink Button is not visible");
         }
         Click(GenerateShort);
         var ButtonStay = ElementByXPath("//a[contains(text(),'Stay in same tab')]");
         DateTime t1 = DateTime.Now.AddSeconds(15);
-        while ( !IsVisible(ButtonStay) )
+        while (!IsVisible(ButtonStay))
         {
-            ButtonStay=ElementByXPath("//a[contains(text(),'Stay in same tab')]");
+            ButtonStay = ElementByXPath("//a[contains(text(),'Stay in same tab')]");
             Wait(1);
-            if ( DateTime.Now>t1 )
+            if (DateTime.Now > t1)
             {
                 break;
             }
         }
-        if ( !IsVisible(ButtonStay) )
+        if (!IsVisible(ButtonStay))
         {
             return Fail("Go to shortLink button is not visible");
         }
 
         Click(ButtonStay);
-        Wait( );
-        if ( !IsVisible(ElementByXPath("//input[@id='login_username']")) )
+        Wait();
+        if (!IsVisible(ElementByXPath("//input[@id='login_username']")))
         {
-            DoTheInternalShort( );
+            DoTheInternalShort();
             Wait(1);
         }
         else
         {
             Log("Need login again, Try login.");
-            BeforeLogin( );
-            DoLogin( );
+            BeforeLogin();
+            DoLogin();
             GoToUrl(Url);
-            return TryUseShortlink(tries+1);
+            return TryUseShortlink(tries + 1);
 
 
         }
@@ -331,212 +358,161 @@ public class ContractMiner : FaucetScript
     /// This method gets called after the BeforeSolveFaucet. You can do the actual claiming of the faucet in here.
     /// </summary>
     /// <returns></returns>
-    public override int DoSolveFaucet( )
+    /// 
+
+    public override int DoSolveFaucet()
     {
-        CoinflipOption coinflipSelectedOption= this.coinflipSelectedOption;
-        if ( coinflipSelectedOption!=CoinflipOption.Disabled )
+        // Daily claim area
+        if (GetBoolSetting("DailyClaim"))
         {
-            GoToUrl("https://www.contract-miner.com/");
+            var claimMyReward = ElementByXPath("//button[contains(text(),'Claim My Reward')]");
+            if (IsVisible(claimMyReward))
+            {
+                Log("Claim daily claim");
+                Click(claimMyReward);
+            }
+            else
+            {
+                Log("Daily reward not available");
+            }
+        }
+
+
+        // Miners tap area
+
+        if (GetBoolSetting("MinerTap"))
+        {
+            GoToUrl("https://www.contract-miner.com/?app=miners-tap");
+            Wait(1);
+            var beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+            if (IsVisible(beginClaimBtn))
+            {
+                Click(beginClaimBtn);
+            }
+            else if(IsVisible(ElementByXPath("//h4[contains(text(),'Claim is pending')]")))
+            {
+                Log("Miners top is in cooldown");
+            }
+            else
+            {
+
+                TryUseShortlink();
+                beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+                if (IsVisible(beginClaimBtn))
+                {
+
+                    Click(beginClaimBtn);
+                }
+            }
+
+
+
+        }
+
+        //Hourly pot claim
+        if (GetBoolSetting("HourlyPot"))
+        {
+            GoToUrl("https://www.contract-miner.com/?app=hourly-pot");
+            Wait();
+            var beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+            if (IsVisible(beginClaimBtn))
+            {
+                Click(beginClaimBtn);
+            }
+            else if (IsVisible(ElementByXPath("//h4[contains(text(),'Claim is pending')]")))
+            {
+                Log("Hourly Pot is in cooldown");
+            }
+            else
+            {
+                TryUseShortlink();
+                beginClaimBtn = ElementByXPath(" //button[contains(text(),'Begin Claim')]");
+                if (IsVisible(beginClaimBtn))
+                {
+
+                    Click(beginClaimBtn);
+                }
+            }
+            TryUseShortlink();
+        }
+
+        if (GetBoolSetting("LootBox"))
+        {
+            GoToUrl("https://www.contract-miner.com/?app=loot-box");
+
             Wait(2);
 
-            var openCoinflipBtn=ElementByXPath("//a[contains(text(),'Flip Coin')]");
-            if ( IsVisible(openCoinflipBtn) )
+            var boxButtons = ElementsByXPath("//button[@name='claim_box']").Where(button => IsVisible(button)).ToList();
+            if (boxButtons.Count > 0)
             {
-                Click(openCoinflipBtn);
-                Wait(2);
-
-                var playCoinflipBtn=ElementByXPath("//button[@name='play_cf']");
-                // if the butotn is visible , so probably coinflip is available to claim
-                if ( IsVisible(playCoinflipBtn) )
+                int MaxTries = boxButtons.Count;
+                int nTrie = 0; 
+                while (boxButtons.Count > 0  && nTrie < MaxTries)
                 {
-                    // We select the option that the user selected 
-
-                    string correctFlipXPath = "//input[@name='coinflip_bet' and @value='"
-                        +(coinflipSelectedOption==CoinflipOption.Heads?"1":"2")
-                        +"']";
-
-                    var changeFlipElement= ElementByXPath(correctFlipXPath);
-                    if ( IsVisible(changeFlipElement) )
-                    {
-
-                        Click(changeFlipElement);
-                        Wait(2);
-
-                    }
 
 
-                    Click(playCoinflipBtn);
-                    Wait( );
-
-                    var successMessage=ElementByXPath("//div[@class='toast-message']");
-                    if ( IsVisible(successMessage) )
-                    {
-                        Log(successMessage.Text);
-                    }
-                }
-            }
-        }
-
-        int Number = GetIntSetting("AutoMiner");
-        if ( Number!=0 )
-        {
-            GoToUrl("https://www.contract-miner.com/?city=home&earn=auto-miner");
-            Wait(2);
-            var ButtonComplete = ElementByXPath("//button[@name='am_captcha_solution']");
-            if ( IsVisible(ButtonComplete) )
-            {
-                var result = DoSolveCaptcha();
-                if ( result>0 )
-                {
-                    Log("Fail in AutoMiner , captcha solution incorrect");
-                }
-                Wait(1);
-                Click(ButtonComplete);
-            }
-
-            var ButtonClaim = ElementsByXPath("//button[@name='start_auto_miner']");
-            if ( ButtonClaim.Count>0 )
-            {
-                int CountClaim = ButtonClaim.Count >= Number ? Number - 1 : ButtonClaim.Count - 1;
-                if ( CountClaim>=0 )
-                {
-                    Click(ButtonClaim[CountClaim]);
-                    Wait( );
-                }
-            }
-        }
-        //button[@name='start_auto_miner']
-        if ( GetBoolSetting("MinersTap") )
-        {
-            Log("Into minerstap");
-            bool Claim = true;
-            try
-            {
-                DateTime D=Convert.ToDateTime(GetSetting("Actived15"));
-                if ( D.AddMinutes(15)>DateTime.Now )
-                {
-                    Claim=false;
-                }
-            }
-            catch ( Exception )
-            {
-                SetSetting("Actived15" , DateTime.Now);
-            }
-            if ( Claim )
-            {
-                GoToUrl("https://www.contract-miner.com/?city=home&app=miners-tap");
-                Wait( );
-                var ShortlinkButton = ElementByXPath("//button[@id='generate_mt_end_shortener_cm']");
-                if ( IsVisible(ShortlinkButton) )
-                {
-                    Click(ShortlinkButton);
-                    Wait( );
-                    var ButtonGoto = ElementByXPath("//a[contains(text(),'Stay in same tab')]");
-                    if ( IsVisible(ButtonGoto) )
-                    {
-                        Click(ButtonGoto);
-                        DoTheInternalShort( );
-                    }
-                    var ToastSucceded = ElementByXPath("//div[@class='toast toast-success']");
-                    if ( IsVisible(ToastSucceded) )
-                    {
-                        Log(ToastSucceded.Text);
-                    }
-                }
-                var ButtonClaim = ElementByXPath("//button[@name='mt_claim']");
-                if ( IsVisible(ButtonClaim) )
-                {
-                    Click(ButtonClaim);
-                    Wait( );
-
-                    SetSetting("Actived15" , DateTime.Now);
-                    Log("Sucessfully activated");
-                }
-
-            }
-            Wait( );
-
-        }
-
-
-        if ( GetBoolSetting("TimedlyHour") )
-        {
-
-            bool Claim = true;
-            try
-            {
-
-
-                DateTime time = Convert.ToDateTime(GetSetting("ActivedHour"));
-                if ( DateTime.Now<time.AddHours(1) )
-                {
-                    Claim=false;
-                }
-
-
-
-            }
-            catch ( Exception )
-            {
-                SetSetting("ActivedHour" , DateTime.Now);
-            }
-            if ( Claim )
-            {
-                GoToUrl("https://www.contract-miner.com/?city=home&app=hourly-pot");
-                Wait( );
-                var ShortlinkButton = ElementByXPath("//button[@id='generate_mt_end_shortener_cm']");
-                if ( IsVisible(ShortlinkButton) )
-                {
-                    Click(ShortlinkButton);
-                    Wait( );
-                    var ButtonGoto = ElementByXPath("//a[contains(text(),'Stay in same tab')]");
-                    if ( IsVisible(ButtonGoto) )
-                    {
-                        Click(ButtonGoto);
-                        DoTheInternalShort( );
-                    }
-                    var ToastSucceded = ElementByXPath("//div[@class='toast toast-success']");
-                    if ( IsVisible(ToastSucceded) )
-                    {
-                        Log(ToastSucceded.Text);
-                    }
-                }
-                Wait( );
-                var BeginClaim = ElementByXPath("//button[@name='hp_claim']");
-                if ( IsVisible(BeginClaim) )
-                {
-                    Click(BeginClaim);
-                    Wait( );
-                    var ActivedMhs = ElementByXPath("//span[@class='counter-number-related text-capitalize']");
-                    if ( IsVisible(ActivedMhs) )
-                    {
-                        SetSetting("ActivedHour" , DateTime.Now);
-                        Log("Sucessfull actived"+ActivedMhs.Text.ToString( )+"For one hour");
-                    }
-
-
+                    Click(boxButtons[0]);
+                    nTrie++;
+                    Wait(); 
+                     boxButtons = ElementsByXPath("//button[@name='claim_box']").Where(button => IsVisible(button)).ToList();
                 }
             }
             else
             {
-                Log("Claim of hourly pot not available");
+                Log("there is not a box loot to claim");
+            }
+
+            var boxOpenButtons = ElementsByXPath("//button[@name='open_box']")
+                .Where(button => IsVisible(button)).ToList();
+            if (boxOpenButtons.Count > 0)
+            {
+                int MaxTries = boxOpenButtons.Count;
+                int nTrie = 0;
+                while(boxOpenButtons.Count >0 && nTrie< MaxTries)
+                {
+                    Click(boxOpenButtons[0]);
+                    nTrie++;
+                    Wait();
+                    boxOpenButtons = ElementsByXPath("//button[@name='open_box']")
+                .Where(button => IsVisible(button)).ToList();
+                }
+            }
+            else
+            {
+                Log("there is not a box lot to open");
             }
 
         }
 
+        if (GetBoolSetting("CoinFlip"))
+        {
+            GoToUrl("https://www.contract-miner.com/?mini-games=rp-coinflip");
+            Wait();
+            var coinflipClaimBtn = ElementByXPath("//button[@name='play_cf']");
+            if (IsVisible(coinflipClaimBtn))
+            {
+                Log("Claim Coinflip");
+                Click(coinflipClaimBtn);
+            }
+            else
+            {
+                Log("Coinflip is in cooldown");
+            }
+        }
+
         //This faucet has nothing to do here. We will let Faucet Collector handle it.
-        return GetWaitSetting( );
+        return GetWaitSetting();
     }
 
-    public bool DoTheInternalShort( )
+    public bool DoTheInternalShort()
     {
         bool IsSolved;
 
-        SelectCorrectCaptcha( );
+        SelectCorrectCaptcha();
 
 
         var Bypasser = new FaucetCollector.Utilities.ShortLinkBypasser(this);
-        IsSolved=Bypasser.DoShortLink( );
+        IsSolved = Bypasser.DoShortLink();
 
 
 

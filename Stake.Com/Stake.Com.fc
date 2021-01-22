@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 26/05/2019 04:00PM
-//Last Update: 01/11/2020 14:00AM - Version 23
+//Last Update: 20/12/2020 20:00PM - Version 29
 //==================//
 
 using System;
@@ -157,14 +157,23 @@ public class stake : FaucetScript
 //========//
     public override int DoLogin()
     {
+		
+
+     Set_English_Language_Function(); //call
+
 	
-      var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
+     var ExitButton = ElementByXPath("//span[contains(text(),'Deposit')] | //span[contains(text(),'Wallet')]");
 	
 	 //if i NOT Login - go to Login Page
 	 if (!IsVisible(ExitButton))
 	 {
 
-		GoToUrl("https://stake.com/?modal=login");
+        //====================================//
+        // only this section is different vs - | Primedice.com | //
+        //====================================//
+		 
+
+		GoToUrl("https://stake.com/?action=login&modal=auth");
 		Wait();		
 		Wait(2);
 
@@ -177,7 +186,12 @@ public class stake : FaucetScript
         */
 
         Driver.Navigate().Refresh(); //that not enter multiple content in input
-        
+		
+		Wait(3);        
+
+        //====================================//
+
+		
 		var box_user = ElementByXPath("//input[contains(@name,'email')]");
         SetText(box_user, GetSetting("Email"));
 		
@@ -313,6 +327,10 @@ public class stake : FaucetScript
  public override int DoSolveFaucet()
   {
 
+
+     Set_English_Language_Function(); //call
+	 
+
      //=======//
      //Vault
      //=======//
@@ -378,12 +396,12 @@ public class stake : FaucetScript
 		//======//
         if (GetBoolSetting("Rakeback"))
         {	
-          GoToUrl("https://stake.com/?currency=btc&modal=vipRakeback");
+          GoToUrl("https://stake.com/?modal=vip&tab=rakeback");
 	      Log("Go to try - Rakeback");	
 	      Wait();
 	      Wait(2);	
 
-          var RakebackAvailable = ElementByXPath("//a[contains(@href,'Rakeback')]/span[contains(text(),'Rakeback')]"); 
+          var RakebackAvailable = ElementByXPath("//button[contains(@class,'Button__StyledButton')]/span[contains(text(),'Rakeback')]");  
 		  
           if (!IsVisible(RakebackAvailable))
           {
@@ -405,12 +423,12 @@ public class stake : FaucetScript
 		//======//
         if (GetBoolSetting("Reload"))
         {	
-          GoToUrl("https://stake.com/?currency=btc&modal=vipReload");
+          GoToUrl("https://stake.com/?currency=btc&modal=vip&tab=reload");
 	      Log("Go to try - Reload");	
 	      Wait();
 	      Wait(2);	
 
-          var ReloadAvailable = ElementByXPath("//a[contains(@href,'Reload')]/span[contains(text(),'Reload')]"); 
+          var ReloadAvailable = ElementByXPath("//button[contains(@class,'Button__StyledButton')]/span[contains(text(),'Reload')]"); 
 		  
           if (!IsVisible(ReloadAvailable))
           {
@@ -427,7 +445,6 @@ public class stake : FaucetScript
 		//======//
 
 
-
 		//======//
 		//ExclusiveBonusDrop_Telegram//
 		//======//
@@ -441,42 +458,52 @@ public class stake : FaucetScript
           GoToUrl("https://t.me/s/StakeCasino");
 	      Log("Go to try - ExclusiveBonusDrop_Telegram");	
 	      Wait();
-	      Wait(7);	
+	      Wait(5);	
 
-          var ExclusiveBonusDrop_Telegram_Last = ElementByXPath("//div[contains(@class,'js-message_text') and contains(., 'rop') ]//a[position() = last() ]"); 
-          if (IsVisible(ExclusiveBonusDrop_Telegram_Last))
-          {          
-	  
+            //Vertical - scrollHeight | scrollTop   //Horizontal - | scrollWidth | scrollLeft
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //if some elements not found in html - just before need to do `scrollTop` to find some elements
+            Wait(3);
+            ExecuteScript("window.scrollTo(0, document.body.scrollTop)"); //again
+            Wait(3);
+			
+            var ExclusiveBonusDrop_Telegram_Last = ElementsByXPath("//div[contains(@class,'tgme_widget_message_text js-message_text') and contains(., 'Drop') ]//a[position() = last() ]");
+            var ElementsToCheck = ExclusiveBonusDrop_Telegram_Last.LastOrDefault();
 
-			Click(ExclusiveBonusDrop_Telegram_Last);
-	        Log("ExclusiveBonusDrop_Telegram_Last - here");
-
-            Driver.SwitchTo().Window(Driver.WindowHandles[1]); 
-			
-			Wait(5);
-			
-			Choose_Coin_Function();
-			
-			Wait(5);
-			
-            var Redeem_VAR = ElementByXPath("//span/span[contains(text(),'Redeem')]"); 
-		    if (IsVisible(Redeem_VAR))
-            {				
-	          Log("ExclusiveBonusDrop_Telegram_Last - here");			
-			  Click(Redeem_VAR);
-			  Wait(7);			  
+            if (ElementsToCheck ==null) // Not Visible
+            {
+	           Log("ElementsToCheck - NOT found");
 			}
 			
-            Driver.SwitchTo().Window(Driver.WindowHandles[0]); 
-			
-            CheckForPopupsEnabled = true;     //enable
-            CheckForPopups();    //call		
-			
-	        Title="stake.com";		  
-            GoToUrl("https://stake.com");	  
-			
-          }
-		
+            if (ElementsToCheck !=null) //Visible  
+            {
+			   Click(ElementsToCheck);
+	           Log("ElementsToCheck - here");
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[1]); 
+			   
+			   Wait(5);
+			   
+			   Choose_Coin_Function();
+			   
+			   Wait(5);
+			   
+               var Redeem_VAR = ElementByXPath("//span/span[contains(text(),'Redeem')]"); 
+		       if (IsVisible(Redeem_VAR))
+               {				
+	             Log("ExclusiveBonusDrop_Telegram_Last - here");			
+			     Click(Redeem_VAR);
+			     Wait(7);			  
+			   }
+			   
+               Driver.SwitchTo().Window(Driver.WindowHandles[0]); 
+			   
+               CheckForPopupsEnabled = true;     //enable
+               CheckForPopups();    //call		
+			   
+	           Title="stake.com";		  
+               GoToUrl("https://stake.com");	  
+            }
+	
         } //end ExclusiveBonusDrop_Telegram
 		//======//
 
@@ -554,19 +581,24 @@ public class stake : FaucetScript
            if (GetBoolSetting("Reload_SiteTimeDate"))
            {
              Title = "stake.com";
-             GoToUrl("https://stake.com/?currency=btc&modal=vipReload");
+             GoToUrl("https://stake.com/?currency=btc&modal=vip&tab=reload");
 	         Log("Go to try - Reload to return to time");	
-	         Wait();
-	         Wait(5);	
-			   
+	         Wait(15);		
+			 
              //site time with date - example 10:00 PM | 10:00 AM
-             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]");
              if (IsVisible(CheckAvailableGeneral))
              {
-               var XpathTimeVAR = ElementByXPath("//div[contains(@class,'ModalFormWrap')]/p[1]/span/span");
-		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text, "t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
-               return (int)((TimeVAR - DateTime.Now).TotalSeconds);
-		     }
+	           Log("DateTime.ParseExact - here"); 
+			   var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+			   //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+
+			   var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+			   
+		     } //end CheckAvailableGeneral
+			 
 		   } // end Reload_SiteTimeDate
 
 		   		   
@@ -594,24 +626,80 @@ public class stake : FaucetScript
         //=================//	
 
 
+
+      //============================//
+      //Set_English_Language_Function
+      //============================//
+      public int Set_English_Language_Function()
+      {	
+	  
+          var CheckLanguage = ElementByXPath("//button[contains(@class,'JGufU')]//img[contains(@src,'gb.svg')] | //button[contains(@class,'fNCTAa')]//img[contains(@src,'gb.svg')]"); 
+                
+	      if (IsVisible(CheckLanguage)) 
+          {
+	       Log("Already English Language");
+          }	
+	      
+          if (!IsVisible(CheckLanguage)) 
+          {
+           var OpenMenuLeftSide = ElementByXPath("//button[contains(@class,'JGufU')]/span[contains(@class,'iHjwOk')]/span[contains(@class,'iHjwOk')]"); 
+           Click(OpenMenuLeftSide);
+	       Log("OpenMenuLeftSide");
+	       
+	       Wait(3);
+	       
+           var ChooseEnglish = ElementByXPath("//ul[contains(@class,'hPNxpF')]//img[contains(@src,'gb.svg')]"); 
+           Click(ChooseEnglish);
+	       Log("ChooseEnglish");
+	       
+	       Wait();
+	       
+	      }
+	  
+		  return 0;
+		  		  
+      } // end Set_English_Language_Function
+		//=========//	
+	
+	
+
         //=========//
         //All_Function
 		//=========//
-        public void All_Function()
+        public int All_Function()
         {	
 
           Choose_Coin_Function(); //call
 		  
           var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+
+          if (IsVisible(CheckAvailableGeneral)) 
+          {	
+	        var NextAvailable = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span"); 
+		    if (IsVisible(NextAvailable)) 
+		    {		
+			Log("Next claim available at " + NextAvailable.Text );
+		    }	
+			
+		    if (!IsVisible(NextAvailable)) 
+		    {		
+			Log("try next time");
+		    }	
+
+		  } //end CheckAvailableGeneral - Visible 
+
+
           if (!IsVisible(CheckAvailableGeneral)) 
           {	
 		    Log("faucet visible - do stuff");
 
-            var CheckClaim = ElementByXPath("//div[contains(@class,'styles__Buttons')]//button[contains(@class,'Button__StyledButton') and (@disabled) ]"); 
+            var CheckClaim = ElementByXPath("//button[@type='submit' and (@disabled) ]"); 
             if (!IsVisible(CheckClaim))
             {	
 
-              var Claim1VAR = ElementByXPath("//div[contains(@class,'styles__ButtonsWrap')]//span[contains(text(),'Claim')] "); //click on the claim 1
+              Log("CheckClaim - here");
+
+              var Claim1VAR = ElementByXPath("//button[@type='submit']"); //click on the claim 1
               Click(Claim1VAR);
               Log("claim 1 - try");
 			  
@@ -621,7 +709,7 @@ public class stake : FaucetScript
 		        Log("Reload - call to solve captch");
                 var result = DoSolveCaptcha(); //call to solve captch		 
 				
-                var Claim2VAR = ElementByXPath("//div[contains(@class,'styles__ButtonsWrap')]//span[contains(text(),'Claim')] "); //click on the claim 2
+                var Claim2VAR = ElementByXPath("//button[@type='submit']"); //click on the claim 2
                 Click(Claim2VAR);
                 Log("claim 2 - Success"); // click again  
 				
@@ -638,9 +726,9 @@ public class stake : FaucetScript
 
             } //CheckClaim
 		  
-		  }//end CheckAvailableGeneral
+		  }//end CheckAvailableGeneral - NOT Visible
 
-
+		  return 0;
 
 		}//end All_Function
 		//=========//
@@ -724,7 +812,7 @@ public class stake : FaucetScript
       public int Choose_Coin_Function()
       {	
 
-        var MenuVAR = ElementByXPath("//button[contains(@class,'Button__StyledButton-sc-8bd3dp-0 jXTFLj')]"); 
+        var MenuVAR = ElementByXPath("//div[contains(@class,'styles__StyledStack')]//button[contains(@class,'iWspNF')]"); 
         if (IsVisible(MenuVAR))
         {
           Log("Menu_Function");				  
@@ -737,56 +825,56 @@ public class stake : FaucetScript
 	    
         if(MenuCoinsVAR=="btc")
         {
-        var btc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[1]/button[contains(@class,'Button__StyledButton')]");
+        var btc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[1]/button");
         Log("choose - btc");
         Click(btc);
 	    }// end btc
 
         if(MenuCoinsVAR=="eth")
         {
-        var eth = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[2]/button[contains(@class,'Button__StyledButton')]");
+        var eth = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[2]/button");
         Log("choose - eth");
         Click(eth);
 	    }// end eth	  
 
         if(MenuCoinsVAR=="ltc")
         {
-        var ltc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[3]/button[contains(@class,'Button__StyledButton')]");
+        var ltc = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[3]/button");
         Log("choose - ltc");
         Click(ltc);
 	    }// end ltc	  
 	    
         if(MenuCoinsVAR=="doge")
         {
-        var doge = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[4]/button[contains(@class,'Button__StyledButton')]");
+        var doge = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[4]/button");
         Log("choose - doge");
         Click(doge);
 	    }// end doge 
 	    
         if(MenuCoinsVAR=="bch")
         {
-        var bch = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[5]/button[contains(@class,'Button__StyledButton')]");
+        var bch = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[5]/button");
         Log("choose - bch");
         Click(bch);
 	    }// end bch
 	    
         if(MenuCoinsVAR=="xrp")
         {
-        var xrp = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[6]/button[contains(@class,'Button__StyledButton')]");
+        var xrp = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[6]/button");
         Log("choose - xrp");
         Click(xrp);
 	    }// end xrp
 	    
         if(MenuCoinsVAR=="trx")
         {
-        var trx = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[7]/button[contains(@class,'Button__StyledButton')]");
+        var trx = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[7]/button");
         Log("choose - trx");
         Click(trx);
 	    }// end trx
 	    
         if(MenuCoinsVAR=="eos")
         {
-        var eos = ElementByXPath("//ul[contains(@class,'styles__InversionActionList-sc-3qwmt9-1')]/li[8]/button[contains(@class,'Button__StyledButton')]");
+        var eos = ElementByXPath("//ul[contains(@class,'styles__InversionActionList')]/li[8]/button");
         Log("choose - eos");
         Click(eos);
 	    }// end eos
@@ -1198,4 +1286,3 @@ public class stake : FaucetScript
 	
 	
 } //end public class
-

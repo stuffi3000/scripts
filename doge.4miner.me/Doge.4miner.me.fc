@@ -1,0 +1,710 @@
+
+//==================//
+//script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
+//Last Update: 22/01/2021 11:05AM - Version 8
+//==================//
+
+using System;
+using System.IO;
+using FaucetCollector.Script;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+//css_ref FaucetCollector.Utilities
+//css_inc RecaptchaUtilities
+
+
+public class Doge_4miner : FaucetScript
+{
+    /// <summary>
+    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
+    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
+    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
+    /// </summary>
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://Doge.4miner.me/#faucet")
+            {
+                //new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
+                //new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
+                new FaucetSetting(){Name="DogeAddress",Display="DogeAddress - to any wallet address",Type=EditorType.TextBox,Required=true},				
+                new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="AutoWithdraw",Display="AutoWithdraw",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="AffWithdraw",Display="AffWithdraw",Type=EditorType.CheckBox,Default=false},		
+       
+			
+                //insert user settings here
+                //new FaucetSetting { 
+                //    Name = "Name of your setting", 
+                //    Display = "Display shown in Faucet Collector", 
+                //    Type = EditorType.TextBox | EditorType.Password | EditorType.CheckBox | EditorType.Wallet | EditorType.Numeric | EditorType.ComboBox | EditorType.CheckComboBox, 
+                //    Required = true | false, 
+                //    Default = "Optionally a default value" | true | false | null.
+                //    Items = new List<string> { "item1", "item2" } (only valid for ComboBox or CheckComboBox)
+                //} 
+            };
+        }
+    }
+
+
+    //My DomainName
+    //string DomainName_String = "https://Freegridco.in";
+	//example - GoToUrl(DomainName_String);
+    //==========//
+	
+	
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+    public override void Start()
+    {
+		ad=false;
+		
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "4miner.me";
+
+        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
+        SuccessXPath = "//div[@class='alert alert-success']"; //*[text()='']
+        FailXPath = "//p[contains(text(),'not a robot')]"; //*[text()='']
+
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+	
+	
+	
+	bool ad;
+	
+	
+    public override int DoInit()
+    {
+
+	   
+        //Let Faucet Collector continue.
+        return base.DoInit();
+    }
+
+	
+	
+	
+//==================//
+//save Login Cookies 
+//==================//
+    public override bool IsLoggedIn()
+    {
+
+        //In this case we check for en element with the class "loggedIn"
+		//return ElementByXPath("//a[contains(@href,'action=logout')]") != null;
+		return true;
+    }
+//==================//
+//save Login Cookies 
+//==================//
+	
+	
+	
+	
+	
+    /// <summary>
+    /// This method gets called if IsLoggedIn returned false, right before the DoLogin method is called.
+    /// </summary>
+    public override int BeforeLogin()
+    {
+		
+		
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeLogin();
+    }
+	
+	
+	
+
+//========//
+//DoLogin
+//========//
+ public override int DoLogin()
+ {
+	
+  
+       return base.DoLogin();
+    }
+//========//
+//DoLogin
+//========//
+	
+
+	
+	
+	
+	
+//==========//
+//AfterLogin
+//=========//
+ public override int AfterLogin()
+ {
+ 
+	 
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterLogin();
+ }
+//==========//
+//AfterLogin
+//=========//
+	
+	
+	
+
+	
+//=============//
+//GetFaucetWaitTime
+//=============//
+ public override int GetFaucetWaitTime()
+ {
+
+    if(ad)
+	{
+        ad=false; //solve the problem in start - after he return to script again
+        return GetWaitSetting();  
+    }	//end ad
+		
+   //let Faucet Collector continue.
+   return base.GetFaucetWaitTime();
+ }
+//=============//
+//GetFaucetWaitTime
+//=============//
+	
+	
+	
+	
+
+    public override int BeforeSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+
+
+    public override int DoSolveCaptcha()
+    {
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveCaptcha();
+    }
+
+
+    public override int AfterSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveCaptcha();
+    }
+	
+	
+
+    public override int BeforeSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+	
+	
+	
+
+
+//=============//
+//DoSolveFaucet
+//=============//
+    public override int DoSolveFaucet()
+    {
+		
+
+      SolveAritmeticCaptcha(); //call to check
+
+
+      //=============//
+      //AffWithdraw
+      //=============//
+      if (GetBoolSetting("AffWithdraw"))
+      {
+        Log("AffWithdraw");			  
+		
+		Wait(2);
+		
+        Set_Function(); //call
+
+        var BalanceVAR = ElementByXPath("//span[@id='ref_balance']");
+        string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
+        if (IsVisible(BalanceVAR) && BalanceINT == 0) // under 0
+        {
+           Log("AffWithdraw - the balance under = 0 - not good");
+           //do all stuff
+        }
+
+        if (IsVisible(BalanceVAR) && BalanceINT > 0) // above 0
+        {
+            Log("AffWithdraw - the balance above > 0 - good");
+            Wait(2);
+            var WithdrawStartVAR = ElementByXPath("//button[@onclick='show_withdraw_options_ref();']");  //("//button[contains(text(),'Unlock') or contains(text(),'unlock')]")
+			Click(WithdrawStartVAR);
+            Wait(5);
+            Alert_Function(); //call
+        }		  
+		  
+	  } //end AffWithdraw
+	  
+	  
+	  
+      //=============//
+      //AutoWithdraw
+      //=============//
+      if (GetBoolSetting("AutoWithdraw"))
+      {
+        Log("AutoWithdraw");
+		
+		Wait(2);
+		
+        Set_Function(); //call
+
+        var BalanceVAR = ElementByXPath("//span[@id='normal_balance']");
+        string BalanceSTRING = BalanceVAR.Text.Trim().Split('.')[0];
+        int BalanceINT = Convert.ToInt32(BalanceSTRING);
+
+
+        if (IsVisible(BalanceVAR) && BalanceINT == 0) // under 0
+        {
+           Log("AutoWithdraw - the balance under = 0 - not good");
+           //do all stuff
+        }
+
+        if (IsVisible(BalanceVAR) && BalanceINT > 0) // above 0
+        {
+            Log("AutoWithdraw - the balance above > 0 - good");
+            Wait(2);
+            var WithdrawStartVAR = ElementByXPath("//button[contains(@onclick,'show_withdraw_options(')]");  //("//button[contains(text(),'Withdraw')]")
+			Click(WithdrawStartVAR);
+            Wait(3);
+			
+            var WalletVAR = ElementByXPath("//button[contains(text(),'Wallet') or contains(text(),'wallet')]");
+            if (IsVisible(WalletVAR) )
+            {
+               Log("AutoWithdraw - normal Wallet");
+		       Click(WalletVAR);
+			}
+            var MicroWalletVAR = ElementByXPath("//div[@class='modal-body']//img[contains(@src,'microwallet.co')]");				
+            if (IsVisible(MicroWalletVAR) )
+            {
+              Log("AutoWithdraw - MicroWallet");
+		      Click(MicroWalletVAR);
+			}
+			
+            Wait(5);
+			
+            Alert_Function(); //call
+        }		  
+		  
+	  } //end AutoWithdraw
+
+
+
+	  
+      //=============//
+      //FaucetClaim
+      //=============//
+      if (GetBoolSetting("FaucetClaim"))
+      {
+
+		GoToUrl("https://Doge.4miner.me/#faucet"); 
+	    Wait();
+	    Wait(5);
+
+        var Maintenance_Message = ElementByXPath("//div[contains(@class,'alert-info') or contains(@class,'alert-warning') and contains(text(),'aintenance')]");  
+		if (IsVisible(Maintenance_Message))
+        {
+		  Log("FaucetClaim - Maintenance_Message"); 
+		  return Time_Function(); //call to function time
+		}	
+		
+        var TimerCounterInputAddress = ElementByXPath("//div[contains(@id,'countsec') and contains(@style,'display: block')]");  
+        
+		if (IsVisible(TimerCounterInputAddress))
+        {
+		 Log("FaucetClaim - TimerCounterInputAddress - visible - Waiting 17 sec to appear");  
+		 Wait(17);
+        }
+        if (!IsVisible(TimerCounterInputAddress))
+        {
+		 Log("FaucetClaim - TimerCounterInputAddress - NOT visible - all good");  
+        }
+
+	    Wait(2);
+		
+        var Email_VAR = ElementByXPath("//div[contains(@class,'input-group')]/input");  
+        if (IsVisible(Email_VAR))
+        {
+		 Log("FaucetClaim - set DogeAddress");  
+         SetText(Email_VAR, GetSetting("DogeAddress"));
+        }
+		
+		Wait(2);
+		
+        var GetVAR = ElementByXPath("//span[contains(@class,'input-group-btn')]/button");  
+        if (IsVisible(GetVAR))
+		{
+		 Log("FaucetClaim - GetVAR");  
+         Click(GetVAR);	
+		}		
+
+		Wait(2);
+		
+        invisible_Recaptcha_Function(); //call
+		
+		Wait(3);
+
+        var NotReady = ElementByXPath("//p[contains(@id,'msgpool') and contains(text(),'Not ready') ]");
+        if (IsVisible(NotReady))
+		{
+		 Log("FaucetClaim - NotReady");  
+		}
+
+		Wait(3);
+
+        var RobotMessage = ElementByXPath("//p[contains(text(),'not a robot')]");
+        if (IsVisible(RobotMessage))
+		{
+		 Log("FaucetClaim - RobotMessage");  
+		}
+		
+		Wait(3);
+
+        var Success_Claim = ElementByXPath("//div[@class='alert alert-success']");
+        if (IsVisible(Success_Claim))
+		{
+		Log(Success_Claim.Text);  
+		ClaimSuccess(); //Marks the claim as a success
+		}
+		
+      } //end FaucetClaim
+
+	  return Time_Function(); //call to function time
+	
+      //This faucet has nothing to do here. We will let Faucet Collector handle it.
+      return base.DoSolveFaucet();
+    }
+	
+
+
+    public override int AfterSolveFaucet()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveFaucet();
+    }
+	
+	
+	
+
+    /// <summary>
+    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
+    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
+    /// These properties should contain XPath expressions to find certain elements on the page.
+    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
+    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
+    /// </summary>
+    public override int CheckFaucetResult()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.CheckFaucetResult();
+    }
+
+
+        //=================//
+       //Alert_Function
+        //=================//
+        public int Alert_Function()
+        {			
+			try
+			{		
+			Log("Alert - Here");
+            Driver.SwitchTo().Alert().Accept();
+			}			
+			catch
+            {
+			Log("Alert - not Here");
+            }
+					
+			Wait(3);
+			Driver.SwitchTo().DefaultContent(); //go back to default content in <html>
+			Wait(3);
+			Driver.Navigate().Refresh(); //Refresh
+		   		   
+		return 0;
+        }//end Alert_Function
+        //=================//	
+		
+
+        //=================//
+       //Set_Function
+        //=================//
+        public int Set_Function()
+        {
+	
+           var RefTab = ElementByXPath("//li//a[@href='#ref']");  
+           if (IsVisible(RefTab))
+		   {
+		    Log("RefTab");  
+            Click(RefTab);	
+		   }
+		   
+           //GoToUrl("https://Doge.4miner.me/#ref");
+           Wait();		
+           Wait(6);
+		   
+           var Email_VAR = ElementByXPath("//div[contains(@class,'referral')]/input[contains(@placeholder,'address')]");  
+           if (IsVisible(Email_VAR))
+           {
+		    Log("set DogeAddress");  
+            SetText(Email_VAR, GetSetting("DogeAddress"));
+           }
+		   
+		   Wait(2);
+		   
+           var LoginVAR = ElementByXPath("//button[contains(@type,'submit')]");  
+           if (IsVisible(LoginVAR))
+		   {
+		    Log("LoginVAR");  
+            Click(LoginVAR);	
+	        Wait(8);
+		   }	
+		   		   
+		return 0;
+        }//end Set_Function
+        //=================//	
+	
+	
+        //=================//
+       //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+
+             //site time with date - example 10:00 PM | 10:00 AM
+             var CheckAvailableGeneral = ElementByXPath("//span[contains(text(),'Next claim available')] | //span[contains(text(),'None yet')]"); 
+             if (IsVisible(CheckAvailableGeneral))
+             {
+	           Log("DateTime.ParseExact - here"); 
+               
+			   var XpathTimeVAR = ElementByXPath("//div[contains(@class,'fqakeD')]/span[1]/span");
+		       var TimeVAR = DateTime.ParseExact(XpathTimeVAR.Text.Trim(),"t", new CultureInfo("en-US") ); //t = Short time pattern - for all info here: predefined formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings  | custom formats: https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings			  
+			   //return (int)((TimeVAR - DateTime.Now).TotalSeconds);
+
+			   var TimeNode = (int)((TimeVAR - DateTime.Now).TotalSeconds);
+               return TimeNode>0 ? TimeNode : GetWaitSetting();  //in case the "ParseExact" fails it will go to "GetWaitSetting"
+			   
+		     } //end CheckAvailableGeneral
+
+ 
+           var NotReady = ElementByXPath("//p[contains(@id,'msgpool') and contains(text(),'Not ready') ]");
+           if (IsVisible(NotReady))
+		   {
+ 
+		      //site time with normal counter
+              var MinVar = ElementByXPath("//p[contains(@id,'msgpool')]") ;
+		      
+              if (IsVisible(MinVar))
+              {
+	            Log("Time_Function - WaitTimerText apper - return to site time"); 
+                int min;
+                min = Convert.ToInt32(MinVar.Text.Trim().Replace("Not ready yet, try here in ", "").Replace(" min", "") )*60;
+                return min;
+              } 
+		      
+              if (!IsVisible(MinVar))
+              {
+	               Log("Time_Function - return to your time"); 
+		           return GetWaitSetting();
+              }
+
+		   }
+
+	       Log("Time_Function - return to your time - backup general"); 
+		   return GetWaitSetting(); //backup general
+
+           return 0;		
+        }//end Time_Function
+        //=================//	
+		
+	
+        //=================//
+       //invisible_Recaptcha_Function
+        //=================//
+        public int invisible_Recaptcha_Function()
+        {
+			
+          var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]");  
+          if (RecaptchaOpen_Iframe !=null)          
+		  {
+            //SolveCaptcha if apper
+            Log("DO invisible_Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+		    RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		    
+            Wait();
+		    
+            //ExecuteScript("afterResolveCaptcha");
+		  }
+		
+		return 0;
+        }//end invisible_Recaptcha_Function
+        //=================//	
+
+
+
+        //=================//
+       //Recaptcha_Function
+        //=================//
+
+        public int Recaptcha_Function()
+        {
+			
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+            if (result_2 > 0)
+            {
+                return Fail("SolveMedia - Fail solving captcha");
+            }
+		  }
+		  
+	     //for recaptcha popup after click on button - ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]")   
+          var RecaptchaOpen_Iframe = ElementByXPath ("//iframe[contains(@src,'recaptcha/api2/anchor')]"); 
+          if (IsVisible(RecaptchaOpen_Iframe))
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Recaptcha - Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+		return 0;
+        }//end Recaptcha_Function
+        //=================//	
+	
+	
+	
+//==============//
+//AritmeticCaptcha
+//==============//
+ public bool SolveAritmeticCaptcha()
+ {
+ 
+		var ImgIconBalk = ElementByXPath("//img[contains(@src,'4miner.me')]"); //Balk image |+| between 2 + 2       
+		if (IsVisible(ImgIconBalk))
+        {	
+           Log("Solve ImgIconBalk - manually - try");
+
+		   var AnswerButton = ElementByXPath("//button[contains(@onclick,'();') ]"); //click on Answer that contains ();  
+		   if (IsVisible(AnswerButton))
+           {		
+           Log("Solve ImgIconBalk - Answer - success");
+		   Click(AnswerButton); 	
+		   }
+		   
+		}	
+		
+		
+        if (!IsVisible(ImgIconBalk))
+        {	
+          // we see if the captcha is visible
+          var captchaQuestion = ElementByXPath("//div[@class='col-md-12' and contains(text(),'How much is')]");
+          if (IsVisible(captchaQuestion))
+          {
+             Log("Solve Aritmetic Captcha");
+            // we get all posible visible solutions
+            var answersCollection = ElementsByXPath("//button[@onclick]").Where(
+            button => IsVisible(button)).ToList();
+            if (answersCollection.Count > 0)
+            {
+                // We define posible aritmetic operations
+                List<string> allowedSymbols =
+                new List<string>()
+                {
+                "+",
+                "-",
+                "*",
+                "/"
+                };
+                Log(captchaQuestion.Text);
+                //We filter the text of the answer and we only take the numbers and the allowed symbols operations
+                // EXAMPLE: How much is 2 + 2 will be converted in 2+2
+                var questionText = captchaQuestion.Text.Replace("?","").Split(' ')
+                    .Where(section =>
+                    section.All(cha => char.IsDigit(cha))
+                    || allowedSymbols.Contains(section))
+                    .ToList();
+
+                if (questionText.Count != 3)
+                {
+                    //if there is more or less than 3 answer meanns that the algoritm is broken
+                    Log("Error has been ocurred trying to get the captcha sections");
+                    return false;
+
+                }
+                // The number sections
+                int firstSection, secondSection;
+                if (int.TryParse(questionText[0], out firstSection) && int.TryParse(questionText[2], out secondSection))
+                {
+                    // If we can convert the first two secitons
+                    int answer = questionText[1] == allowedSymbols[0] ?
+                        //SUM +
+                        firstSection + secondSection : questionText[1] == allowedSymbols[1] ?
+                        //Rest -
+                        firstSection - secondSection : questionText[1] == allowedSymbols[3] ? 
+                        //*
+                        firstSection * secondSection : 
+                        // /
+                        firstSection / secondSection;
+
+                    Log("The result is " + answer.ToString());
+                    // WE filter form the available buttons if there is some that contains the answer text and click on it 
+                    var finalButton = answersCollection.FirstOrDefault(button => button.Text.Contains(answer.ToString()));
+                    if (finalButton != null)
+                    {
+                        Click(finalButton);
+                        return true;
+                    }
+                }
+            }
+          }
+		}	//end ImgIconBalk - NOT visible
+		
+        Log("Aritmetic captcha not found or not visible");
+        // So aritmetic captcha is not found or not visible
+        return false;
+		
+ }
+//==============//
+
+	
+	
+} //public class

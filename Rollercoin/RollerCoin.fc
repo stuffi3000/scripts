@@ -1,5 +1,8 @@
-﻿using FaucetCollector.Script;
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
 using OpenQA.Selenium;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +16,7 @@ class RollerCoin : FaucetScript
         get
         {
 
-            return new FaucetSettings ( "https://rollercoin.com" )
+            return new FaucetSettings("https://rollercoin.com")
          {
             new FaucetSetting()
             {
@@ -47,33 +50,33 @@ class RollerCoin : FaucetScript
         Coins_2048,
     }
 
-    public override void Start ( )
+    public override void Start()
     {
-        Title="Rollercoin";
+        Title = "Rollercoin";
 
-        SuccessXPath="//div[@class='react-responsive-spritesheet-container__move']";
-        FailXPath="//*[contains(@text(),'')]";
+        SuccessXPath = "//div[@class='react-responsive-spritesheet-container__move']";
+        FailXPath = "//*[contains(@text(),'THE CAPTCHA CODE YOU ENTERED')]";
 
-        base.Start ( );
+        base.Start();
     }
     // Get List of games.
     public List<string> ListOfGames
     {
         get
         {
-            return Enum.GetNames ( typeof ( Games ) ).ToList ( );
+            return Enum.GetNames(typeof(Games)).ToList();
         }
     }
 
-    public override string GetHCaptchaSiteKey( )
+    public override string GetHCaptchaSiteKey()
     {
-        var hcaptchaIframe=ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
 
-        if ( hcaptchaIframe!=null )
+        if (hcaptchaIframe != null)
         {
-            string src= hcaptchaIframe.GetAttribute("src");
+            string src = hcaptchaIframe.GetAttribute("src");
 
-            if ( !string.IsNullOrEmpty(src) )
+            if (!string.IsNullOrEmpty(src))
             {
                 // we find the sitekey 
                 var queryParams = src.Split('&').ToList();
@@ -83,7 +86,7 @@ class RollerCoin : FaucetScript
 
                 //we find the sitekey 
 
-                string siteKey= queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
+                string siteKey = queryParams.FirstOrDefault(param => param.ToLower().Contains("sitekey")).Split('=').LastOrDefault();
 
 
                 return siteKey;
@@ -91,78 +94,105 @@ class RollerCoin : FaucetScript
             }
         }
 
-        return base.GetHCaptchaSiteKey( );
+        return base.GetHCaptchaSiteKey();
     }
 
-
-    public override int DoLogin ( )
+    public override bool SetHCaptchaResponse(string response)
     {
-        GoToUrl ( "https://rollercoin.com/sign-in" );
-        Wait ( 1 );
-        
-        FaucetCollector.Utilities.CloudFlareUtilities cloudUtils=new FaucetCollector.Utilities.CloudFlareUtilities( this);
-        cloudUtils.DoSolve( );
+
+
+        if (ElementByXPath("//*[@name='g-recaptcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=g-recaptcha-response]').innerText = '" + response + "'");
+        }
+        if (ElementByXPath("//*[@name='h-captcha-response']") != null)
+        {
+            ExecuteScript("document.querySelector('[name=h-captcha-response]').innerText = '" + response + "'");
+
+        }
+
+        var hcaptchaIframe = ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");
+
+        if (hcaptchaIframe != null)
+        {
+            ExecuteScript("arguments[0].setAttribute('data-hcaptcha-response','" + response + "');", hcaptchaIframe);
+        }
+
+        return true;
+    }
+    public override int DoLogin()
+    {
+        GoToUrl("https://rollercoin.com/sign-in");
         Wait(1);
 
-        var UserBox=ElementByXPath("//input[@id='mail']");
-        if ( !IsVisible ( UserBox ) )
+        FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+        cloudUtils.DoSolve();
+        Wait(1);
+
+        var UserBox = ElementByXPath("//input[@id='mail']");
+        if (!IsVisible(UserBox))
         {
-            return Fail ( "User box not visible" );
+            return Fail("User box not visible");
         }
 
-        var PasswordBox=ElementByXPath("//input[@id='password']");
-        if ( !IsVisible ( PasswordBox ) )
+        var PasswordBox = ElementByXPath("//input[@id='password']");
+        if (!IsVisible(PasswordBox))
         {
-            return Fail ( "Password box is not visible" );
+            return Fail("Password box is not visible");
         }
 
-        var ButtonLogin=ElementByXPath("//button[@class='btn btn-default-btn w-100']");
-        if ( !IsVisible ( ButtonLogin ) )
+        var ButtonLogin = ElementByXPath("//button[@class='btn btn-default-btn w-100']");
+        if (!IsVisible(ButtonLogin))
         {
-            return Fail ( "Button login is not visible" );
+            return Fail("Button login is not visible");
         }
-        SetText ( UserBox , GetSetting ( "User" ) );
-        SetText ( PasswordBox , GetPassword ( "Pass" ) );
+        SetText(UserBox, GetSetting("User"));
+        SetText(PasswordBox, GetPassword("Pass"));
 
-
-        var KeepSigned=ElementByXPath("//label[@for='keepSigned']");
-        if ( IsVisible ( KeepSigned ) )
+        var result = DoSolveCaptcha();
+        if (result>0)
         {
-            Click ( KeepSigned );
-            Wait ( 1 );
+            return result; 
         }
 
-        Click ( ButtonLogin );
-
-        Wait ( 1 );
-
-        var Error=ElementByXPath("//p[@class='danger-text wrong-mail-error error-text']");
-        if ( IsVisible ( Error ) )
+        var KeepSigned = ElementByXPath("//label[@for='keepSigned']");
+        if (IsVisible(KeepSigned))
         {
-            Log ( Error.Text );
-            if ( Error.Text.Contains ( "find user with password" ) )
+            Click(KeepSigned);
+            Wait(1);
+        }
+
+        Click(ButtonLogin);
+
+        Wait(1);
+
+        var Error = ElementByXPath("//p[@class='danger-text wrong-mail-error error-text']");
+        if (IsVisible(Error))
+        {
+            Log(Error.Text);
+            if (Error.Text.Contains("find user with password"))
             {
-                Disable ( );
-                return Fail ( "You need to put correctly your credentials" );
+                Disable();
+                return Fail("You need to put correctly your credentials");
             }
         }
-        return base.DoLogin ( );
+        return base.DoLogin();
     }
 
-    public override bool IsLoggedIn ( )
+    public override bool IsLoggedIn()
     {
-        return ElementByXPath ( "//a[@href='/exit']" )!=null;
+        return ElementByXPath("//a[@href='/exit']") != null;
     }
 
     //private const string XPathCoins2048="//img[contains(@src,'/static/img/gamePreview/7-small.png')]";
     //private const string XPathCoinFlip="//img[contains(@src,'/static/img/gamePreview/8-small.png')]";
 
-    public int FindGamePosition ( Games game )
+    public int FindGamePosition(Games game)
     {
-        var Elements =ElementsByXPath("//p[@class='game-title']");
-        if ( Elements.Count>0 )
+        var Elements = ElementsByXPath("//p[@class='game-title']");
+        if (Elements.Count > 0)
         {
-            return Elements.IndexOf ( Elements.FirstOrDefault ( x => x.Text.ToLower ( ).Contains ( ( game ).ToString ( ).ToLower ( ) ) ) );
+            return Elements.IndexOf(Elements.FirstOrDefault(x => x.Text.ToLower().Contains((game).ToString().ToLower())));
 
         }
 
@@ -170,59 +200,97 @@ class RollerCoin : FaucetScript
 
 
     }
-    public IWebElement GetSpecificElement ( Games game )
+    public IWebElement GetSpecificElement(Games game)
     {
-        int Position=FindGamePosition(game);
-        var Buttons=ElementsByXPath("//button[@class='tree-dimensional-button btn-cyan w-100']");
-        if ( Position>=0&&( Buttons.Count-1 )>=Position )
+        int Position = FindGamePosition(game);
+        var Buttons = ElementsByXPath("//button[@class='tree-dimensional-button btn-cyan w-100']");
+        if (Position >= 0 && (Buttons.Count - 1) >= Position)
         {
             return Buttons[Position];
         }
         return Buttons[7];
     }
-    public override int BeforeSolveFaucet ( )
+    public override int BeforeSolveFaucet()
     {
-        var ButtonAcceptCookies=ElementByXPath("//button[@class='qc-cmp-button' and contains(text(),'I ACCEPT')]");
-        if ( IsVisible ( ButtonAcceptCookies ) )
+        var ButtonAcceptCookies = ElementByXPath("//button[@class='qc-cmp-button' and contains(text(),'I ACCEPT')]");
+        if (IsVisible(ButtonAcceptCookies))
         {
-            Click ( ButtonAcceptCookies );
-            Wait ( );
+            Click(ButtonAcceptCookies);
+            Wait();
         }
-        return base.BeforeSolveFaucet ( );
+        return base.BeforeSolveFaucet();
     }
-    public override int DoSolveFaucet ( )
+
+    public override int DoSolveCaptcha()
     {
-        GoToUrl ( "https://rollercoin.com/game/choose_game" );
-        Wait ( 1 );
+        RecaptchaUtility utility = new RecaptchaUtility(this);
+
+        var result = base.DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+        utility.DoSolve();
+
+        return result;
+    }
+    public override int DoSolveFaucet()
+    {
+
+        var gamesButton = ElementByXPath("//a[contains(@class,'games-button')]");
+        if (IsVisible(gamesButton))
+        {
+            Click
+                (gamesButton);
+        }
+        else
+        {
+            GoToUrl("https://rollercoin.com/game/choose_game");
+        }
+
+        Wait(1, 2);
 
 
-
-        var GameSelected=   (Games) Enum.Parse ( typeof ( Games ) , GetSetting ( "Game" ));
-        Wait ( 5 );
+        var GameSelected = (Games)Enum.Parse(typeof(Games), GetSetting("Game"));
+        Wait(5);
         //var GameElem=GetSpecificElement(GameSelected);
-        var GameElem=ElementByXPath("//div[7]//div[1]//div[2]//div[2]//div[2]//button[1]");
-        if ( IsVisible ( GameElem ) )
+        var GameElem = ElementByXPath("//div[7]//div[1]//div[2]//div[2]//div[2]//button[1]");
+        if (IsVisible(GameElem))
         {
 
 
-            Click ( GameElem );
-            Wait ( );
+            Click(GameElem);
+            Wait();
 
 
-            Wait ( );
-            if ( GameSelected==Games.Coins_2048 )
+            Wait();
+            if (GameSelected == Games.Coins_2048)
             {
-                FaucetCollector.FaucetTemplates.RollerCoinTemplate template=new FaucetCollector.FaucetTemplates.RollerCoinTemplate(this);
-                template.Play2048Coins ( );
+                FaucetCollector.FaucetTemplates.RollerCoinTemplate template = new FaucetCollector.FaucetTemplates.RollerCoinTemplate(this);
+                template.Play2048Coins();
 
             }
 
-            Wait ( 15 );
-            Log ( "Game successfully played" );
-            IsSuccess=true;
-            ClaimSuccess ( );
+            Wait(15, 20);
 
-            return GetWaitSetting ( );
+            var captchaModalBody = ElementByXPath("//div[@class='captcha-body modal-body']");
+            if (IsVisible(captchaModalBody))
+            {
+                var result = DoSolveCaptcha();
+                if (result > 0)
+                {
+                    return Fail("There is a problem solving the captcha");
+                }
+
+
+            }
+
+
+            Log("Game successfully played");
+            IsSuccess = true;
+            ClaimSuccess();
+
+            return GetWaitSetting();
 
 
 
@@ -230,8 +298,9 @@ class RollerCoin : FaucetScript
         }
 
 
-        return base.DoSolveFaucet ( );
+        return base.DoSolveFaucet();
     }
+
 
 
 }
