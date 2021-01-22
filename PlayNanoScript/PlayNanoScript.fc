@@ -27,13 +27,6 @@ public class PlayNanoScript : FaucetScript
                     Display="Password",
                     Type=EditorType.Password,
                     Required=true
-                },
-                new FaucetSetting( )
-                {
-                    Name="Address",
-                    Display="Nano Address",
-                    Type=EditorType.Wallet,
-                    Required=true
                 }
             };
         }
@@ -41,7 +34,7 @@ public class PlayNanoScript : FaucetScript
 
     public override void Start()
     {
-        SuccessXPath = "//div[@class='noty_body' and not(@style)]";
+        SuccessXPath = "//div[contains(@id,'noty_bar')]";
         FailXPath = "//div[@class='noty_body']";
         Title = "PlayNANO";
         base.Start();
@@ -169,32 +162,23 @@ public class PlayNanoScript : FaucetScript
 
         Wait(1);
 
-        var nanoAddressBox = ElementById("gu_address");
-        if (!IsVisible(nanoAddressBox))
+        var buttonStopWatch = ElementByXPath("//button[contains(@class,'button cancel') and @value='stop']");
+        if (!IsVisible(buttonStopWatch))
         {
-            return Fail("nano address box not visible");
+            return Fail("Button stop watch and get reward is not found");
         }
-
-        SetText(nanoAddressBox, GetSetting("Address"));
-
-        var stopButton = ElementByXPath("//button[@value='stop']");
-        if (!IsVisible(stopButton))
-        {
-            return Fail("Finish button not found");
-        }
+        // solve hcaptcha
         var result = DoSolveCaptcha();
-        if (result > 0)
+        if (result>0)
         {
             return result;
         }
 
-        Click(stopButton);
+        Click(buttonStopWatch);
 
-        Wait(1);
+        Wait(1, 2);
 
         CheckFaucetResult();
-        Log("you sucessfully viewed the ads", Level.Payout);
-        ClaimSuccess();
 
         return GetWaitSetting();
     }
