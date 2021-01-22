@@ -16,7 +16,7 @@ public class BCHJollyScript : FaucetScript
 			return new FaucetSettings("https://www.bchjolly.com")
 			{
 				new FaucetSetting(){Display="BCH Address",Type=EditorType.TextBox,Required=true,Name="Address"},
-				new FaucetSetting(){Display="Claims to Make",Type=EditorType.Numeric,Required=true,Name="ClaimsTM"}
+				new FaucetSetting(){Display="Claims to Make",Type=EditorType.Numeric,Required=true,Name="ClaimsTM",Default=5}
 				//insert user settings here
 				//new FaucetSetting { 
 				//	Name = "Name of your setting", 
