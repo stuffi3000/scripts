@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 21/01/2021 23:00PM - Version 7
+//Last Update: 22/01/2021 11:05AM - Version 8
 //==================//
 
 using System;
@@ -617,17 +617,21 @@ public class Doge_4miner : FaucetScript
 //==============//
  public bool SolveAritmeticCaptcha()
  {
+ 
 		var ImgIconBalk = ElementByXPath("//img[contains(@src,'4miner.me')]"); //Balk image |+| between 2 + 2       
 		if (IsVisible(ImgIconBalk))
         {	
-	      var Question2 = ElementByXPath("//div[@class='col-md-12' and contains(text(),'How much is 2')]");
-          if (IsVisible(Question2))
-          {
-           Log("Solve ImgIconBalk - manually");
-		   var Answer4Button = ElementByXPath("//button[starts-with(text(),'4')] | //button/img[contains(@src,'freedogecoin')] "); //click on Answer 4 Button	   
-           Click(Answer4Button); // click on 4 button
-		  }
+           Log("Solve ImgIconBalk - manually - try");
+
+		   var AnswerButton = ElementByXPath("//button[contains(@onclick,'();') ]"); //click on Answer that contains ();  
+		   if (IsVisible(AnswerButton))
+           {		
+           Log("Solve ImgIconBalk - Answer - success");
+		   Click(AnswerButton); 	
+		   }
+		   
 		}	
+		
 		
         if (!IsVisible(ImgIconBalk))
         {	
