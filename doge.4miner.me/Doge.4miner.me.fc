@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 23/01/2021 17:40PM - Version 10
+//Last Update: 25/01/2021 19:30PM - Version 11
 //==================//
 
 using System;
@@ -623,7 +623,7 @@ public class Doge_4miner : FaucetScript
         {	
            Log("Solve ImgIconBalk - manually - try");
 
-		   var AnswerButton = ElementByXPath("//button[starts-with(@onclick,'d')]");
+		   var AnswerButton = ElementByXPath("//button[starts-with(@onclick,'d') and last()-1 ]");
 		   if (IsVisible(AnswerButton))
            {		
            Log("Solve ImgIconBalk - Answer - success");
