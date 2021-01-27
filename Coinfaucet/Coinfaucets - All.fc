@@ -157,7 +157,7 @@ class Coinfaucets : FaucetScript
         get
         {
             var Key = GetSetting("Faucet");
- 
+
             if (Faucets.ContainsKey(Key))
             {
 
@@ -178,17 +178,7 @@ class Coinfaucets : FaucetScript
 
 
     }
-    public override int BeforeLogin()
-    {
-        GoToUrl(Url_);
-        Wait(2);
-        FaucetCollector.Utilities.CloudFlareUtilities cloudFlareUtilities = new FaucetCollector.Utilities.CloudFlareUtilities(this);
 
-        cloudFlareUtilities.DoSolve();
-
-        return base.BeforeLogin();
-
-    }
     public override bool SetHCaptchaResponse(string response)
     {
 
@@ -244,8 +234,18 @@ class Coinfaucets : FaucetScript
     }
     public override int DoLogin()
     {
+        GoToUrl(Url_);
 
+        Wait(2);
         var UserBox = ElementByXPath("//div[contains(@class,'login-wrapper')]//input[@name='email']");
+        if (!IsVisible(UserBox))
+        {
+            FaucetCollector.Utilities.CloudFlareUtilities cloudFlareUtilities = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+
+            cloudFlareUtilities.DoSolve();
+        }
+
+        UserBox = ElementByXPath("//div[contains(@class,'login-wrapper')]//input[@name='email']");
         if (!IsVisible(UserBox))
         {
             return Fail("Userbox not visible");
