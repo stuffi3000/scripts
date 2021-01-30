@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 26/01/2021 18:00PM - Version 12
+//Last Update: 30/01/2021 21:00PM - Version 13
 //==================//
 
 using System;
@@ -669,7 +669,13 @@ public class Doge_4miner : FaucetScript
 //==============//
  public bool SolveAritmeticCaptcha()
  {
- 
+
+		var GeetestVAR = ElementByXPath("//div[contains(@class,'geetest_btn')]");
+		if (IsVisible(GeetestVAR))
+        {	
+          Log("Geetest - here - we can't solve Geetest captcha for now - Sorry");
+		}
+
 		var ImgIconBalk = ElementByXPath("//img[contains(@src,'4miner.me')]"); //Balk image |+| between 2 + 2       
 		if (IsVisible(ImgIconBalk))
         {	
