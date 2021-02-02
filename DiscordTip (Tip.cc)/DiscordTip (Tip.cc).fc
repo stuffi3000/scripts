@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 29/01/2021 21:00PM - Version 79
+//Last Update: 02/02/2021 20:30PM - Version 80
 //==================//
 
 using System;
@@ -580,7 +580,8 @@ public class DiscordScript: FaucetScript
         if (GetBoolSetting("Discordtip_Main_vote_OnOff"))
         {
             Title = "Discordtip";
-            ADFunction_String_URL_DiscordBotsTip(); //call to Discordtip main 
+            //ADFunction_String_URL_DiscordBotsTip(); //call to Discordtip main 
+		    GoToUrl("https://discordbots.org/bot/617037497574359050/vote"); //tip.cc
             Wait();
 
 			Log("Discordtip_Main - do vote");			
@@ -595,8 +596,9 @@ public class DiscordScript: FaucetScript
         if (GetBoolSetting("Discordtip_LaccsFaucet_vote_OnOff"))
         {
            Title = "Discordtip";
-           ADFunction_String_URL_Discordtip_LaccsFaucet(); //call to Discordtip_LaccsFaucet 
-           Wait();
+           //ADFunction_String_URL_Discordtip_LaccsFaucet(); //call to Discordtip_LaccsFaucet 
+		   GoToUrl("https://discordbots.org/bot/719287586849423420/vote"); //LaccsFaucet           
+		   Wait();
 		
  	       Log("Discordtip_LaccsFaucet - do vote first");			
            Tasks_Function(); //call
@@ -630,8 +632,9 @@ public class DiscordScript: FaucetScript
            Wait(3);		
 			
            Title = "Discordtip";
-           ADFunction_String_URL_Discordtip_Tippi(); //call to Discordtip_Tippi
-           Wait();
+           //ADFunction_String_URL_Discordtip_Tippi(); //call to Discordtip_Tippi
+		   GoToUrl("https://discordbots.org/bot/569955063519510549/vote"); //Tippi
+		   Wait();
 		
  	       Log("Discordtip_Tippi - do vote first");			
            Tasks_Function(); //call
