@@ -1,0 +1,439 @@
+//==================//
+//script Written by: ••AviramDayan•• 04/02/2021 21:00PM - Version 1
+//Last Update: 04/02/2021 21:00PM - Version 1
+//==================//
+
+using System;
+using System.IO;
+using FaucetCollector.Script;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+
+//css_inc ShortLinkUtilities
+//css_ref FaucetCollector.Utilities
+//css_inc RecaptchaUtilities
+//css_inc AntiBotLinksUtility
+//css_ref ImageProcessing
+//css_ref ProcessingImagesUsingLockBits
+//css_inc GetestCaptcha
+
+
+public class stakecube : FaucetScript
+{
+    /// <summary>
+    /// List of Settings that will be shown in the bot when selecting this Faucet in the bot.
+    /// You can get the value the user entered with the methods: GetSetting("[Name of the FaucetSetting]"), GetBoolSetting and GetDateTimeSetting
+    /// You can also create a new setting value using SetSetting("[Name you want to use]", "value")
+    /// </summary>
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://StakeCenter.co/")
+            {
+				
+                new FaucetSetting(){Name="Email",Display="UserName",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="Password",Display="Your Password",Type=EditorType.TextBox,Required=true},			
+			
+                new FaucetSetting() { Name = "FaucetCollect", Display = "FaucetCollect - Auto Collect all coins every 24h", Type = EditorType.CheckBox, Default = true},	
+                new FaucetSetting() { Name = "Label_1", Display = "PREMIUM FAUCETS - FREE - every 24h - SCC,SPE,MMO,ESBC,APR,TRBO,VSX,ASAFE,ABET,CTSC,KYDC,PRIV,GPKR", Type = EditorType.Label, Default = false},	
+                new FaucetSetting() { Name = "Label_2", Display = "COMMUNITY FAUCETS - Updated seldom - BTC,LTC,DOGE,DASH,DC,BLOCK,DGB,PIVX", Type = EditorType.Label, Default = false},	
+																			
+
+            };
+        }
+    }
+	
+	
+
+
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+    public override void Start()
+    {
+        ad = false;
+		
+        //Title that shows in the browser. Is used to identify and close popup windows
+        Title = "Stake Center";
+
+        //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
+        SuccessXPath ="//*";
+        FailXPath = "//*";  //*[text()='']
+		
+        //TimerIsCountingUp = true;
+
+        //Let Faucet Collector start up everything
+        base.Start();
+    }
+//============================================================//
+//the number of "successes" in the script - when are finished  
+//============================================================//
+
+
+    bool ad; //custom bool
+
+    public override int DoInit()
+    {
+
+
+        //Let Faucet Collector continue.
+        return base.DoInit();
+    }
+
+
+
+//==================//
+//save Login Cookies 
+//==================//
+    public override bool IsLoggedIn()
+    {
+
+        //if the Logout apper
+        return ElementByXPath("//a[contains(@href,'logout')]") != null;
+
+        //return base.IsLoggedIn();
+    }
+//==================//
+//save Login Cookies 
+//==================//
+	
+
+	
+//=============//
+//BeforeLogin 
+//=============//
+ public override int BeforeLogin()
+ {
+ 
+ 
+   //This faucet has nothing to do here. We will let Faucet Collector handle it.
+   return base.BeforeLogin();
+ }
+//=============//
+//BeforeLogin 
+//=============//
+	
+	
+	
+//==============//
+//start DoLogin
+//==============//
+ public override int DoLogin()
+ {
+
+	 var LoginVar = ElementByXPath("//a[contains(@href,'logout')]"); //Login
+
+     if (!IsVisible(LoginVar))
+     {	
+ 	    // go to login page
+	    Log("Login: go to login page");
+	    GoToUrl("https://stakecenter.co/client/login");	
+	    Wait();		
+	    Wait(5);
+				
+	    var UserNameVar = ElementByXPath("//input[contains(@id,'user')]");
+        Log("Login: set Email");
+        SetText(UserNameVar, GetSetting("Email"));
+		
+	    Wait(2);
+				
+	    var PasswordVar = ElementByXPath("//input[contains(@id,'password')]");
+        Log("Login: set Password");
+        SetText(PasswordVar, GetSetting("Password"));
+		
+		Wait(2);			
+		
+        Recaptcha_Function(); // call to solve
+		
+	    Wait(2);
+
+		//login button
+        var LoginButton1 = ElementByXPath("//a[contains(@href,'login')]");
+        Log("Login: Login Button 1");	
+        Click(LoginButton1);
+		
+	    Wait();	
+		
+     }//end LoginVar
+ 
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoLogin();
+ }
+
+//==============//
+//start DoLogin
+//==============//
+	
+
+	
+//==============//
+//start AfterLogin
+//==============//
+ public override int AfterLogin()
+ {
+
+ 
+    //This faucet has nothing to do here. We will let Faucet Collector handle it.
+    return base.AfterLogin();
+ }
+	
+//==============//
+//start AfterLogin
+//==============//	
+	
+
+	
+//=============//
+//GetFaucetWaitTime
+//=============//
+    public override int GetFaucetWaitTime()
+    {
+
+        if (ad)
+        {
+		ad=false; //solve the problem in start - after he return to script again
+        return GetWaitSetting();	
+        }
+		
+        //let Faucet Collector continue.
+        return base.GetFaucetWaitTime();
+    }
+//=============//
+//GetFaucetWaitTime
+//=============//
+	
+	
+    public override int BeforeSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+
+
+    public override int DoSolveCaptcha()
+    {
+
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.DoSolveCaptcha();
+    }
+
+
+    public override int AfterSolveCaptcha()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.AfterSolveCaptcha();
+    }
+	
+
+//================//	
+//BeforeSolveCaptcha
+//================//	
+    public override int BeforeSolveFaucet()
+    {
+		
+
+		
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.BeforeSolveCaptcha();
+    }
+//================//	
+//BeforeSolveCaptcha
+//================//	
+
+
+//=============//	
+//DoSolveFaucet
+//=============//
+ public override int DoSolveFaucet()
+ {
+
+     //============//
+    //FaucetCollect
+    //=============//
+    if (GetBoolSetting("FaucetCollect"))
+    { 
+
+		//go to faucet
+        GoToUrl("https://stakecenter.co/client/faucets");
+		Log("FaucetCollect: Collect All" );
+	    Wait();		
+	    Wait(5);	
+		
+        var TimeToWaitForBreak = DateTime.Now.AddSeconds(360);
+        while (true)
+        {
+        
+          var FaucetCheck = ElementByXPath("//span[contains(text(),'Get')]");
+          if (IsVisible(FaucetCheck))
+          {
+        
+            Wait(5);
+        
+            Click(FaucetCheck);
+            Log("FaucetCheck - click");
+        
+            Wait(3);
+ 
+            var PopUpWindow = ElementByXPath("//div[@class='modal fade in']");
+            if (IsVisible(PopUpWindow))
+            {
+              Log("PopUpWindow - visible");		  
+			  
+			  Wait(2);	
+			  
+		      Recaptcha_Function(); //call to check
+			  
+              var ClaimInside = ElementByXPath("//div[@class='modal fade in']//a");
+              if (IsVisible(ClaimInside))
+              {
+		      Log("ClaimInside - visible");
+              Click(ClaimInside);
+			  }
+			  
+			  Wait(2);
+			 
+			}
+ 
+            var SuccessMessage = ElementByXPath("//div[@class='modal fade in']//div[contains(@class,'alert-success')]");
+            if (IsVisible(SuccessMessage))
+            {
+            Log(SuccessMessage.Text);
+            ClaimSuccess(); //Success
+            }
+        
+            Wait(2);
+        
+          }// end FaucetCheck
+        
+          if (!IsVisible(FaucetCheck))
+          {
+          Log("FaucetClaim - break - not Available");
+          break;
+          }
+        
+          if (DateTime.Now > TimeToWaitForBreak) //if the time above 65 sec 
+          {
+          Log("FaucetClaim - break - TimeToWaitForBreak");
+          break; //break the wait loop
+          }
+        
+        } //end while true	
+	
+    } // end FaucetCollect
+    //=============//
+
+	
+    Wait();
+
+    return Time_Function();
+
+   
+   //We are good to continue
+   return base.DoSolveFaucet();
+ }
+ 
+//=============//	
+//DoSolveFaucet
+//=============//
+ 
+	
+//===============//
+//AfterSolveFaucet
+//===============//
+ public override int AfterSolveFaucet()
+ {
+  
+  //Let Faucet Collector continue
+  return base.AfterSolveFaucet();
+	
+ }
+//===============//
+//AfterSolveFaucet
+//===============//
+
+
+    /// <summary>
+    /// This method gets called in the end after the BeforeSolveFaucet/DoSolveFaucet and AfterSolveFaucet methods were done.
+    /// The base.CheckFaucetResult will try to find a visible element on the page using the XPath from SuccessXPath and FailXPath (see the Start method)
+    /// These properties should contain XPath expressions to find certain elements on the page.
+    /// For example if it finds one of the elements from the SuccessXPath, and it is visible, then it will flag the claim attempt as a success.
+    /// Or if it finds one of the elements from the FailXPath, and it is visible, then it will flag the claim attempt as a failure.
+    /// </summary>
+    public override int CheckFaucetResult()
+    {
+        //This faucet has nothing to do here. We will let Faucet Collector handle it.
+        return base.CheckFaucetResult();
+    }
+ 
+
+        //=================//
+       //Time_Function
+        //=================//
+        public int Time_Function()
+        {
+			
+           var MinVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[2]/span[1]") ;
+		   var SecVar = ElementByXPath("//article[contains(@class,'maincontent')]//span[3]/span[1]") ;
+
+           if (IsVisible(MinVar))
+           {
+	         Log("ClaimBTC - WaitTimerText apper - return to site time"); 
+             int min,sec;
+             min = Convert.ToInt32(MinVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[0])*60;
+             sec = Convert.ToInt32(SecVar.Text.Trim().Replace("m.", "").Replace("s.", "").Split(' ')[1]);
+             return min+sec;
+           } 
+
+           if (!IsVisible(MinVar))
+           {
+	            Log("ClaimBTC - return to your time"); 
+		        return GetWaitSetting();
+           }
+
+           return 0;		
+        }//end Time_Function
+        //=================//	
+
+	
+        //=================//
+       //Recaptcha_Function
+        //=================//
+
+        public int Recaptcha_Function()
+        {
+			
+          //DoSolveImageCaptcha
+          var SolveMedia = ElementByXPath ("//img[contains(@id,'adcopy-puzzle-image-image')]"); 
+          if (IsVisible(SolveMedia))
+		  {  
+            Log("DO SolveMedia");	  
+	        var result_2 = DoSolveImageCaptcha(ElementByXPath("//img[contains(@id,'adcopy-puzzle-image-image')]"),ElementByXPath("//input[@name='adcopy_response']")); 
+		  }
+		  
+	     //for recaptcha popup after click on button - ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ")
+          var RecaptchaFaucet = ElementByXPath("//div[@class='modal fade in']//iframe"); 
+          var RecaptchaLogin = ElementByXPath("//div[@id='page-inner']//iframe"); 
+
+          if (IsVisible(RecaptchaFaucet) || IsVisible(RecaptchaLogin) )
+		  {
+            //SolveCaptcha if apper
+            Log("DO Recaptcha");	  
+            var result = base.DoSolveCaptcha();
+            if (result > 0)
+            {
+                return Fail("Fail solving captcha");
+            }
+            RecaptchaUtility utility = new RecaptchaUtility(this);
+            utility.DoSolve();
+		  }
+
+		return 0;
+        }//end Recaptcha_Function
+        //=================//	
+ 
+ 
+} //END public class 
