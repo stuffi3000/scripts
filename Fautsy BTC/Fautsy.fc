@@ -1,0 +1,135 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
+using System.Threading.Tasks;
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+public class FautsyScript : FaucetScript
+{
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("http://fautsy.com/")
+                {
+
+                    new FaucetSetting(){Name="User",Display="Wallet address",Type=EditorType.TextBox,Required=true},
+                    new FaucetSetting(){Name="UseSolvemedia",Display="UseSolvemedia",Type=EditorType.CheckBox,Default=true}
+                };
+
+        }
+    }
+
+
+    public override void Start()
+    {
+        Title = "Fautsy";
+        SuccessXPath = "//div[@class='alert alert-success']";
+        FailXPath = "//div[@class='alert alert-danger']";
+
+        base.Start();
+
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return true;
+    }
+
+    public override int DoSolveFaucet()
+    {
+
+        string faucetUrl = GetBoolSetting("UseSolvemedia") ? "http://fautsy.com/?cc=SolveMedia" : "http://fautsy.com/";
+        GoToUrl(faucetUrl);
+
+        Wait(1, 2);
+
+        var addressBox = ElementByXPath("//input[@class='fname']");
+        if (!IsVisible(addressBox))
+        {
+            return Fail("Address box is not found or not visible");
+        }
+
+        SetText(addressBox, GetSetting("User"));
+        Wait(1);
+
+
+        var modalBtn = ElementByXPath("//a[@data-toggle='modal']");
+        if (!IsVisible(modalBtn))
+        {
+
+            return Fail("Modal button not found or not visible");
+
+
+        }
+
+
+        ExecuteScript("arguments[0].click()", modalBtn);
+
+
+        Wait(1);
+
+        var result = DoSolveCaptcha();
+
+        if (result > 0)
+        {
+            return result;
+        }
+
+
+
+        Wait(2, 3);
+
+        var claimBtn = ElementByXPath("//input[contains(@class,'claim-button')]");
+        if (!IsVisible(claimBtn))
+        {
+            return Fail("Claim btn not found");
+        }
+        Click(claimBtn);
+
+        Wait(1, 2);
+
+
+
+        return base.DoSolveFaucet();
+
+    }
+
+
+
+
+    public override int DoSolveCaptcha()
+    {
+
+        var antibotLinksUtils = new AntibotLinksMlUtils(this);
+
+
+        var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
+
+        var antibotLinksTask = Task.Run(() => antibotLinksUtils.DosolveAntibotLinks());
+
+        Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
+
+
+        return taskCaptcha.Result + antibotLinksTask.Result;
+
+
+    }
+
+    public override int GetFaucetWaitTime()
+    {
+
+        var timer = ElementByXPath("//p[@class='alert alert-info' and contains(text(),'You have to wait')]|//div[@class='alert alert-success']");
+        if (IsVisible(timer))
+        {
+            return 300;
+        }
+
+        return base.GetFaucetWaitTime();
+    }
+
+}
+
+
+
