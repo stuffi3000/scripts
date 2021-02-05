@@ -1,214 +1,130 @@
-﻿using System;
+﻿using FaucetCollector.Captcha;
 using FaucetCollector.Script;
 
-
-public class faustyBTCScript : FaucetScript
+using System.Threading.Tasks;
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+public class ClaimBitsScript : FaucetScript
 {
-    
     public override FaucetSettings Settings
     {
         get
         {
-            return new FaucetSettings("http://www.claimbits.io/?cc=SolveMedia")
-            {
-                new FaucetSetting() {
-                    Name = "BTC",
-                    Display = "FaucetHub linked BTC wallet address",
-                    Type = EditorType.Wallet,
-                    Required = true,
-                    Default = null
-               },
-                new FaucetSetting()
+
+            return new FaucetSettings("http://claimbits.io/")
                 {
-                    Name="UseSolvemedia",Display="UseSolvemedia",Type=EditorType.CheckBox,Default=true,
-                }
-            };
+
+                    new FaucetSetting(){Name="User",Display="Wallet address",Type=EditorType.TextBox,Required=true},
+                    new FaucetSetting(){Name="UseSolvemedia",Display="UseSolvemedia",Type=EditorType.CheckBox,Default=true}
+                };
+
         }
     }
 
-    
+
     public override void Start()
     {
-        Title = "ClaimBits|";
+        Title = "ClaimBits";
+        SuccessXPath = "//div[@class='alert alert-success']";
+        FailXPath = "//div[@class='alert alert-danger']";
 
-        SuccessXPath = "//div[contains(@class,'alert-success')]";
-        FailXPath = "//div[contains(@class,'alert-danger')]";
-
-        
         base.Start();
+
     }
 
-    
     public override bool IsLoggedIn()
     {
-        
-        var walletInput = ElementByXPath("//input[@type='text' and contains(@class, 'fname')]");
-        if (walletInput != null)
-        {
-            
-            var hasValue = !string.IsNullOrEmpty(walletInput.GetAttribute("value"));
-            if (hasValue)
-            {
-                return true;
-            }
-        }
-
-        
-        var waitElement = ElementByXPath("//p[contains(@class,'alertbox')]");
-        if (IsVisible(waitElement))
-        {
-            return true;
-        }
-
-        
-
-
-        return false;
+        return true;
     }
 
-    
-    public override int BeforeLogin()
-    {
-        
-       
-        
-        return base.BeforeLogin(); ;
-    }
 
-   
-    public override int DoLogin()
-    {
-        
-        var signInaddress = ElementByXPath("//input[@type='text' and contains(@class, 'fname')]");
-        if (signInaddress == null)
-        {
-            
-            return Fail("Signin address not found.");
-        }
-
-        
-        SetText(signInaddress, GetSetting("BTC"));
-
-        
-        var loginButton = ElementByXPath("//a[@data-target='#myModal']");
-        if (loginButton == null)
-        {
-           
-            return Fail("Login button not found.");
-        }
-
-        
-        Click(loginButton);
-
-        
-        return base.DoLogin();
-    }
-
-    
-    public override int AfterLogin()
-    {
-        
-        return base.AfterLogin();
-    }
-
-    
-    public override int GetFaucetWaitTime()
-    {
-	if(IsVisible(ElementByXPath("//p[@class='alert alert-info' and contains(text(),'You have to wait')]")))
-        {
-            var timer = ElementByXPath("//p[@class='alert alert-info' and contains(text(),'You have to wait')]");
-            string Time = timer.Text.Replace("You have to wait", "").Replace("minutes", "").Trim();
-            try
-            {
-                return Convert.ToInt32(Time)*60;
-            }
-            catch (Exception) {
-                return GetWaitSetting();
-            }
-        }
-
-        return 0;
-    }
-   
-    public override int BeforeSolveCaptcha()
-    {
-		
-
-        return base.BeforeSolveCaptcha();
-    }
-
-    
-    public override int DoSolveCaptcha()
-    {
-       
-     
-
-        return base.DoSolveCaptcha();
-    }
-
-    
-    public override int AfterSolveCaptcha()
-    {
-        
-        return base.AfterSolveCaptcha();
-    }
-
-    
-    public override int BeforeSolveFaucet()
-    {
-       
-
-        
-        return base.BeforeSolveFaucet();
-    }
-    
-    
     public override int DoSolveFaucet()
     {
-        
-        var submitButton = ElementByXPath("//input[@value='Claim Now!']");
-        if (!IsVisible(submitButton))
+
+        string faucetUrl = GetBoolSetting("UseSolvemedia") ? "http://claimbits.io/?cc=SolveMedia" : "http://claimbits.io/";
+        GoToUrl(faucetUrl);
+
+        Wait(1, 2);
+
+        var addressBox = ElementByXPath("//input[@class='fname']");
+        if (!IsVisible(addressBox))
         {
-            
-            return Fail("Submit button not found or not visible.");
+            return Fail("Address box is not found or not visible");
         }
 
-        
+        SetText(addressBox, GetSetting("User"));
+        Wait(1);
+
+
+        var modalBtn = ElementByXPath("//a[@class='clmnow']");
+        if (!IsVisible(modalBtn))
+        {
+
+            return Fail("Modal button not found or not visible");
+
+
+        }
+
+        ExecuteScript("arguments[0].click()", modalBtn);
+
+
+        Wait(1);
+
         var result = DoSolveCaptcha();
+
         if (result > 0)
         {
-            
             return result;
         }
 
-        
-        Click(submitButton);
 
-        
+
+        Wait(2, 3);
+
+        var claimBtn = ElementByXPath("//input[contains(@class,'claim-button')]");
+        if (!IsVisible(claimBtn))
+        {
+            return Fail("Claim btn not found");
+        }
+        Click(claimBtn);
+
+        Wait(1, 2);
+
+
+
         return base.DoSolveFaucet();
+
     }
 
-    
-    public override int AfterSolveFaucet()
+
+
+
+    public override int DoSolveCaptcha()
     {
 
-        return base.AfterSolveFaucet();
+        var antibotLinksHelper = new AntibotLinksMlUtils(this);
+
+        var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
+
+        var antibotLinksTask = Task.Run(() => antibotLinksHelper.DosolveAntibotLinks());
+
+        Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
+
+        return taskCaptcha.Result + antibotLinksTask.Result;
     }
 
-   
-    public override int CheckFaucetResult()
+    public override int GetFaucetWaitTime()
     {
-            var result = base.CheckFaucetResult();
-            if (IsSuccess)
-            {
-                
-                result = GetWaitSetting();
 
-                
-                Reload = true;
-            }
+        var timer = ElementByXPath("//p[@class='alert alert-info' and contains(text(),'You have to wait')]|//div[@class='alert alert-success']|//div[contains(@class,'alertbox') and contains(text(),'You have to wait')]");
+        if (IsVisible(timer))
+        {
+            return 300;
+        }
 
-            return result;
-       
+        return base.GetFaucetWaitTime();
     }
+
+
 }
+
