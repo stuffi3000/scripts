@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 02/02/2021 20:30PM - Version 80
+//Last Update: 04/02/2021 19:30PM - Version 81
 //==================//
 
 using System;
@@ -45,8 +45,8 @@ public class DiscordScript: FaucetScript
 				new FaucetSetting(){Name="Discordtip_LaccsFaucet_vote_OnOff",Display="Discordtip_LaccsFaucet_vote - On/off",Type=EditorType.CheckBox,Default=true},
 				new FaucetSetting(){Name="Discordtip_LaccsFaucet_Main_ID",Display="LaccsFaucet - Vote and Claim between 50 to 100 satoshi - every 12 hours' ",Default="719287586849423420",Type=EditorType.TextBox,Required=true},
                 new FaucetSetting(){Name="Discordtip_LaccsFaucet_BTC_OnOff",Display="LaccsFaucet BTC - AirDrop - 'commands' channel - On/off",Type=EditorType.CheckBox,Default=true},	
-				new FaucetSetting(){Name="Command_1",Display="LaccsFaucet_BTC - Command_1",Default="!claim",Type=EditorType.TextBox,Required=true},
-				new FaucetSetting(){Name="Command_2",Display="LaccsFaucet_BTC - Command_2",Default="%claim",Type=EditorType.TextBox,Required=true},
+				new FaucetSetting(){Name="Command_1",Display="LaccsFaucet_BTC - Command_1 - every 12 hours",Default="%vote",Type=EditorType.TextBox,Required=true},
+				new FaucetSetting(){Name="Command_2",Display="LaccsFaucet_BTC - Command_2 - every 3 hours",Default="%claim",Type=EditorType.TextBox,Required=true},
 
 				new FaucetSetting(){Name="Discordtip_Tippi_vote_OnOff",Display="Discordtip_Tippi_vote - On/off",Type=EditorType.CheckBox,Default=true},
 				new FaucetSetting(){Name="Discordtip_Tippi_Main_ID",Display="Tippi - Vote and Claim between 50 to 100 satoshi - every 12 hours' ",Default="569955063519510549",Type=EditorType.TextBox,Required=true},
