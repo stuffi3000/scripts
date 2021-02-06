@@ -2,8 +2,10 @@
 using FaucetCollector.Captcha;
 using FaucetCollector.Script;
 
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+
 using System;
-using System.ComponentModel;
 using System.Linq;
 //css_ref FaucetCollector.Utilities
 //css_ref FaucetCollector.Captcha
@@ -33,6 +35,20 @@ public class FaucetCryptoScript : FaucetScript
         SuccessXPath = "//*[contains(text(),'')]";
         FailXPath = "//*[contains(text(),'')]";
         base.Start();
+    }
+
+    private void HoldElement(IWebElement element)
+    {
+        if (!IsVisible(element))
+        {
+            return;
+        }
+        Actions actionsBuilder = new Actions(Driver);
+
+        actionsBuilder.MoveToElement(element).Build().Perform();
+
+
+
     }
 
     public override int DoLogin()
@@ -161,6 +177,9 @@ public class FaucetCryptoScript : FaucetScript
 
                     }
 
+                    HoldElement(buttonClaim);
+
+
                     DateTime timeout = DateTime.Now.AddSeconds(40);
 
                     while (IsVisible(buttonClaim) && !buttonClaim.Text.Contains("Get Reward") && DateTime.Now < timeout)
@@ -178,11 +197,11 @@ public class FaucetCryptoScript : FaucetScript
                     var insideAdButton = ElementByXPath("//span//a[contains(text(),'Continue')]");
 
 
-                
+
 
                     timeout = DateTime.Now.AddSeconds(75);
 
-                    while (!IsVisible(insideAdButton) && DateTime.Now<timeout)
+                    while (!IsVisible(insideAdButton) && DateTime.Now < timeout)
                     {
                         Wait(1, 2);
                         insideAdButton = ElementByXPath("//span//a[contains(text(),'Continue')]");
@@ -223,7 +242,7 @@ public class FaucetCryptoScript : FaucetScript
         Wait(1, 2);
 
         var result = DoSolveCaptcha();
-        if (result>0)
+        if (result > 0)
         {
             return result;
         }
@@ -233,6 +252,7 @@ public class FaucetCryptoScript : FaucetScript
         {
             return Fail("button claim is not visible or not found");
         }
+        HoldElement(buttonClaim);
 
         DateTime timeout = DateTime.Now.AddSeconds(25);
 
