@@ -75,6 +75,7 @@ public class StarBitsScript : FaucetScript
 
         if (result > 0)
         {
+            Driver.Manage().Cookies.DeleteAllCookies();
             return result;
         }
 
