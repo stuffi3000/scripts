@@ -1,0 +1,147 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
+using System.Collections.Generic;
+using System.Linq;
+
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+public class MozPlayScript : FaucetScript
+{
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("about:blank")
+            {
+                new FaucetSetting(){Name="User",Display="Wallet address",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="SelectedFaucet",Display="Selected Faucet",Type=EditorType.ComboBox,Items = AvailableFaucets.Keys.ToList(), Default=AvailableFaucets.Keys.FirstOrDefault()},
+                
+            };
+        }
+    }
+
+
+    private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>()
+    {
+        {"BTC","https://cryptorotator.website/btc_play/" },
+        {"LTC","https://cryptorotator.website/ltc_play/" },
+        {"DOGE","https://cryptorotator.website/doge_play/" },
+        {"ETH","https://cryptorotator.website/eth_play/" },
+        {"BCH","https://cryptorotator.website/bch_play/" },
+        {"DASH","https://cryptorotator.website/dash_play/" },
+        {"DGB","https://cryptorotator.website/digibyte_play/" },
+        {"TRON","https://cryptorotator.website/digibyte_play/" }
+    };
+
+
+    private string FaucetUrl
+    {
+        get
+        {
+            string setting = GetSetting("SelectedFaucet");
+            if (!string.IsNullOrEmpty(setting))
+            {
+                if (AvailableFaucets.ContainsKey(setting))
+                {
+                    return AvailableFaucets[setting];
+                }
+            }
+
+            return AvailableFaucets.Values.FirstOrDefault();
+
+        }
+    }
+
+    public override void Start()
+    {
+
+        Title = "play";
+        SuccessXPath = "//div[contains(@class,'alert alert-success')]";
+        FailXPath = "//div[contains(@class,'alert alert-danger')]";
+        base.Start();
+
+    }
+
+    public override int DoInit()
+    {
+        Url = FaucetUrl;
+        return base.DoInit();
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return true;
+    }
+
+    public override int DoSolveFaucet()
+    {
+        GoToUrl(FaucetUrl);
+        Wait(1, 2);
+        var addressBox = ElementByXPath("//input[@id='address']");
+        if (!IsVisible(addressBox))
+        {
+            return Fail("Address box is not visible or not found");
+        }
+
+        SetText(addressBox, GetSetting("User"));
+        Wait(1);
+
+        var buttonModal = ElementByXPath("//button[@data-toggle='modal']");
+        if (!IsVisible(buttonModal))
+        {
+            return Fail("Button modal is not visible or not found");
+        }
+        Click(buttonModal);
+        Wait(1, 2);
+
+        var result = DoSolveCaptcha();
+        if (result>0)
+        {
+            return result;
+        }
+        var faucetClaimButton = ElementByXPath("//input[@id='login']");
+        if (!IsVisible(faucetClaimButton))
+        {
+            return Fail("faucet claim button is not visible or not found");
+        }
+        Click(faucetClaimButton);
+
+        return base.DoSolveFaucet();
+    }
+
+
+    public override int DoSolveCaptcha()
+    {
+
+        AntibotLinksMlUtils antibotLinksMlUtils = new AntibotLinksMlUtils(this);
+
+        var result1 = base.DoSolveCaptcha();
+        if (result1 > 0)
+        {
+            return result1;
+        }
+
+        var result2 = antibotLinksMlUtils.DosolveAntibotLinks();
+
+
+        return result1 + result2;
+
+    }
+
+
+    public override int GetFaucetWaitTime()
+    {
+        GoToUrl(FaucetUrl);
+        Wait(1, 2);
+
+        if (IsVisible(ElementByXPath(SuccessXPath)) || (IsVisible(ElementByXPath("//div[contains(@class,'alert alert-danger')]")) && !IsVisible(ElementByXPath("//input[@id='address']"))))
+        {
+            return 300;
+        }
+
+        return base.GetFaucetWaitTime();
+    }
+}
+
