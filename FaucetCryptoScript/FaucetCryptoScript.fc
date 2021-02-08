@@ -100,7 +100,7 @@ public class FaucetCryptoScript : FaucetScript
     public override bool IsLoggedIn()
     {
 
-        return ElementByXPath("//a[contains(@href,'faucet-claim')]") != null;
+        return ElementByXPath("//a[contains(@href,'faucet-claim')]|//a[contains(@href,'dashboard')]") != null;
 
     }
 
