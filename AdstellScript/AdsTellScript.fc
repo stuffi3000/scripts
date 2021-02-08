@@ -38,7 +38,7 @@ public class AdstellScript : FaucetScript
         Title = "Adstell";
         SuccessXPath = "//div[contains(@class,'alert alert-success')]";
         FailXPath = "//div[contains(@class,'alert alert-danger')]";
-
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
         base.Start();
     }
 
@@ -80,7 +80,7 @@ public class AdstellScript : FaucetScript
 
         return base.DoSolveFaucet();
     }
-
+    AntibotLinksMlUtils AntibotLinksMlUtils;
     public override int DoSolveCaptcha()
     {
         string xpathCaptchaSwitcher = GetBoolSetting("UseSolvemedia") ? "//a[@id='switch' and contains(text(),'Switch to SolveMedia')]" : "//a[@id='switch' and contains(text(),'Switch to reCaptcha')]";
@@ -92,7 +92,7 @@ public class AdstellScript : FaucetScript
             Wait(1, 2);
         }
 
-        AntibotLinksMlUtils antibotLinksMlUtils = new AntibotLinksMlUtils(this);
+        
 
         var result1 = base.DoSolveCaptcha();
         if (result1 > 0)
@@ -100,7 +100,7 @@ public class AdstellScript : FaucetScript
             return result1;
         }
 
-        var result2 = antibotLinksMlUtils.DosolveAntibotLinks();
+        var result2 = AntibotLinksMlUtils.DosolveAntibotLinks();
 
 
 
@@ -117,7 +117,21 @@ public class AdstellScript : FaucetScript
 
         return base.GetFaucetWaitTime();
     }
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
 
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Invalid AntiBot"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
+    }
 
 }
 
