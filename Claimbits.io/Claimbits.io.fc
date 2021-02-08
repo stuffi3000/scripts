@@ -27,7 +27,7 @@ public class ClaimBitsScript : FaucetScript
         Title = "ClaimBits";
         SuccessXPath = "//div[@class='alert alert-success']";
         FailXPath = "//div[@class='alert alert-danger']";
-
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
         base.Start();
 
     }
@@ -100,15 +100,15 @@ public class ClaimBitsScript : FaucetScript
 
 
 
-
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
     public override int DoSolveCaptcha()
     {
 
-        var antibotLinksHelper = new AntibotLinksMlUtils(this);
+     
 
         var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
 
-        var antibotLinksTask = Task.Run(() => antibotLinksHelper.DosolveAntibotLinks());
+        var antibotLinksTask = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
 
         Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
 
@@ -125,6 +125,22 @@ public class ClaimBitsScript : FaucetScript
         }
 
         return base.GetFaucetWaitTime();
+    }
+
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Invalid AntiBot"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
     }
 
 
