@@ -29,10 +29,11 @@ public class GobitsScript : FaucetScript
         Title = "GoBits";
         SuccessXPath = "//div[@class='alert alert-success']";
         FailXPath = "//div[@class='alert alert-danger']";
-
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
         base.Start();
 
     }
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
     public override int DoInit()
     {
         return base.DoInit();
@@ -110,12 +111,11 @@ public class GobitsScript : FaucetScript
     {
 
 
-        AntibotLinksMlUtils antibotLinksMlUtils = new AntibotLinksMlUtils(this);
 
         var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
 
 
-        var taskAbl = Task.Run(() => antibotLinksMlUtils.DosolveAntibotLinks());
+        var taskAbl = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
 
         Task.WhenAll(taskCaptcha, taskAbl).Wait();
 
@@ -136,5 +136,20 @@ public class GobitsScript : FaucetScript
         return base.GetFaucetWaitTime();
     }
 
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Invalid AntiBot"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
+    }
 }
 
