@@ -1,0 +1,176 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
+using System.Collections.Generic;
+using System.Linq;
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+public class LbtceScript : FaucetScript
+{
+
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("about:blank")
+            {
+                new FaucetSetting()
+                {
+                    Name="User",
+                    Display="Wallet Address",
+                    Type=EditorType.TextBox,
+                    Required=true
+                },
+                new FaucetSetting()
+                {
+                    Name="Faucet",
+                    Display="Selected Faucet",
+                    Type=EditorType.ComboBox,
+                    Default=AvailableFaucets.Keys.FirstOrDefault(),
+                    Items=AvailableFaucets.Keys.ToList()
+                },
+                new FaucetSetting()
+                {
+                    Name="UseSolvemedia",
+                    Display="UseSolvemedia",
+                    Type=EditorType.CheckBox,
+                    Default=true
+                }
+            };
+
+        }
+    }
+
+    private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>()
+    {
+        {"DOGE","https://lbtce.com/doge/" },
+        {"BTC","https://lbtce.com/" }
+
+    };
+
+
+    public override void Start()
+    {
+        Title = "LBTCE";
+        SuccessXPath = "//div[@class='alert alert-success']";
+        FailXPath = "//div[@class='alert alert-danger']";
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+        base.Start();
+    }
+
+
+    private string FaucetUrl
+    {
+        get
+        {
+            string setting = GetSetting("Faucet");
+            if (!string.IsNullOrEmpty(setting))
+            {
+                if (AvailableFaucets.ContainsKey(setting))
+                {
+                    return AvailableFaucets[setting];
+                }
+            }
+            return AvailableFaucets.Values.FirstOrDefault();
+        }
+    }
+
+    public override int DoInit()
+    {
+        Url = FaucetUrl;
+        return base.DoInit();
+    }
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
+    public override bool IsLoggedIn()
+    {
+        return true;
+    }
+
+    public override int DoSolveFaucet()
+    {
+
+        GoToUrl(FaucetUrl);
+        Wait(2);
+
+        var walletBox = ElementByXPath("//input[@id='address']");
+        if (!IsVisible(walletBox))
+        {
+            return Fail("Wallet box is not visible or not found");
+        }
+        SetText(walletBox, GetSetting("User"));
+
+
+
+        var modalButton = ElementByXPath("//button[@data-toggle='modal']");
+        if (!IsVisible(modalButton))
+        {
+            return Fail("modal button is not visible or not found");
+        }
+        Click(modalButton);
+        Wait(1);
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+        return base.DoSolveFaucet();
+
+
+    }
+
+    public override int DoSolveCaptcha()
+    {
+
+        string switchCaptchaXPath = GetBoolSetting("UseSolvemedia") ? "//a[@id='switch' and contains(text(),' Switch to SolveMedia')]" : "//a[@id='switch' and contains(text(),'Switch to reCaptcha')]";
+
+        var switchCaptchaElement = ElementByXPath(switchCaptchaXPath);
+        if (IsVisible(switchCaptchaElement))
+        {
+            Click(switchCaptchaElement);
+            Wait(1);
+        }
+
+        var result1 = base.DoSolveCaptcha();
+
+        if (result1 > 0)
+        {
+            return result1;
+        }
+        var result2 = AntibotLinksMlUtils.DosolveAntibotLinks();
+
+        return result1 + result2;
+    }
+
+
+    public override int GetFaucetWaitTime()
+    {
+
+        if (IsVisible(ElementByXPath(SuccessXPath)) || (IsVisible(ElementByXPath("//div[contains(@class,'alert alert-danger')]")) && !IsVisible(ElementByXPath("//input[@id='address']"))))
+        {
+            return 3600;
+        }
+
+        return base.GetFaucetWaitTime();
+    }
+
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Invalid AntiBot"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
+    }
+
+
+}
+
