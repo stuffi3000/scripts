@@ -97,13 +97,24 @@ public class FaucetCryptoScript : FaucetScript
         return base.DoLogin();
     }
 
+    public override int AfterLogin()
+    {
+        var skipBtn = ElementByXPath("//button[contains(text(),'Skip')]");
+        if (IsVisible(skipBtn))
+        {
+            Click(skipBtn);
+            Wait(1, 2);
+        }
+
+        return base.AfterLogin();
+    }
     public override bool IsLoggedIn()
     {
 
-        return ElementByXPath("//a[contains(@href,'faucet-claim')]|//a[contains(@href,'dashboard')]") != null;
+        return ElementByXPath("//a[contains(@href,'faucet-claim')]|//a[contains(@href,'coin-balance')]") != null;
 
     }
-
+    
     public override int DoSolveCaptcha()
     {
 
