@@ -28,11 +28,11 @@ public class FautsyScript : FaucetScript
         Title = "Fautsy";
         SuccessXPath = "//div[@class='alert alert-success']";
         FailXPath = "//div[@class='alert alert-danger']";
-
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
         base.Start();
 
     }
-
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
     public override bool IsLoggedIn()
     {
         return true;
@@ -106,12 +106,11 @@ public class FautsyScript : FaucetScript
     public override int DoSolveCaptcha()
     {
 
-        var antibotLinksUtils = new AntibotLinksMlUtils(this);
 
 
         var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
 
-        var antibotLinksTask = Task.Run(() => antibotLinksUtils.DosolveAntibotLinks());
+        var antibotLinksTask = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
 
         Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
 
@@ -133,6 +132,21 @@ public class FautsyScript : FaucetScript
         return base.GetFaucetWaitTime();
     }
 
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Invalid AntiBot"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
+    }
 }
 
 
