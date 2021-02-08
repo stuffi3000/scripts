@@ -53,20 +53,24 @@ public class MozPlayScript : FaucetScript
 
         }
     }
-
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
     public override void Start()
     {
 
         Title = "play";
         SuccessXPath = "//div[contains(@class,'alert alert-success')]";
         FailXPath = "//div[contains(@class,'alert alert-danger')]";
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
         base.Start();
 
     }
 
+    
     public override int DoInit()
     {
         Url = FaucetUrl;
+
+        
         return base.DoInit();
     }
 
@@ -115,7 +119,6 @@ public class MozPlayScript : FaucetScript
     public override int DoSolveCaptcha()
     {
 
-        AntibotLinksMlUtils antibotLinksMlUtils = new AntibotLinksMlUtils(this);
 
         var result1 = base.DoSolveCaptcha();
         if (result1 > 0)
@@ -123,7 +126,7 @@ public class MozPlayScript : FaucetScript
             return result1;
         }
 
-        var result2 = antibotLinksMlUtils.DosolveAntibotLinks();
+        var result2 = AntibotLinksMlUtils.DosolveAntibotLinks();
 
 
         return result1 + result2;
@@ -142,6 +145,27 @@ public class MozPlayScript : FaucetScript
         }
 
         return base.GetFaucetWaitTime();
+    }
+    public override int CheckFaucetResult()
+    {
+
+        
+
+        var result  = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+            
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Antibotlinks"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+
+
+        return result;
+
     }
 }
 
