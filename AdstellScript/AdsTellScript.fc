@@ -1,6 +1,7 @@
 ﻿using FaucetCollector.Captcha;
 using FaucetCollector.Script;
-
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
 public class AdstellScript : FaucetScript
 {
 
