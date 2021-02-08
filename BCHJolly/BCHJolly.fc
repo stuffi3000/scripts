@@ -217,6 +217,9 @@ public class BCHJollyScript : FaucetScript
 					Wait(1);
 					Click(ElementByXPath("//button[@class='swal-button swal-button--confirm']"));
 					Wait(1);
+					IsSuccess=false;
+					ClaimFailed();
+					break;
 				}
 					
 				else if ( IsVisible(ElementByXPath("//div[@class='swal-icon--success__ring']")) )
