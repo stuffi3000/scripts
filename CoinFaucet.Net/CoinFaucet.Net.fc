@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 13/10/2020 04:30AM - Version 1
-//Last Update: 25/10/2020 22:10PM - Version 5
+//Last Update: 28/01/2021 22:00PM - Version 6
 //==================//
 
 using System;
@@ -40,6 +40,7 @@ public class CoinFaucetNet : FaucetScript
                 new FaucetSetting(){Name="Password",Display="Password",Type=EditorType.Password,Required=true},
 				
                 new FaucetSetting(){Name="FaucetClaim",Display="FaucetClaim",Type=EditorType.CheckBox,Default=true},		
+                new FaucetSetting(){Name="Coin",Display="type your coin - Symbol (in Lowercase for example - btc,eth,ltc )",Default="btc",Type=EditorType.TextBox},		
                 
 			
                 //insert user settings here
@@ -281,7 +282,7 @@ public class CoinFaucetNet : FaucetScript
       if (GetBoolSetting("FaucetClaim"))
       {
 
-		GoToUrl("https://coinfaucet.net/get-free/btc");
+		GoToUrl("https://coinfaucet.net/get-free/" + GetSetting("Coin") );
 		
 	    Wait();
 	    Wait(4);

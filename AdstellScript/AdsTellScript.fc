@@ -1,0 +1,138 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+public class AdstellScript : FaucetScript
+{
+
+    public override FaucetSettings Settings
+    {
+
+        get
+        {
+
+            return new FaucetSettings("https://www.adstell.com/")
+            {
+                new FaucetSetting()
+                {
+                    Name="User",
+                    Type=EditorType.TextBox,
+                    Required=true,
+                    Display="Wallet address"
+
+                },
+                new FaucetSetting()
+                {
+                    Name="UseSolvemedia",
+                    Type=EditorType.CheckBox,
+                    Default=true,
+                    Display="UseSolvemedia"
+                }
+            };
+
+
+        }
+    }
+
+    public override void Start()
+    {
+        Title = "Adstell";
+        SuccessXPath = "//div[contains(@class,'alert alert-success')]";
+        FailXPath = "//div[contains(@class,'alert alert-danger')]";
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+        base.Start();
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return true;
+    }
+
+    public override int DoSolveFaucet()
+    {
+        var userBox = ElementByXPath("//input[@id='address']");
+        if (!IsVisible(userBox))
+        {
+            return Fail("User box is not visible or not found");
+        }
+        SetText(userBox, GetSetting("User"));
+
+        var modalBtn = ElementByXPath("//button[@data-toggle='modal']");
+        if (!IsVisible(modalBtn))
+        {
+            return Fail("Modal btn is not visible or not found");
+        }
+        Click(modalBtn);
+        Wait(1, 2);
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+
+        var verifyCaptchaButton = ElementByXPath("//input[@id='login']");
+        if (!IsVisible(verifyCaptchaButton))
+        {
+            return Fail("verify captcha button is not visible");
+        }
+
+        Click(verifyCaptchaButton);
+
+        return base.DoSolveFaucet();
+    }
+    AntibotLinksMlUtils AntibotLinksMlUtils;
+    public override int DoSolveCaptcha()
+    {
+        string xpathCaptchaSwitcher = GetBoolSetting("UseSolvemedia") ? "//a[@id='switch' and contains(text(),'Switch to SolveMedia')]" : "//a[@id='switch' and contains(text(),'Switch to reCaptcha')]";
+
+        var captchaSwitcher = ElementByXPath(xpathCaptchaSwitcher);
+        if (IsVisible(captchaSwitcher))
+        {
+            Click(captchaSwitcher);
+            Wait(1, 2);
+        }
+
+        
+
+        var result1 = base.DoSolveCaptcha();
+        if (result1 > 0)
+        {
+            return result1;
+        }
+
+        var result2 = AntibotLinksMlUtils.DosolveAntibotLinks();
+
+
+
+        return result1 + result2;
+    }
+
+    public override int GetFaucetWaitTime()
+    {
+
+        if (IsVisible(ElementByXPath(SuccessXPath)) || (IsVisible(ElementByXPath("//div[contains(@class,'alert alert-danger')]")) && !IsVisible(ElementByXPath("//input[@id='address']"))))
+        {
+            return 3600;
+        }
+
+        return base.GetFaucetWaitTime();
+    }
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Invalid AntiBot"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
+    }
+
+}
+

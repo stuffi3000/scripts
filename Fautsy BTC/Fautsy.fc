@@ -1,23 +1,22 @@
 ﻿using FaucetCollector.Captcha;
 using FaucetCollector.Script;
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 //css_ref FaucetCollector.Utilities
 //css_ref FaucetCollector.Captcha
-public class GobitsScript : FaucetScript
+public class FautsyScript : FaucetScript
 {
-
     public override FaucetSettings Settings
     {
         get
         {
 
-            return new FaucetSettings("http://www.gobits.io/")
+            return new FaucetSettings("http://fautsy.com/")
                 {
 
                     new FaucetSetting(){Name="User",Display="Wallet address",Type=EditorType.TextBox,Required=true},
                     new FaucetSetting(){Name="UseSolvemedia",Display="UseSolvemedia",Type=EditorType.CheckBox,Default=true}
+                    
                 };
 
         }
@@ -26,7 +25,7 @@ public class GobitsScript : FaucetScript
 
     public override void Start()
     {
-        Title = "GoBits";
+        Title = "Fautsy";
         SuccessXPath = "//div[@class='alert alert-success']";
         FailXPath = "//div[@class='alert alert-danger']";
         AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
@@ -34,11 +33,6 @@ public class GobitsScript : FaucetScript
 
     }
     private AntibotLinksMlUtils AntibotLinksMlUtils;
-    public override int DoInit()
-    {
-        return base.DoInit();
-    }
-
     public override bool IsLoggedIn()
     {
         return true;
@@ -47,7 +41,7 @@ public class GobitsScript : FaucetScript
     public override int DoSolveFaucet()
     {
 
-        string faucetUrl = GetBoolSetting("UseSolvemedia") ? "http://www.gobits.io/?cc=SolveMedia" : "http://www.gobits.io/";
+        string faucetUrl = GetBoolSetting("UseSolvemedia") ? "http://fautsy.com/?cc=SolveMedia" : "http://fautsy.com/";
         GoToUrl(faucetUrl);
 
         Wait(1, 2);
@@ -62,7 +56,7 @@ public class GobitsScript : FaucetScript
         Wait(1);
 
 
-        var modalBtn = ElementByXPath("//a[@class='clmnow']");
+        var modalBtn = ElementByXPath("//a[@data-toggle='modal']");
         if (!IsVisible(modalBtn))
         {
 
@@ -81,7 +75,9 @@ public class GobitsScript : FaucetScript
 
         if (result > 0)
         {
+            
             Driver.Manage().Cookies.DeleteAllCookies();
+
             return result;
         }
 
@@ -98,7 +94,7 @@ public class GobitsScript : FaucetScript
 
         Wait(1, 2);
 
-   
+
 
         return base.DoSolveFaucet();
 
@@ -114,13 +110,13 @@ public class GobitsScript : FaucetScript
 
         var taskCaptcha = Task.Run(() => base.DoSolveCaptcha());
 
+        var antibotLinksTask = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
 
-        var taskAbl = Task.Run(() => AntibotLinksMlUtils.DosolveAntibotLinks());
-
-        Task.WhenAll(taskCaptcha, taskAbl).Wait();
+        Task.WhenAll(taskCaptcha, antibotLinksTask).Wait();
 
 
-        return taskCaptcha.Result + taskAbl.Result;
+        return taskCaptcha.Result + antibotLinksTask.Result;
+
 
     }
 
@@ -152,4 +148,6 @@ public class GobitsScript : FaucetScript
         return result;
     }
 }
+
+
 

@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 22/01/2021 11:05AM - Version 8
+//Last Update: 30/01/2021 22:40PM - Version 13
 //==================//
 
 using System;
@@ -12,8 +12,11 @@ using OpenQA.Selenium.Interactions;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+
 //css_ref FaucetCollector.Utilities
 //css_inc RecaptchaUtilities
+
+
 
 
 public class Doge_4miner : FaucetScript
@@ -225,7 +228,7 @@ public class Doge_4miner : FaucetScript
     {
 		
 
-      SolveAritmeticCaptcha(); //call to check
+      SolveManualCaptcha(); //call to check
 
 
       //=============//
@@ -610,31 +613,88 @@ public class Doge_4miner : FaucetScript
         }//end Recaptcha_Function
         //=================//	
 	
+
 	
-	
-//==============//
-//AritmeticCaptcha
-//==============//
- public bool SolveAritmeticCaptcha()
- {
- 
+ public int SolveManualCaptcha()
+ {	
+
+		var GeetestVAR = ElementByXPath("//div[contains(@class,'geetest_btn')]");
+		if (IsVisible(GeetestVAR))
+        {	
+          Log("Geetest - here - we can't solve Geetest captcha for now - Sorry");
+		  Disable(); //Disable script
+          Log("Disable script");
+          return 1;
+		}
+
 		var ImgIconBalk = ElementByXPath("//img[contains(@src,'4miner.me')]"); //Balk image |+| between 2 + 2       
+		
+		if (!IsVisible(ImgIconBalk))
+        {
+			Log("Solve Aritmetic Captcha - Trying to see if available");
+			SolveAritmeticCaptcha(); //call
+		} //end ImgIconBalk - NOT visible
+
+		
 		if (IsVisible(ImgIconBalk))
         {	
-           Log("Solve ImgIconBalk - manually - try");
+          Log("Solve ImgIconBalk - manually - try");
+          SolveManualCaptcha(); //call   
 
-		   var AnswerButton = ElementByXPath("//button[contains(@onclick,'();') ]"); //click on Answer that contains ();  
+           /*
+		   var AnswerButton = ElementByXPath("//button[starts-with(@onclick,'d') and last()-1 ]");
 		   if (IsVisible(AnswerButton))
            {		
            Log("Solve ImgIconBalk - Answer - success");
 		   Click(AnswerButton); 	
 		   }
+		   */	   
+
+           var buttons = ElementsByXPath("//button[@onclick]");
+           IWebElement button = null;
+           foreach (var btn in buttons)
+           {
+               Log("foreach");
+
+               var onclick = btn.GetAttribute("onclick");
+               if (string.IsNullOrEmpty(onclick))
+               {
+                   continue;
+               }
 		   
-		}	
+               if (buttons.Any(b => b != btn && string.Equals(onclick, b.GetAttribute("onclick"), StringComparison.OrdinalIgnoreCase)))
+               {
+                   continue;
+               }
+		   
+               button = btn;
+               Log("SolveManualCaptcha - success");
+               break;
+           }
+		   
+           if (button == null)
+           {
+               return Fail("not found");
+           }
+		   
+           Log("Click");		   
+           Click(button);
+		   
+		} //end ImgIconBalk visible 
 		
-		
-        if (!IsVisible(ImgIconBalk))
-        {	
+  return 0;
+ }//end SolveManualCaptcha
+ //=================//	
+
+
+
+
+//==============//
+//AritmeticCaptcha
+//==============//
+ public bool SolveAritmeticCaptcha()
+ {
+
           // we see if the captcha is visible
           var captchaQuestion = ElementByXPath("//div[@class='col-md-12' and contains(text(),'How much is')]");
           if (IsVisible(captchaQuestion))
@@ -696,12 +756,13 @@ public class Doge_4miner : FaucetScript
                 }
             }
           }
-		}	//end ImgIconBalk - NOT visible
+
 		
         Log("Aritmetic captcha not found or not visible");
         // So aritmetic captcha is not found or not visible
         return false;
 		
+	//return 0;	
  }
 //==============//
 
