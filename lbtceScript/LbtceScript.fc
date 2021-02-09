@@ -102,6 +102,7 @@ public class LbtceScript : FaucetScript
 
         GoToUrl(FaucetUrl);
         Wait(2);
+        ClosePopUp();
 
         var walletBox = ElementByXPath("//input[@id='address']");
         if (!IsVisible(walletBox))
