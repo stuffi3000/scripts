@@ -87,6 +87,16 @@ public class LbtceScript : FaucetScript
         return true;
     }
 
+    public void ClosePopUp()
+    {
+        var closeBtn = ElementByXPath("//span[contains(@class,'closeBtn')]");
+        if (IsVisible(closeBtn))
+        {
+            ExecuteScript("arguments[0].click", closeBtn);
+            Wait(1);
+        }
+    }
+
     public override int DoSolveFaucet()
     {
 
@@ -115,6 +125,16 @@ public class LbtceScript : FaucetScript
         {
             return result;
         }
+
+        var captchaSolvedButton = ElementByXPath("//input[@id='login']");
+        if (!IsVisible(captchaSolvedButton))
+        {
+            return Fail("Captcha solved button is not solved or not found");
+        }
+        Click(captchaSolvedButton);
+
+        Wait(1, 2);
+
         return base.DoSolveFaucet();
 
 
