@@ -178,7 +178,8 @@ public class FaucetCryptoScript : FaucetScript
                     var result = DoSolveCaptcha();
                     if (result > 0)
                     {
-                        continue;
+                        Log("Need to wait");
+                        break;
                     }
                     var buttonClaim = ElementByXPath("//span[contains(@class,'notranslate')]//button");
                     if (!IsVisible(buttonClaim))
@@ -255,7 +256,16 @@ public class FaucetCryptoScript : FaucetScript
         var result = DoSolveCaptcha();
         if (result > 0)
         {
-            return result;
+
+
+            Log("We need to wait 5 minutes");
+            return 300;
+            //return result;
+        }
+
+        if (IsVisbileAntibotLinks)
+        {
+            return Fail("We need to solve the captcha a new time");
         }
 
         var buttonClaim = ElementByXPath("//span[contains(@class,'notranslate')]//button");
