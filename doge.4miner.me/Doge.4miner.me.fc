@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 30/01/2021 22:40PM - Version 13
+//Last Update: 09/02/2021 19:10PM - Version 14
 //==================//
 
 using System;
@@ -638,18 +638,27 @@ public class Doge_4miner : FaucetScript
 		
 		if (IsVisible(ImgIconBalk))
         {	
-          Log("Solve ImgIconBalk - manually - try");
-          SolveManualCaptcha(); //call   
+           Log("Solve ImgIconBalk - manually - try");
 
-           /*
 		   var AnswerButton = ElementByXPath("//button[starts-with(@onclick,'d') and last()-1 ]");
 		   if (IsVisible(AnswerButton))
            {		
            Log("Solve ImgIconBalk - Answer - success");
 		   Click(AnswerButton); 	
 		   }
-		   */	   
 
+		   var AnswerReCp = ElementByXPath("//button[starts-with(@data-callback,'on')]");
+		   if (IsVisible(AnswerReCp))
+           {		
+           Log("Solve ImgIconBalk - try - ReCp");
+		   Click(AnswerReCp); 
+		   Wait(2);
+		   invisible_Recaptcha_Function(); //call to check
+		   }
+  
+                       
+		   /*
+		   //Find Unique
            var buttons = ElementsByXPath("//button[@onclick]");
            IWebElement button = null;
            foreach (var btn in buttons)
@@ -679,6 +688,9 @@ public class Doge_4miner : FaucetScript
 		   
            Log("Click");		   
            Click(button);
+		   
+		   */
+		   
 		   
 		} //end ImgIconBalk visible 
 		
