@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 09/02/2021 19:10PM - Version 14
+//Last Update: 11/02/2021 04:00AM - Version 15
 //==================//
 
 using System;
@@ -647,50 +647,51 @@ public class Doge_4miner : FaucetScript
 		   Click(AnswerButton); 	
 		   }
 
+
 		   var AnswerReCp = ElementByXPath("//button[starts-with(@data-callback,'on')]");
+		   
 		   if (IsVisible(AnswerReCp))
            {		
-           Log("Solve ImgIconBalk - try - ReCp");
-		   Click(AnswerReCp); 
-		   Wait(2);
-		   invisible_Recaptcha_Function(); //call to check
+             Log("Solve ImgIconBalk - try - ReCp");
+		     Click(AnswerReCp); 
+		     Wait(2);
+		     invisible_Recaptcha_Function(); //call to check
 		   }
-  
-                       
-		   /*
-		   //Find Unique
-           var buttons = ElementsByXPath("//button[@onclick]");
-           IWebElement button = null;
-           foreach (var btn in buttons)
-           {
-               Log("foreach");
-
-               var onclick = btn.GetAttribute("onclick");
-               if (string.IsNullOrEmpty(onclick))
-               {
-                   continue;
-               }
-		   
-               if (buttons.Any(b => b != btn && string.Equals(onclick, b.GetAttribute("onclick"), StringComparison.OrdinalIgnoreCase)))
-               {
-                   continue;
-               }
-		   
-               button = btn;
-               Log("SolveManualCaptcha - success");
-               break;
-           }
-		   
-           if (button == null)
-           {
-               return Fail("not found");
-           }
-		   
-           Log("Click");		   
-           Click(button);
-		   
-		   */
-		   
+                         
+		   if (!IsVisible(AnswerReCp))
+           {			
+		     //Find Unique
+             var buttons = ElementsByXPath("//button[@onclick]");
+             IWebElement button = null;
+             foreach (var btn in buttons)
+             {
+                 Log("foreach");
+		     
+                 var onclick = btn.GetAttribute("onclick");
+                 if (string.IsNullOrEmpty(onclick))
+                 {
+                     continue;
+                 }
+		     
+                 if (buttons.Any(b => b != btn && string.Equals(onclick, b.GetAttribute("onclick"), StringComparison.OrdinalIgnoreCase)))
+                 {
+                     continue;
+                 }
+		     
+                 button = btn;
+                 Log("SolveManualCaptcha - success");
+                 break;
+             }
+		     
+             if (button == null)
+             {
+                 return Fail("not found");
+             }
+		     
+             Log("Click");		   
+             Click(button);
+			 
+		   } //AnswerReCp not visible
 		   
 		} //end ImgIconBalk visible 
 		
