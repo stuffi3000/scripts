@@ -75,6 +75,7 @@ public class ClaimFreeCoinsScript : FaucetScript
         SuccessXPath = "//div[@class='alert alert-success']";
         FailXPath = "//div[@class='alert alert-danger']";
         AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+        AntibotLinksMlUtils.AntibotLinksHeaderXPath = "//div[contains(@class,'modal-title')]//img[contains(@src,'data:image')]";
         base.Start();
     }
     public override int DoInit()
@@ -85,14 +86,22 @@ public class ClaimFreeCoinsScript : FaucetScript
 
     public override bool IsLoggedIn()
     {
-        return ElementByXPath("//button[@data-target='#antibot']") != null;
+        return ElementByXPath("//button[@data-target='#antibot']|//div[@id='claim_again']") != null;
     }
-
+    public void CheckForCookieError()
+    {
+        var refreshBtn = ElementByXPath("//a[contains(text(),'Refresh to Claim Again!')]");
+        if (IsVisible(refreshBtn))
+        {
+            Driver.Manage().Cookies.DeleteAllCookies();
+            Driver.Navigate().Refresh();
+        }
+    }
     public override int DoLogin()
     {
         GoToUrl(FaucetUrl);
         Wait(2);
-
+        CheckForCookieError();
         var addressBox = ElementByXPath("//input[@name='address']");
         if (!IsVisible(addressBox))
         {
@@ -121,6 +130,7 @@ public class ClaimFreeCoinsScript : FaucetScript
         GoToUrl(FaucetUrl);
         Wait(2);
 
+        CheckForCookieError();
         var goAntibot = ElementByXPath("//button[@data-target='#antibot']");
         if(!IsVisible(goAntibot))
 
@@ -149,6 +159,17 @@ public class ClaimFreeCoinsScript : FaucetScript
         return base.DoSolveFaucet();
     }
 
+    public override int GetFaucetWaitTime()
+    {
+
+        var timer = ElementByXPath("//div[@id='claim_again']");
+        if (IsVisible(timer) || IsVisible(ElementByXPath(SuccessXPath)))
+        {
+            return 300; 
+        }
+
+        return base.GetFaucetWaitTime();
+    }
     public override int DoSolveCaptcha()
     {
 
