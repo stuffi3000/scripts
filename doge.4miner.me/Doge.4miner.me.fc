@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 11/02/2021 04:00AM - Version 15
+//Last Update: 11/02/2021 05:00AM - Version 15
 //==================//
 
 using System;
@@ -479,7 +479,7 @@ public class Doge_4miner : FaucetScript
 		   
 		   Wait(2);
 		   
-           var LoginVAR = ElementByXPath("//button[contains(@type,'submit')]");  
+           var LoginVAR = ElementByXPath("//span[contains(text(),'Login')] | //button[contains(text(),'Login')] | //button[contains(@type,'submit')] ");  
            if (IsVisible(LoginVAR))
 		   {
 		    Log("LoginVAR");  
