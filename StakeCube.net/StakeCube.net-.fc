@@ -1,6 +1,6 @@
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 26/07/2019 17:00PM - Version 13
+//Last Update: 11/02/2021 04:00AM - Version 14
 //==================//
 
 using System;
@@ -369,7 +369,7 @@ public class stakecube : FaucetScript
         {
         
           var FaucetCheck = ElementByXPath("//button[contains(@onclick,'claim')]");
-          if (IsVisible(FaucetCheck))
+          if (FaucetCheck !=null) //Visible
           {
         
             Wait(5);
@@ -387,11 +387,12 @@ public class stakecube : FaucetScript
             ClaimSuccess(); //Success
             }
         
-            Wait(2);
-        
+            Driver.Navigate().Refresh();
+            Wait(4);
+			
           }// end FaucetCheck
         
-          if (!IsVisible(FaucetCheck))
+          if (FaucetCheck ==null) //NOT Visible
           {
           Log("FaucetClaim - break - not Available");
           break;
