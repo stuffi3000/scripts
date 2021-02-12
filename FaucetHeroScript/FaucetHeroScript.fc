@@ -1,0 +1,249 @@
+﻿
+using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+using FaucetCollector.Utilities;
+
+using System.Linq;
+
+//css_ref FaucetCollector.Utilities
+//css_ref FaucetCollector.Captcha
+
+public class FaucetHeroScript : FaucetScript
+{
+
+    public override FaucetSettings Settings
+    {
+        get
+        {
+            return new FaucetSettings("https://faucethero.com/")
+            {
+                new FaucetSetting(){Name="User",Display="Username",Type=EditorType.TextBox,Required=true},
+                new FaucetSetting(){Name="Pass",Display="Password",Type=EditorType.Password,Required=true},
+                new FaucetSetting(){Name="UseSolvemedia",Type=EditorType.CheckBox,Default=true,Display="UseSolvemedia"}
+            };
+
+        }
+    }
+
+
+    public override void Start()
+    {
+        Title = "FaucetHero";
+
+        SuccessXPath = "//div[contains(@class,'alert alert-success')]";
+        FailXPath = "//div[contains(@class,'alert alert-danger')]";
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+        AntibotLinksMlUtils.AntibotLinksHeaderXPath = "//img[contains(@class,'img-responsive') and contains(@src,'data:image')]";
+
+        base.Start();
+    }
+
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
+    public override int DoLogin()
+    {
+        GoToUrl("https://faucethero.com/account/login");
+        Wait(1, 2);
+
+
+        var userBox = ElementByXPath("//input[@name='username']");
+        if (!IsVisible(userBox))
+        {
+            return Fail("User box is not visible or not found");
+        }
+        SetText(userBox, GetSetting("User"));
+
+        var passwordBox = ElementByXPath("//input[@name='password']");
+        if (!IsVisible(passwordBox))
+        {
+            return Fail("Password box is not visbile or not found");
+
+        }
+
+        SetText(passwordBox, GetPassword("Pass"));
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+
+
+        var loginBtn = ElementByXPath("//input[@value='Login']");
+        if (!IsVisible(loginBtn))
+        {
+            return Fail("Login btn is not visible or not found");
+        }
+
+        Click(loginBtn);
+
+
+        return base.DoLogin();
+    }
+
+    public override int DoSolveCaptcha()
+    {
+        var captchaSelect = ElementByXPath("//select[@name='captcha']");
+        if (IsVisible(captchaSelect))
+        {
+            var valueCorrectCaptcha = GetBoolSetting("UseSolvemedia") ? "SolveMedia" : "reCaptcha";
+            SelectOptionByValue(captchaSelect, valueCorrectCaptcha);
+            Wait(2, 3);
+        }
+
+        if (ElementByXPath("//img[contains(@class,'img-responsive') and contains(@src,'data:image')]") != null)
+        {
+            var result = AntibotLinksMlUtils.DosolveAntibotLinks();
+            if (result > 0)
+            {
+                return result;
+            }
+        }
+
+
+        return base.DoSolveCaptcha();
+    }
+    public override bool IsLoggedIn()
+    {
+        return ElementByXPath("//a[@href='account/logout']") != null;
+    }
+
+
+    public override int DoSolveFaucet()
+    {
+        GoToUrl("https://faucethero.com/faucetlist/most-active");
+
+        Wait(1, 2);
+
+        var availableFaucetsToClaim = ElementsByXPath("//a[contains(@href,'faucet') and contains(text(),'Claim')]");
+
+        if (availableFaucetsToClaim.Count == 0)
+        {
+
+            Log("There is not faucet to claims in this moment");
+
+        }
+        int nFaucet = Random(0, availableFaucetsToClaim.Count);
+        int tries = 0;
+        bool isFaucetAvailable = false;
+        // we select a valid site 
+        while (!isFaucetAvailable && tries < 5)
+        {
+            try
+            {
+                Click(availableFaucetsToClaim[nFaucet]);
+                Wait(1, 2);
+
+                if (IsVisible(ElementByXPath("//div[contains(@class,'alert alert-danger')]")))
+                {
+                    continue;
+                }
+
+                var alertClaimsLeft = ElementByXPath("//div[contains(@class,'alert alert-info')]");
+                if (IsVisible(alertClaimsLeft))
+                {
+
+                    string text = ExecuteScript("arguments[0].textContent", alertClaimsLeft).ToString();
+
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        var splitedText = text.Split(' ').ToList();
+
+                        int index = splitedText.IndexOf("have");
+
+                        if (index != -1 && index < splitedText.Count - 1)
+                        {
+                            int availableClaims;
+                            if (int.TryParse(splitedText[index + 1], out availableClaims) && availableClaims > 0)
+                            {
+                                isFaucetAvailable = true;
+                            }
+
+                        }
+
+                    }
+
+
+                }
+            }
+            finally
+            {
+                if (!isFaucetAvailable)
+                {
+                    tries++;
+                    GoToUrl("https://faucethero.com/faucetlist/most-active");
+
+                    Wait(1, 2);
+
+                    availableFaucetsToClaim = ElementsByXPath("//a[contains(@href,'faucet') and contains(text(),'Claim')]");
+
+                    if (availableFaucetsToClaim.Count == 0)
+                    {
+
+                        Log("There is not faucet to claims in this moment");
+
+                    }
+                    nFaucet = Random(0, availableFaucetsToClaim.Count);
+                }
+
+            }
+
+        }
+
+
+        var result = DoSolveCaptcha();
+        if (result > 0)
+        {
+            return result;
+        }
+
+
+        var sendClaimBtn = ElementByXPath("//input[@name='verifycaptcha']");
+        if (!IsVisible(sendClaimBtn))
+        {
+            return Fail("Send claim button not found");
+        }
+
+        Click(sendClaimBtn);
+
+        var goSponsor = ElementByXPath("//a[contains(text(),'Go to Sponsor')]");
+        if (!IsVisible(goSponsor))
+        {
+            return Fail("Go sponsor link not found");
+        }
+
+        ShortLinkBypasser shortLinkBypasser = new ShortLinkBypasser(this);
+        Click(goSponsor);
+        Wait(1, 2);
+
+        shortLinkBypasser.DoShortLink();
+
+        CheckFaucetResult();
+
+        if (IsSuccess)
+        {
+            return GetWaitSetting();
+        }
+
+
+        return base.DoSolveFaucet();
+    }
+
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Wrong"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
+    }
+
+
+}
+
