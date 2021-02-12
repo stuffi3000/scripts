@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 04/02/2021 19:30PM - Version 81
+//Last Update: 12/02/2021 01:30AM - Version 82
 //==================//
 
 using System;
@@ -1822,7 +1822,7 @@ public class DiscordScript: FaucetScript
             Wait(5);
 
             //vote button
-            var VoteButton = ElementByXPath("//span[@id='votingvoted']");
+            var VoteButton = ElementByXPath("//input[@id='votingvoted']");
             if (IsVisible(VoteButton))
             {
                 Log("VoteButton - 1");
