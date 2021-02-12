@@ -84,6 +84,13 @@ public class ClaimFreeCoinsScript : FaucetScript
         return base.DoInit();
     }
 
+
+    private void CheckCloudFlare()
+    {
+        FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+        cloudUtils.DoSolve();
+    }
+
     public override bool IsLoggedIn()
     {
         return ElementByXPath("//button[@data-target='#antibot']|//div[@id='claim_again']") != null;
@@ -101,6 +108,7 @@ public class ClaimFreeCoinsScript : FaucetScript
     {
         GoToUrl(FaucetUrl);
         Wait(2);
+        CheckCloudFlare();
         CheckForCookieError();
         var addressBox = ElementByXPath("//input[@name='address']");
         if (!IsVisible(addressBox))
