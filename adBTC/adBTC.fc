@@ -87,12 +87,14 @@ namespace Adbtc
 
                         using (MemoryStream memoryStream = new MemoryStream())
                         {
-                            dbmp.Save(memoryStream,ImageFormat.Png);
+                            dbmp.Save(memoryStream, ImageFormat.Png);
 
                             string base64 = Convert.ToBase64String(memoryStream.ToArray());
                             base64 = "data:image/png;base64," + base64;
 
-                            ExecuteScript("arguments[0].setAttribute('src','" + base64 + "');");
+                            ExecuteScript("arguments[0].removeAttribute('style')", imgs[0]);
+
+                            ExecuteScript("arguments[0].setAttribute('src','" + base64 + "');", imgs[0]);
 
                             Wait(1);
                             return DoSolveImageCaptcha(imgs[0], ElementByXPath("//input[@type='number']"));
@@ -304,7 +306,7 @@ namespace Adbtc
                     else
                     {
 
-                        var bt = ElementByXPath("//a[contains(@class,'pulse animated') and contains(@class,'valign-wrapper')]|//a[contains(@class,'btn') and contains(@class,'deep')]");
+                        var bt = ElementByXPath("//a[contains(@class,'btn ') and not(contains(@href,'skip'))]");
 
                         if (IsVisible(bt))
                         {
