@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 05/12/2018 06:00AM 
-//Last Update: 12/02/2021 01:30AM - Version 82
+//Last Update: 13/02/2021 12:00AM - Version 83
 //==================//
 
 using System;
@@ -579,13 +579,7 @@ public class DiscordScript: FaucetScript
         //================//
         if (GetBoolSetting("Discordtip_Main_vote_OnOff"))
         {
-            Title = "Discordtip";
-            //ADFunction_String_URL_DiscordBotsTip(); //call to Discordtip main 
-		    GoToUrl("https://discordbots.org/bot/617037497574359050/vote"); //tip.cc
-            Wait();
-
-			Log("Discordtip_Main - do vote");			
-            Tasks_Function(); //call
+           DiscordTipCC_Vote_Check_Function(); //call
         
 		} //end Discordtip_Main_vote_OnOff
         //================//
@@ -631,13 +625,7 @@ public class DiscordScript: FaucetScript
 		   
            Wait(3);		
 			
-           Title = "Discordtip";
-           //ADFunction_String_URL_Discordtip_Tippi(); //call to Discordtip_Tippi
-		   GoToUrl("https://discordbots.org/bot/569955063519510549/vote"); //Tippi
-		   Wait();
-		
- 	       Log("Discordtip_Tippi - do vote first");			
-           Tasks_Function(); //call
+           Tippi_Vote_Check_Function(); //call
         
 		} //end Discordtip_Tippi_vote_OnOff
         //================//
@@ -1780,6 +1768,87 @@ public class DiscordScript: FaucetScript
     //====================//
 	
 
+   //=================//
+  //Tippi_Vote_Check_Function
+  //=================//
+  public int Tippi_Vote_Check_Function()
+  {
+		  Title = "#vote-bounty";	
+		  GoToUrl("https://discord.com/channels/569537504080822312/569537639213039626"); //channel
+		  Wait();	
+		  Wait(4);
+		  
+          Scroll_Function(); //call to scroll down
+		  
+		  Wait(3);	
+		  
+   		  var Tippi_Vote_Check_VAR = ElementByXPath(" //div[contains(@class,'mentioned') and contains(., 'Today') ] [last()] ");      
+	      if (Tippi_Vote_Check_VAR !=null) //Visible
+          {
+			  Log("Tippi - Vote - you Already Vote Today - try Tomorrow");	  
+		  }
+		  
+		  if (Tippi_Vote_Check_VAR ==null) //NOT Visible
+          {
+			  Log("Tippi - Vote - go to claim ");
+			  
+              Title = "Discordtip";
+              //ADFunction_String_URL_Discordtip_Tippi(); //call to Discordtip_Tippi
+		      GoToUrl("https://discordbots.org/bot/569955063519510549/vote"); //Tippi
+		      Wait();
+		      
+ 	          Log("Discordtip_Tippi - do vote first");			
+              Tasks_Function(); //call
+		  }	  
+		  
+		  
+        return 0;
+		
+  } //end Tippi_Vote_Check_Function
+   //=================//
+   
+   
+  //=================//
+  //DiscordTipCC_Vote_Check_Function
+  //=================//
+  public int DiscordTipCC_Vote_Check_Function()
+  {
+	  
+          Start_SearchBar_TipCC_Function(); //call
+		  
+		  Wait(2);			  
+		  
+          Scroll_Function(); //call to scroll down
+		  
+		  Wait(3);	
+		  
+   		  var DiscordTipCC_Vote_Check_VAR = ElementByXPath(" //div[contains(@class, 'scrollerInner-') ]//div[contains(., 'Today at') and contains(., 'Thank you for vot') ] ");      
+	      if (DiscordTipCC_Vote_Check_VAR !=null) //Visible
+          {
+			  Log("DiscordTipCC - Vote - you Already Vote Today - try Tomorrow");	  
+		  }
+		  
+		  if (DiscordTipCC_Vote_Check_VAR ==null) //NOT Visible
+          {
+			  Log("DiscordTipCC - Vote - go to claim ");
+			  
+              Title = "Discordtip";
+              //ADFunction_String_URL_DiscordBotsTip(); //call to Discordtip main 
+		      GoToUrl("https://discordbots.org/bot/617037497574359050/vote"); //tip.cc
+              Wait();
+			  
+			  Log("Discordtip_Main - do vote");			
+              Tasks_Function(); //call
+		  }	  
+		  
+		  
+        return 0;
+		
+  } //end DiscordTipCC_Vote_Check_Function
+   //=================//  
+
+
+
       //=================//
       //Tasks_Function
       //=================//
@@ -1827,11 +1896,13 @@ public class DiscordScript: FaucetScript
             {
                 Log("VoteButton - 1");
                 Click(VoteButton);
-				
             }
 			
             Wait(3);
 			
+		    invisible_Recaptcha_Function(); //call to check
+			
+/*			
             var PopUp_2_Login = ElementByXPath("//div[@class='modal is-active']"); //("//div[@class='modal is-active']")		
             if (IsVisible(PopUp_2_Login))
             {
@@ -1843,12 +1914,7 @@ public class DiscordScript: FaucetScript
 
             Wait(4);
 
-            var invisible_Recaptcha_1_VAR = ElementByXPath("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ");
-            if (invisible_Recaptcha_1_VAR !=null)
-            {
-                Log("invisible_Recaptcha_1_VAR");
-				invisible_Recaptcha_Function(); //call
-			}
+		    invisible_Recaptcha_Function(); //call to check
 			
             Wait();
 	
@@ -1876,19 +1942,14 @@ public class DiscordScript: FaucetScript
 			
             Wait(3);
 
-            var invisible_Recaptcha_2_VAR = ElementByXPath("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] ");
-            if (invisible_Recaptcha_2_VAR !=null)
-            {
-                Log("invisible_Recaptcha_2_VAR");
-				invisible_Recaptcha_Function(); //call
-			}
+		    invisible_Recaptcha_Function(); //call to check
+*/
+            Wait(3);
 
-            Wait(4);
+            var ThanksMessage = ElementByXPath("//div[@id='reminder']/h2[text()='Thanks for voting!']");
+            var AlreadyVoted = ElementByXPath("//input[@id='votingvoted' and contains(@value, 'You already voted') ]");
 
-            var ThanksMessage = ElementByXPath("//div[@id='reminder']/p[text()='Thanks for voting!']");
-            var AlreadyVoted = ElementByXPath("//span[@id='votingvoted'] [text()='You already voted for this bot. Try again in 12 hours.']");
-
-            if (IsVisible(ThanksMessage))
+	        if (ThanksMessage !=null) //Visible
             {
 				
                 Log("FaucetClaim:" + ThanksMessage.Text);				
@@ -1910,7 +1971,7 @@ public class DiscordScript: FaucetScript
 
             }
 
-            if (IsVisible(AlreadyVoted))
+	        if (AlreadyVoted !=null) //Visible
             {
                 Log("FaucetClaim: Already Voted");
 				
@@ -2614,7 +2675,7 @@ public class DiscordScript: FaucetScript
         public int invisible_Recaptcha_Function()
         {
 			
-          var RecaptchaOpen_Iframe = ElementByXPath ("//button[contains(@class,'reload')] | //button[contains(@id,'reload')] "); 
+          var RecaptchaOpen_Iframe = ElementByXPath ("//div[contains(@style,'opacity: 1')]//iframe[contains(@src,'recaptcha')]");  
           if (RecaptchaOpen_Iframe !=null)          
 		  {
             //SolveCaptcha if apper
@@ -2624,10 +2685,14 @@ public class DiscordScript: FaucetScript
             {
                 return Fail("Recaptcha - Fail solving captcha");
             }
-            RecaptchaUtility utility = new RecaptchaUtility(this);
+		    RecaptchaUtility utility = new RecaptchaUtility(this);
             utility.DoSolve();
+		    
+            Wait();
+		    
+            //ExecuteScript("afterResolveCaptcha");
 		  }
-			
+		
 		return 0;
         }//end invisible_Recaptcha_Function
         //=================//	
