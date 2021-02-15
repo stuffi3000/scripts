@@ -1,0 +1,221 @@
+﻿using FaucetCollector.Captcha;
+using FaucetCollector.Script;
+
+using System.Collections.Generic;
+using System.Linq;
+
+//css_ref FaucetCollector.Captcha
+//css_ref FaucetCollector.Utilities
+public class ClaimFreeCoinsScript : FaucetScript
+{
+    public override FaucetSettings Settings
+    {
+        get
+        {
+
+            return new FaucetSettings("about:blank")
+                {
+                    new FaucetSetting(){
+                    Name="User",
+                    Display="Wallet",
+                    Type=EditorType.TextBox,
+                    Required=true
+
+                    },
+                    new FaucetSetting()
+                    {
+                        Name="SelectedFaucet",
+                        Display="Selected Faucet",
+                        Type=EditorType.ComboBox,
+                        Items=AvailableFaucets.Keys.ToList(),
+                        Default=AvailableFaucets.Keys.FirstOrDefault()
+                    },
+                    new FaucetSetting()
+                    {
+                        Name="UseSolvemedia",
+                        Type=EditorType.CheckBox,
+                        Default=true,
+                        Display="UseSolvemedia"
+                    }
+                };
+
+        }
+    }
+
+    private readonly Dictionary<string, string> AvailableFaucets = new Dictionary<string, string>()
+    {
+        {"BTC","https://claimfreecoins.io/free-bitcoin/" },
+        {"ETH","https://claimfreecoins.io/free-ethereum/" },
+        {"DOGE","https://claimfreecoins.io/free-dogecoin/" },
+        {"LTC","https://claimfreecoins.io/free-litecoin/" },
+        {"BCASH","https://claimfreecoins.io/free-bitcoin-cash/" },
+        {"DASH","https://claimfreecoins.io/free-dash/" },
+        {"TRX","https://claimfreecoins.io/free-tron/" },
+        {"DGB","https://claimfreecoins.io/free-digibyte/" },
+        {"USDT","https://claimfreecoins.io/free-tether/" }
+    };
+
+    private string FaucetUrl
+    {
+        get
+        {
+            var setting = GetSetting("SelectedFaucet");
+            if (string.IsNullOrEmpty(setting) || !AvailableFaucets.ContainsKey(setting))
+            {
+                return AvailableFaucets.Values.FirstOrDefault()+(GetBoolSetting("UseSolvemedia")?"?captcha=solvemedia":"");
+            }
+
+            return AvailableFaucets[setting] + (GetBoolSetting("UseSolvemedia") ? "?captcha=solvemedia" : "");
+        }
+    }
+    private AntibotLinksMlUtils AntibotLinksMlUtils;
+    public override void Start()
+    {
+        Title = "Claim Free";
+        SuccessXPath = "//div[@class='alert alert-success']";
+        FailXPath = "//div[@class='alert alert-danger']";
+        AntibotLinksMlUtils = new AntibotLinksMlUtils(this);
+        AntibotLinksMlUtils.AntibotLinksHeaderXPath = "//div[contains(@class,'modal-title')]//img[contains(@src,'data:image')]";
+        base.Start();
+    }
+    public override int DoInit()
+    {
+        Url = FaucetUrl;
+        return base.DoInit();
+    }
+
+
+    private void CheckCloudFlare()
+    {
+        FaucetCollector.Utilities.CloudFlareUtilities cloudUtils = new FaucetCollector.Utilities.CloudFlareUtilities(this);
+        cloudUtils.DoSolve();
+    }
+
+    public override bool IsLoggedIn()
+    {
+        return ElementByXPath("//button[@data-target='#antibot']|//div[@id='claim_again']") != null;
+    }
+    public void CheckForCookieError()
+    {
+        var refreshBtn = ElementByXPath("//a[contains(text(),'Refresh to Claim Again!')]");
+        if (IsVisible(refreshBtn))
+        {
+            Driver.Manage().Cookies.DeleteAllCookies();
+            Driver.Navigate().Refresh();
+        }
+    }
+    public override int DoLogin()
+    {
+        GoToUrl(FaucetUrl);
+        Wait(2);
+        CheckCloudFlare();
+        CheckForCookieError();
+        var addressBox = ElementByXPath("//input[@name='address']");
+        if (!IsVisible(addressBox))
+        {
+            return Fail("address box not visible or not found");
+        }
+        SetText(addressBox, GetSetting("User"));
+
+        Wait(1);
+
+
+        var loginButton = ElementByXPath("//input[@value='Login']");
+        if (!IsVisible(loginButton))
+        {
+            return Fail("login button not visible or not found");
+        }
+        Click(loginButton);
+        
+
+
+
+        return base.DoLogin();
+    }
+    public override int DoSolveFaucet()
+    {
+
+        GoToUrl(FaucetUrl);
+        Wait(2);
+
+        CheckForCookieError();
+        var goAntibot = ElementByXPath("//button[@data-target='#antibot']");
+        if(!IsVisible(goAntibot))
+
+        {
+            return Fail("Go antibot button not visible or not found");
+        }
+        Click(goAntibot);
+        Wait(1);
+
+        var result = DoSolveCaptcha();
+        if (result>0)
+        {
+            return result;
+        }
+
+        var submitBtn = ElementByXPath("//input[@name='captcha']");
+        if (!IsVisible(submitBtn))
+        {
+
+            return Fail("Submit claim button not visible or not found");
+        }
+        Click(submitBtn);
+
+        Wait(1);
+
+        CheckFaucetResult();
+        if (IsSuccess)
+        {
+            return GetWaitSetting();
+        }
+
+        return base.DoSolveFaucet();
+    }
+
+    public override int GetFaucetWaitTime()
+    {
+
+        var timer = ElementByXPath("//div[@id='claim_again']");
+        if (IsVisible(timer) || IsVisible(ElementByXPath(SuccessXPath)))
+        {
+            return 300; 
+        }
+
+        return base.GetFaucetWaitTime();
+    }
+    public override int DoSolveCaptcha()
+    {
+
+
+        var result =  base.DoSolveCaptcha();
+        if (result>0)
+        {
+            return result;
+        }
+        var result2 = AntibotLinksMlUtils.DosolveAntibotLinks();
+
+
+        return result + result2;
+    }
+
+    public override int CheckFaucetResult()
+    {
+        var result = base.CheckFaucetResult();
+
+        if (!IsSuccess)
+        {
+
+            var failElement = ElementByXPath(FailXPath);
+            if (IsVisible(failElement) && failElement.Text.Contains("Wrong Order"))
+            {
+                AntibotLinksMlUtils.ReportLastCaptchaAsIncorrect();
+            }
+        }
+        return result;
+    }
+
+
+
+}
+

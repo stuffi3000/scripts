@@ -1,4 +1,4 @@
-﻿using FaucetCollector.Script;
+using FaucetCollector.Script;
 
 using System;
 using System.Collections.Generic;
@@ -365,7 +365,7 @@ public class ContractMiner : FaucetScript
         // Daily claim area
         if (GetBoolSetting("DailyClaim"))
         {
-            var claimMyReward = ElementByXPath("//button[contains(text(),'Claim My Reward')]");
+            var claimMyReward = ElementByXPath("//button[contains(text(),'eward')] | //button[contains(@name,'claim_d')] ");
             if (IsVisible(claimMyReward))
             {
                 Log("Claim daily claim");

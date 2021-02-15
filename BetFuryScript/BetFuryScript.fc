@@ -1,4 +1,4 @@
-﻿using FaucetCollector.Script;
+using FaucetCollector.Script;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -90,10 +90,16 @@ public class BetFuryScript : FaucetScript
 
         GoToUrl("https://betfury.io/boxes/all");
         Wait(3 , 4);
-
+/*
         var claimModalBtn=ElementsByXPath("//button[contains(@class,'redbox__btn')]")
             .FirstOrDefault( x=> IsVisible(x) &&  x.Enabled);
 
+        if ( claimModalBtn==null )
+        {
+            return Fail("claim modal btn not visible or not found");
+        }
+*/
+        var claimModalBtn=ElementByXPath("//button[contains(@class,'redbox__btn') and contains(text(),'ithdraw')]");
         if ( claimModalBtn==null )
         {
             return Fail("claim modal btn not visible or not found");
@@ -118,6 +124,9 @@ public class BetFuryScript : FaucetScript
 
         return base.DoSolveFaucet( );
     }
+	
+	
+	
     public override string GetHCaptchaSiteKey( )
     {
         var hcaptchaIframe=ElementByXPath("//iframe[contains(@src,'hcaptcha.com/captcha')]");

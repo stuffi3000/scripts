@@ -1,7 +1,7 @@
 
 //==================//
 //script Written by: ••AviramDayan•• 03/12/2020 07:30AM - Version 1
-//Last Update: 30/01/2021 22:40PM - Version 13
+//Last Update: 11/02/2021 05:00AM - Version 15
 //==================//
 
 using System;
@@ -479,7 +479,7 @@ public class Doge_4miner : FaucetScript
 		   
 		   Wait(2);
 		   
-           var LoginVAR = ElementByXPath("//button[contains(@type,'submit')]");  
+           var LoginVAR = ElementByXPath("//span[contains(text(),'Login')] | //button[contains(text(),'Login')] | //button[contains(@type,'submit')] ");  
            if (IsVisible(LoginVAR))
 		   {
 		    Log("LoginVAR");  
@@ -638,47 +638,60 @@ public class Doge_4miner : FaucetScript
 		
 		if (IsVisible(ImgIconBalk))
         {	
-          Log("Solve ImgIconBalk - manually - try");
-          SolveManualCaptcha(); //call   
+           Log("Solve ImgIconBalk - manually - try");
 
-           /*
 		   var AnswerButton = ElementByXPath("//button[starts-with(@onclick,'d') and last()-1 ]");
 		   if (IsVisible(AnswerButton))
            {		
            Log("Solve ImgIconBalk - Answer - success");
 		   Click(AnswerButton); 	
 		   }
-		   */	   
 
-           var buttons = ElementsByXPath("//button[@onclick]");
-           IWebElement button = null;
-           foreach (var btn in buttons)
-           {
-               Log("foreach");
 
-               var onclick = btn.GetAttribute("onclick");
-               if (string.IsNullOrEmpty(onclick))
-               {
-                   continue;
-               }
+		   var AnswerReCp = ElementByXPath("//button[starts-with(@data-callback,'on')]");
 		   
-               if (buttons.Any(b => b != btn && string.Equals(onclick, b.GetAttribute("onclick"), StringComparison.OrdinalIgnoreCase)))
-               {
-                   continue;
-               }
-		   
-               button = btn;
-               Log("SolveManualCaptcha - success");
-               break;
-           }
-		   
-           if (button == null)
-           {
-               return Fail("not found");
-           }
-		   
-           Log("Click");		   
-           Click(button);
+		   if (IsVisible(AnswerReCp))
+           {		
+             Log("Solve ImgIconBalk - try - ReCp");
+		     Click(AnswerReCp); 
+		     Wait(2);
+		     invisible_Recaptcha_Function(); //call to check
+		   }
+                         
+		   if (!IsVisible(AnswerReCp))
+           {			
+		     //Find Unique
+             var buttons = ElementsByXPath("//button[@onclick]");
+             IWebElement button = null;
+             foreach (var btn in buttons)
+             {
+                 Log("foreach");
+		     
+                 var onclick = btn.GetAttribute("onclick");
+                 if (string.IsNullOrEmpty(onclick))
+                 {
+                     continue;
+                 }
+		     
+                 if (buttons.Any(b => b != btn && string.Equals(onclick, b.GetAttribute("onclick"), StringComparison.OrdinalIgnoreCase)))
+                 {
+                     continue;
+                 }
+		     
+                 button = btn;
+                 Log("SolveManualCaptcha - success");
+                 break;
+             }
+		     
+             if (button == null)
+             {
+                 return Fail("not found");
+             }
+		     
+             Log("Click");		   
+             Click(button);
+			 
+		   } //AnswerReCp not visible
 		   
 		} //end ImgIconBalk visible 
 		
