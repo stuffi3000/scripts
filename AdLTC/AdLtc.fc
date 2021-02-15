@@ -235,6 +235,7 @@ public class AdLtcScript : FaucetScript
                     Click(ButtonAd , false);
                     Wait(1);
                     Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
+					Log("Viewing ad: " + ElementByXPath("/html/body/div[1]/div[2]/div[2]/h4/b").Text);
 
                     var Timer = ElementByXPath("//h5[@id='timer']");
                     DateTime Timeout = DateTime.Now.AddSeconds(135);

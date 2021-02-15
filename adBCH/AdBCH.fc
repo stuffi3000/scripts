@@ -37,7 +37,7 @@ public class AdBchScript : FaucetScript
     public override void Start( )
     {
         //Title that shows in the browser. Is used to identify and close popup windows
-        Title="adBCH";
+        Title="adBCH|seconds left";
 
         //After we did try to claim on the faucet we search for these elements to determine if it was a success or a fail
         SuccessXPath="//*[text()='']";
@@ -234,6 +234,7 @@ public class AdBchScript : FaucetScript
                     Click(ButtonAd , false);
                     Wait(1);
                     Driver.SwitchTo( ).Window(Driver.WindowHandles[0]);
+					Log("Viewing ad: " + ElementByXPath("/html/body/div[1]/div[2]/div[2]/h4/b").Text);
 
                     var Timer = ElementByXPath("//h5[@id='timer']");
                     DateTime Timeout = DateTime.Now.AddSeconds(135);
